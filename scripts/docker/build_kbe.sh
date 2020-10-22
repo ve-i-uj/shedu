@@ -6,22 +6,11 @@
 # import global variables of scripts
 curr_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 source `realpath $curr_dir/../init.sh`
+source `realpath $curr_dir/init.sh`
 
 echo 
 echo "DOCKERFILES_DIR=$DOCKERFILES_DIR"
 echo
-
-USER=shedu
-
-# Directories contained Dockerfiles
-PREQS_DIR=kbe-build-prerequisites
-SRC_DIR=kbe-src
-COMPILED_DIR=kbe-compiled
-
-# Image names
-PREREQS_IMAGE_NAME="$USER/$PREQS_DIR"
-SRC_IMAGE_NAME="$USER/$SRC_DIR:master"
-COMPILED_IMAGE_NAME="$USER/$COMPILED_DIR:master"
 
 echo
 echo "*** Build an image contained prerequisites ***"
