@@ -9,10 +9,6 @@ source `realpath $curr_dir/../init.sh`
 curr_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 source `realpath $curr_dir/init.sh`
 
-echo 
-echo "DOCKERFILES_DIR=$DOCKERFILES_DIR"
-echo
-
 from=$COMPILED_IMAGE_NAME
 echo
 echo "*** Build an image contained compiled KBEngine (from '$from') ***"

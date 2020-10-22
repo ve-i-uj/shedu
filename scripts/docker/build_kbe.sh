@@ -8,10 +8,6 @@ curr_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 source `realpath $curr_dir/../init.sh`
 source `realpath $curr_dir/init.sh`
 
-echo 
-echo "DOCKERFILES_DIR=$DOCKERFILES_DIR"
-echo
-
 echo
 echo "*** Build an image contained prerequisites ***"
 echo
