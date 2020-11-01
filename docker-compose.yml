@@ -1,0 +1,34 @@
+version: '3'
+
+services:
+  kbe-mariadb:
+    image: mariadb:latest
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      - kbe-mariadb-volume:/var/lib/mysql
+    container_name: "kbe-mariadb"
+    ports:
+       - 3306:3306
+    networks:
+      - kbe-net
+
+  kbe-assets:
+    build: ./dockerfiles/kbengine/kbe-assets
+    image: shedu/kbe-assets
+    restart: always
+    container_name: kbe-assets
+    entrypoint: ["./wait-for-it.sh", "kbe-mariadb:3306", "--", "/bin/bash", "docker-entrypoint.sh"]
+    networks:
+      - kbe-net
+
+volumes:
+  kbe-mariadb-volume:
+
+networks:
+  kbe-net:
+  
