@@ -2,11 +2,14 @@ ARG FROM_IMAGE_NAME
 FROM ${FROM_IMAGE_NAME}
 LABEL maintainer="Aleksei Burov <burov_alexey@mail.ru>"
 
-# TODO: configure source of assets
-COPY assets /opt/assets
-COPY scripts/docker-entrypoint.sh /opt/assets/docker-entrypoint.sh
-COPY scripts/tail_logs.sh /opt/assets/tail_logs.sh
-COPY scripts/wait-for-it.sh /opt/assets/wait-for-it.sh
+ARG ASSETS_PATH="assets"
+ARG SCRIPTS_DIR="scripts"
+
+COPY ${ASSETS_PATH} /opt/assets
+COPY ${SCRIPTS_DIR}/docker-entrypoint.sh /opt/assets/docker-entrypoint.sh
+COPY ${SCRIPTS_DIR}/tail_logs.sh /opt/assets/tail_logs.sh
+COPY ${SCRIPTS_DIR}/wait-for-it.sh /opt/assets/wait-for-it.sh
+
 RUN chmod +x /opt/assets/wait-for-it.sh
 
 WORKDIR /opt/assets/

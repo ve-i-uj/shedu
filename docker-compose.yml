@@ -1,6 +1,7 @@
 version: '3'
 
 services:
+
   kbe-mariadb:
     image: mariadb:latest
     restart: always
@@ -18,7 +19,13 @@ services:
       - kbe-net
 
   kbe-assets:
-    build: ./dockerfiles/kbengine/kbe-assets
+    build:
+      context: .
+      dockerfile: ./dockerfiles/kbengine/kbe-assets/Dockerfile
+      args:
+        FROM_IMAGE_NAME: shedu/kbe-compiled:latest
+        ASSETS_PATH: ./assets
+        SCRIPTS_DIR: ./dockerfiles/kbengine/kbe-assets/scripts
     image: shedu/kbe-assets
     restart: always
     container_name: kbe-assets
