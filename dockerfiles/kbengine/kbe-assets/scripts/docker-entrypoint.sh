@@ -6,6 +6,12 @@
 TIMEOUT=5
 
 echo
+echo "*** Update kbengine.xml file the engine connect to DB ***"
+echo
+curr_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+python3 $curr_dir/modify_kbe_config.py
+
+echo
 echo "*** Start the kbe engine ***"
 echo
 curr_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"

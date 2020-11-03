@@ -13,3 +13,9 @@ Full clean up
 ```
 docker-compose --env-file configs/dev.env down -v
 ```
+
+Restart
+
+```
+docker-compose --env-file configs/dev.env up --remove-orphans --force-recreate --build
+```

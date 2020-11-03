@@ -5,10 +5,10 @@ LABEL maintainer="Aleksei Burov <burov_alexey@mail.ru>"
 ARG ASSETS_PATH="assets"
 ARG SCRIPTS_DIR="scripts"
 
+RUN yum install python3 -y
+
 COPY ${ASSETS_PATH} /opt/assets
-COPY ${SCRIPTS_DIR}/docker-entrypoint.sh /opt/assets/docker-entrypoint.sh
-COPY ${SCRIPTS_DIR}/tail_logs.sh /opt/assets/tail_logs.sh
-COPY ${SCRIPTS_DIR}/wait-for-it.sh /opt/assets/wait-for-it.sh
+COPY ${SCRIPTS_DIR}/* /opt/assets/
 
 RUN chmod +x /opt/assets/wait-for-it.sh
 
