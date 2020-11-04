@@ -29,6 +29,12 @@ services:
     image: shedu/kbe-assets
     restart: always
     container_name: kbe-assets
+    ports:
+      # LoginApp
+      - 20013:20013
+      # BaseApp
+      - 20015-20019:20015-20019
+      - 20005-20009:20005-20009/udp
     entrypoint: ["./wait-for-it.sh", "kbe-mariadb:3306", "--", "/bin/bash", "docker-entrypoint.sh"]
     networks:
       - kbe-net
