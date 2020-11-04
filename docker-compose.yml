@@ -26,6 +26,7 @@ services:
         FROM_IMAGE_NAME: shedu/kbe-compiled:master
         ASSETS_PATH: ./assets
         SCRIPTS_DIR: ./dockerfiles/kbengine/kbe-assets/scripts
+        HOST_ADDR: ${HOST_ADDR}
     image: shedu/kbe-assets
     restart: always
     container_name: kbe-assets

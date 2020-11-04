@@ -10,6 +10,10 @@ RUN yum install python3 -y
 COPY ${ASSETS_PATH} /opt/assets
 COPY ${SCRIPTS_DIR}/* /opt/assets/
 
+# Update kbengine.xml file
+ARG HOST_ADDR
+RUN HOST_ADDR=${HOST_ADDR} python3 /opt/assets/modify_kbe_config.py
+
 RUN chmod +x /opt/assets/wait-for-it.sh
 
 WORKDIR /opt/assets/
