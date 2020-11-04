@@ -23,7 +23,7 @@ services:
       context: .
       dockerfile: ./dockerfiles/kbengine/kbe-assets/Dockerfile
       args:
-        FROM_IMAGE_NAME: shedu/kbe-compiled:latest
+        FROM_IMAGE_NAME: shedu/kbe-compiled:master
         ASSETS_PATH: ./assets
         SCRIPTS_DIR: ./dockerfiles/kbengine/kbe-assets/scripts
     image: shedu/kbe-assets
