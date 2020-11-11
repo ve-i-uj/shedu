@@ -6,6 +6,8 @@ ARG ASSETS_PATH="assets"
 ARG SCRIPTS_DIR="scripts"
 
 RUN yum install python3 -y
+# For debug
+RUN yum install net-tools -y
 
 COPY ${ASSETS_PATH} /opt/assets
 COPY ${SCRIPTS_DIR}/* /opt/assets/
