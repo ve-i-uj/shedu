@@ -36,6 +36,9 @@ services:
       # BaseApp
       - 20015-20019:20015-20019
       - 20005-20009:20005-20009/udp
+      # Bots
+      # telnet
+      - 51000:51000
     entrypoint: ["./wait-for-it.sh", "kbe-mariadb:3306", "--", "/bin/bash", "docker-entrypoint.sh"]
     networks:
       - kbe-net
