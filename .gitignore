@@ -2,3 +2,6 @@
 .project
 .pydevproject
 
+# Copied assets
+assets
+
