@@ -24,7 +24,7 @@ services:
       dockerfile: ./dockerfiles/kbengine/kbe-assets/Dockerfile
       args:
         FROM_IMAGE_NAME: shedu/kbe-compiled:master
-        ASSETS_PATH: ./assets
+        ASSETS_PATH: ${ASSETS_PATH}
         SCRIPTS_DIR: ./dockerfiles/kbengine/kbe-assets/scripts
         HOST_ADDR: ${HOST_ADDR}
     image: shedu/kbe-assets
