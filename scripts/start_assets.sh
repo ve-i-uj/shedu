@@ -1,13 +1,13 @@
 #!/bin/bash
 #
-# Copy an assets directory and build a docker image of KBEngine with assets
+# Copy the assets directory and build the docker image of KBEngine with assets
 #
 
 # import global variables of scripts
 curr_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 source `realpath $curr_dir/init.sh`
 
-USAGE="Use an absolute path to an assets in the first argument. Example:\nbash $0 /home/leto/code/pCloud/2PeopleCompany/anu\n"
+USAGE="Use an absolute path to an assets in the first argument. Example:\nbash $0 `realpath $PWD/../anu`\n"
 
 # check argumet exists
 if [ -z "$1" ] 
@@ -36,3 +36,7 @@ docker-compose --env-file "$PROJECT_DIR/configs/dev.env" up \
     --remove-orphans \
     --force-recreate \
     --build
+    
+# echo "Remove the built assets ..." 
+# rm -rf "$dst"
+

@@ -11,7 +11,6 @@ echo
 curr_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 bash $curr_dir/start_server.sh &
 
-
 echo
 echo "*** Waiting for $TIMEOUT seconds the engine starts ***"
 echo

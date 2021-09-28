@@ -21,4 +21,3 @@ RUN chmod +x /opt/assets/wait-for-it.sh
 WORKDIR /opt/assets/
 
 ENTRYPOINT bash docker-entrypoint.sh
-
