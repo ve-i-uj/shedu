@@ -2,6 +2,6 @@
 .project
 .pydevproject
 
-# Copied assets
-assets
+# Idea settings
+.idea
 
