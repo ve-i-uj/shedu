@@ -8,7 +8,7 @@ docker-compose --env-file configs/dev.env build
 docker-compose --env-file configs/dev.env up --remove-orphans --force-recreate
 ```
 
-Full clean up
+Full cleanup
 
 ```
 docker-compose --env-file configs/dev.env down -v

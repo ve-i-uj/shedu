@@ -10,7 +10,7 @@ DOCKER_SCRIPTS_DIR=$SCRIPTS_DIR/docker
 
 echo
 echo "********************************"
-echo "*** Common scritps variables ***"
+echo "*** Common scripts variables ***"
 echo "********************************"
 echo
 echo "PROJECT_DIR=$PROJECT_DIR"
