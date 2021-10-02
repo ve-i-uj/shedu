@@ -3,9 +3,10 @@
 # Build a docker image of KBEngine
 #
 
+set -e
+
 # import global variables of scripts
 curr_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-source $( realpath "$curr_dir"/../init.sh )
 source $( realpath "$curr_dir"/init.sh )
 
 KBE_REPO="https://api.github.com/repos/kbengine/kbengine/commits/master"
@@ -24,39 +25,37 @@ do
         *)
     esac
 done
+
 echo "CLI arguments: "
 echo "    user_tag=$user_tag"
 echo "    git_commit=$git_commit"
+
+echo "Request the last commit sha of the kbengine master branch ..."
+json=$( curl -sb -H "Accept: application/json" -H "Content-Type: application/json" "$KBE_REPO" )
+last_sha=$( echo "$json" | jq ".sha" | tr -d '""' )
+if [ "$last_sha" = "null" ] || [ -z "$last_sha" ]; then
+    echo -e "[ERROR] Last commit sha cannot be requested. Json = \n$json"
+    exit 1
+fi
+echo "The last commit sha is \"$last_sha\"."
+last_sha=${last_sha::6}
+
+if [ -z "$git_commit" ]; then
+    echo "No argument \"--git-commit\". The last sha value \"$last_sha\" will be set."
+    git_commit="$last_sha"
+fi
 
 # Add prefix to the user tag if it is
 if [ -n "$user_tag" ]; then
     user_tag="-$user_tag"
 fi
 
-echo -e "*** Build an image contained prerequisites ***"
-cd "$DOCKERFILES_DIR/kbengine/$PREREQS_DIR"
-docker build -t "$PREREQS_IMAGE_NAME" .
-echo -e "*** Done (the docker image contained prerequisites) ***\n"
-
-echo -e "*** Build an image contained source code of KBEngine (from '$from') ***"
-echo "Request the last commit sha of the kbengine master branch ..."
-json=$( curl -sb -H "Accept: application/json" -H "Content-Type: application/json" "$KBE_REPO" )
-last_sha=$( echo "$json" | jq ".sha" | tr -d '""' )
-if [ "$last_sha" = "null" ]; then
-    echo -e "[ERROR] Last commit sha cannot be requested. Json = \n$json"
-    exit 0
-fi
-echo "The last commit sha is \"$last_sha\"."
-last_sha=${last_sha::6}
 echo "Download KBEngine and build a docker image ..."
-from="$PREREQS_IMAGE_NAME"
-cd "$DOCKERFILES_DIR/kbengine/$SRC_DIR"
-tag="$SRC_IMAGE_NAME:$last_sha$user_tag"
-docker build --build-arg FROM_IMAGE_NAME="$from" -t "$tag" .
-echo -e "*** Done (KBEngine source code image) ***\n"
+bash "$curr_dir/build_kbe/build_prereq.sh"
+bash "$curr_dir/build_kbe/build_latest.sh"
 
-echo -e "*** Build an image contained compiled KBEngine (from '$from') ***"
-from=$tag
-cd "$DOCKERFILES_DIR/kbengine/$COMPILED_DIR"
-docker build --build-arg FROM_IMAGE_NAME="$from" -t "$COMPILED_IMAGE_NAME:$last_sha$user_tag" .
-echo -e "*** Done (the docker image of KBEngine compiled code) ***\n"
+src_tag="$SRC_IMAGE_NAME:$version"
+bash "$curr_dir/build_kbe/build_src.sh" "$git_commit" "$src_tag"
+bash "$curr_dir/build_kbe/build_compiled.sh" "$src_tag"
+
+echo "Done."

@@ -2,6 +2,4 @@ ARG FROM_IMAGE_NAME
 FROM ${FROM_IMAGE_NAME}
 LABEL maintainer="Aleksei Burov <burov_alexey@mail.ru>"
 
-ARG COMMIT_SHA
-WORKDIR /opt
-RUN git checkout ${COMMIT_SHA} -b kbe-deploy-branch-${COMMIT_SHA}
+RUN git clone https://github.com/kbengine/kbengine.git --progress /opt
