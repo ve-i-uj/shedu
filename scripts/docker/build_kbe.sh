@@ -10,6 +10,7 @@ curr_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 source $( realpath "$curr_dir"/init.sh )
 
 KBE_REPO="https://api.github.com/repos/kbengine/kbengine/commits/master"
+USAGE="Build KBEngine. Example:\nbash $0 [--git-commit=5283b9b8] [--user-tag=v2.5.11]\n"
 
 echo "Parse CLI arguments ..."
 user_tag=""
@@ -22,6 +23,14 @@ do
     case "$key" in
         --user-tag)              user_tag=${value} ;;
         --git-commit)            git_commit=${value} ;;
+        --help)
+            echo -e "$USAGE"
+            exit 1
+            ;;
+        -h)
+            echo -e "$USAGE"
+            exit 1
+            ;;
         *)
     esac
 done
@@ -54,7 +63,7 @@ echo "Download KBEngine and build a docker image ..."
 bash "$curr_dir/build_kbe/build_prereq.sh"
 bash "$curr_dir/build_kbe/build_latest.sh"
 
-src_tag="$SRC_IMAGE_NAME:$version"
+src_tag="$SRC_IMAGE_NAME:$git_commit$user_tag"
 bash "$curr_dir/build_kbe/build_src.sh" "$git_commit" "$src_tag"
 bash "$curr_dir/build_kbe/build_compiled.sh" "$src_tag"
 

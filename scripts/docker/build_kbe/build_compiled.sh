@@ -17,7 +17,7 @@ if [ -z "$from" ]; then
 fi
 
 suffix=$( echo "$from" | cut -c $(( ${#SRC_IMAGE_NAME} + 2 ))- )
-echo -e "*** Build an image contained compiled KBEngine (from '$from') ***"
+echo -e "*** Build an image contained compiled KBEngine (from '$from', suffix = $suffix) ***"
 docker build \
     --file "$COMPILED_DOCKERFILE_PATH" \
     --build-arg FROM_IMAGE_NAME="$from" \
