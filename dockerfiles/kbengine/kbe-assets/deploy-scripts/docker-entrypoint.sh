@@ -20,4 +20,3 @@ echo
 echo "*** Tail the engine log files ***"
 echo
 bash "$curr_dir"/tail_logs.sh
-
