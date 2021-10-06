@@ -20,14 +20,12 @@ services:
 
   kbe-assets:
     build:
-      context: .
-      dockerfile: ./dockerfiles/kbengine/kbe-assets/Dockerfile
+      context: ${ASSETS_PATH}
+      dockerfile: ${PROJECT_DIR}/dockerfiles/kbengine/kbe-assets/Dockerfile.kbe-assets
       args:
-        FROM_IMAGE_NAME: shedu/kbe-compiled:master
-        ASSETS_PATH: ${ASSETS_PATH}
-        SCRIPTS_DIR: ./dockerfiles/kbengine/kbe-assets/scripts
+        FROM_IMAGE_NAME: ${KBE_IMAGE}
         HOST_ADDR: ${HOST_ADDR}
-    image: shedu/kbe-assets
+    image: shedu/kbe-assets-${VERSION}
     restart: always
     container_name: kbe-assets
     ports:

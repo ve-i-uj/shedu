@@ -47,7 +47,7 @@ if [ "$last_sha" = "null" ] || [ -z "$last_sha" ]; then
     exit 1
 fi
 echo "The last commit sha is \"$last_sha\"."
-last_sha=${last_sha::6}
+last_sha=${last_sha::8}
 
 if [ -z "$git_commit" ]; then
     echo "No argument \"--git-commit\". The last sha value \"$last_sha\" will be set."
@@ -60,11 +60,13 @@ if [ -n "$user_tag" ]; then
 fi
 
 echo "Download KBEngine and build a docker image ..."
-bash "$curr_dir/build_kbe/build_prereq.sh"
+bash "$curr_dir/build_kbe/build_pre_build.sh"
 bash "$curr_dir/build_kbe/build_latest.sh"
 
+version="$git_commit$user_tag"
 src_tag="$SRC_IMAGE_NAME:$git_commit$user_tag"
 bash "$curr_dir/build_kbe/build_src.sh" "$git_commit" "$src_tag"
 bash "$curr_dir/build_kbe/build_compiled.sh" "$src_tag"
+bash "$curr_dir/build_kbe/build_pre_assets.sh" "$version"
 
 echo "Done."
