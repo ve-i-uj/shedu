@@ -6,9 +6,6 @@
 # import global variables of scripts
 curr_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 source $( realpath "$curr_dir/init.sh" )
-# TODO: криво. Лучше убрать скрипт тогда в docker папку
-source $( realpath "$curr_dir/docker/init.sh" )
-curr_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 USAGE="
 Usage. Start the docker image of compiled KBEngine with assets. Example:
@@ -43,6 +40,7 @@ echo "    --assets-path=$assets_path"
 echo "    --assets-version=$assets_version"
 
 if [ -z "$version" ] || [ -z "$assets_path" ] || [ -z "$assets_version" ] || [ "$help" = true ]; then
+    echo "[ERROR] Not all arguments presented"
     echo -e "$USAGE"
     exit 1
 fi
@@ -56,18 +54,15 @@ fi
 sha=$( echo "$version" | cut -d '-' -f 1 )
 echo "The KBEngine commit \"$sha\" is needed. Checking the docker image of compiled KBE (this version) exists ..."
 existed=$( docker images --format "{{.Repository}}:{{.Tag}}" \
-    | grep "$COMPILED_IMAGE_NAME:$version" )
+    | grep "$PRE_ASSETS_IMAGE_NAME:$version" )
 if [ -z "$existed"  ]; then
     echo -e "[ERROR] There is NO compiled KBEngine with the version \"$version\". Use \"build_kbe.sh\" at first."
-    choice_set=$( docker images --format "{{.Tag}} ({{.Repository}}:{{.Tag}})" | grep "$COMPILED_IMAGE_NAME" )
-    echo -e "Available kbe versions:\n$choice_set"
+    choice_set=$( docker images --format "{{.Tag}} ({{.Repository}}:{{.Tag}})" | grep "$PRE_ASSETS_IMAGE_NAME" )
+    echo -e "\nAvailable kbe versions:\n$choice_set"
     echo "$USAGE"
     exit 1
 fi
 echo "The compiled KBEngine image exists"
-
-# Tag new pre-assets
-bash "$curr_dir/docker/build_pre_assets.sh" "$version"
 
 cd "$PROJECT_DIR"
 echo "Start the assets container ..."
