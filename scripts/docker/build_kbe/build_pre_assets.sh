@@ -10,6 +10,8 @@
 # Therefore, scripts are copied into the image in advance, and assets will be
 # connected to this image later.
 
+set -e
+
 # Import docker/init.sh
 curr_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 source $( realpath "$curr_dir"/../init.sh )

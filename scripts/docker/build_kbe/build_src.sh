@@ -3,6 +3,8 @@
 # Build a docker image contained build dependencies.
 #
 
+set -e
+
 USAGE="Use the commit sha and the inner build version. Example:\nbash $0 7d379b 7d379b-v2.1.3\n"
 
 # Import docker/init.sh

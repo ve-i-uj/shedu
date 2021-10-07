@@ -3,6 +3,8 @@
 # Build a docker image of KBEngine with assets
 #
 
+set -e
+
 # import global variables of scripts
 curr_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 source $( realpath "$curr_dir/init.sh" )
