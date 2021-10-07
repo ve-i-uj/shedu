@@ -25,7 +25,7 @@ services:
       args:
         FROM_IMAGE_NAME: ${KBE_IMAGE}
         HOST_ADDR: ${HOST_ADDR}
-    image: shedu/kbe-assets-${VERSION}
+    image: ${TAG}
     restart: always
     container_name: kbe-assets
     ports:

@@ -38,8 +38,8 @@ do
 done
 
 echo "CLI arguments: "
-echo "    user_tag=$user_tag"
-echo "    git_commit=$git_commit"
+echo "    --user-tag=$user_tag"
+echo "    --git-commit=$git_commit"
 
 echo "Request the last commit sha of the kbengine master branch ..."
 json=$( curl -sb -H "Accept: application/json" -H "Content-Type: application/json" "$KBE_REPO" )
