@@ -2,10 +2,6 @@ ARG FROM_IMAGE_NAME
 FROM ${FROM_IMAGE_NAME}
 LABEL maintainer="Aleksei Burov <burov_alexey@mail.ru>"
 
-RUN yum install python3 -y
-# For debug
-RUN yum install net-tools -y
-
 ARG SCRIPTS_DIR
 COPY ${SCRIPTS_DIR}/* /opt/assets/
 

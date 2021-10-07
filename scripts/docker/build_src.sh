@@ -9,13 +9,13 @@ USAGE="Use the commit sha and the inner build version. Example:\nbash $0 7d379b 
 
 # Import docker/init.sh
 curr_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-source $( realpath "$curr_dir"/../init.sh )
+source $( realpath "$curr_dir"/init.sh )
 
 sha="$1"
-tag="$2"
+version="$2"
 from="$LATEST_IMAGE_NAME"
 
-if [ -z "$sha" ] || [ -z "$tag" ]; then
+if [ -z "$sha" ] || [ -z "$version" ]; then
     echo -e "$USAGE"
     exit 1
 fi
@@ -25,6 +25,6 @@ docker build \
     --file "$SRC_DOCKERFILE_PATH" \
     --build-arg FROM_IMAGE_NAME="$from" \
     --build-arg COMMIT_SHA="$sha" \
-    --tag "$tag" \
+    --tag "$SRC_IMAGE_NAME:$version" \
     .
 echo -e "*** Done (KBEngine source code image) ***\n"

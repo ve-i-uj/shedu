@@ -5,4 +5,4 @@ LABEL maintainer="Aleksei Burov <burov_alexey@mail.ru>"
 WORKDIR /opt/kbe/src/
 RUN make
 # TODO: проверить, что будет работать после удаления
-# RUN rm -r /opt/kbe/src/
+RUN rm -r /opt/kbe/src/
