@@ -2,8 +2,6 @@ FROM centos:centos7 AS kbe_pre_build
 LABEL maintainer="Aleksei Burov <burov_alexey@mail.ru>"
 RUN yum groupinstall 'Development Tools' -y \
     && yum install mariadb-devel -y \
-    && yum install python3 -y \
-    && yum install net-tools -y \
     yum clean all && \
     rm -rf /var/cache/yum
 
@@ -21,7 +19,13 @@ FROM kbe_src AS kbe_compiled
 WORKDIR /opt/kbe/src/
 RUN make
 
-FROM kbe_pre_build AS pre_assets
+FROM centos:centos7 AS pre_assets
+# "net-tools" for debuging to view network state of a running container
+RUN yum install python3 -y \
+    && yum install net-tools -y \
+    && yum clean all \
+    && rm -rf /var/cache/yum
+# Copy only the compiled binary files and the resources
 COPY --from=kbe_compiled /opt/kbe/bin/ /opt/kbengine/kbe/bin/
 COPY --from=kbe_compiled /opt/kbe/res/ /opt/kbengine/kbe/res/
 COPY deploy-scripts/* /opt/kbengine/assets/
