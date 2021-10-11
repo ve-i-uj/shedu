@@ -21,7 +21,7 @@ services:
   kbe-assets:
     build:
       context: ${ASSETS_PATH}
-      dockerfile: ${PROJECT_DIR}/dockerfiles/kbengine/kbe-assets/Dockerfile.kbe-assets
+      dockerfile: ${PROJECT_DIR}/dockerfiles/kbengine/Dockerfile.assets
       args:
         FROM_IMAGE_NAME: ${KBE_IMAGE}
         HOST_ADDR: ${HOST_ADDR}
