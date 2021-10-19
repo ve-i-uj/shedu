@@ -1,14 +1,12 @@
 #!/usr/bin/bash
-#
-# Set a new version to the version.txt file and mark the current commit
-# by the version tag.
-#
+# Write the new version to the version.txt file and mark the current commit
+# by a version tag.
 
 USAGE="\nUsage. The scripts sets a new project version. Use the new version \
 in the first argument. The script works only on the \"develop\" branch. \
 Example:\nbash $0 v1.2.3\n"
 
-# import global variables of scripts
+# Import global constants of the project
 curr_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 source $( realpath "$curr_dir"/init.sh )
 
