@@ -1,14 +1,14 @@
 #!/bin/bash
+# Build a kbengine docker image contained assets.
 #
-# Copy the assets directory and build the docker image of KBEngine with assets
-#
+# It binds "assets" with the built kbengine image.
 
 # Import global constants of the project
 curr_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 source $( realpath "$curr_dir/init.sh" )
 
 USAGE="
-Usage. Start the docker image of compiled KBEngine with assets. Example:
+Usage. Build a docker image of compiled KBEngine with assets (game logic). Example:
 bash $0 \\
   --kbe-version=7d379b9f-v2.5.12 \\
   --assets-path=/tmp/assets \\
@@ -64,16 +64,10 @@ if [ -z "$existed"  ]; then
 fi
 echo "The compiled KBEngine image exists"
 
-cd "$PROJECT_DIR"
-echo "Start the assets container ..."
-# Shell environment variables have priority under environment file
-export ASSETS_PATH="$assets_path"
-export KBE_IMAGE="$PRE_ASSETS_IMAGE_NAME:$version"
-export PROJECT_DIR="$PROJECT_DIR"
-export TAG="$ASSETS_IMAGE_NAME-$version:$assets_version"
-# TODO: а он точно нужен? Может там просто константой прописать нули
-export HOST_ADDR="0.0.0.0"
-echo -e "*** Build an image contained compiled KBEngine (from \"$PRE_ASSETS_IMAGE_NAME:$version\") ***"
-docker-compose --env-file "$PROJECT_DIR/configs/dev.env" up \
-    --force-recreate \
-    --build
+cd "$assets_path"
+docker build \
+    --file "$ASSETS_DOCKERFILE_PATH" \
+    --build-arg FROM_IMAGE_NAME="$PRE_ASSETS_IMAGE_NAME:$version" \
+    --build-arg HOST_ADDR="0.0.0.0" \
+    --tag "$ASSETS_IMAGE_NAME-$version:$assets_version" \
+    .

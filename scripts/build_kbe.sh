@@ -8,7 +8,9 @@ curr_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 source $( realpath "$curr_dir"/init.sh )
 
 KBE_REPO="https://api.github.com/repos/kbengine/kbengine"
-USAGE="\nUsage. Build KBEngine. Example:\nbash $0 [--git-commit=5283b9b8] [--user-tag=v2.5.11]\n"
+USAGE="\nUsage. Build KBEngine. Example:\nbash $0 [--git-commit=5283b9b8] [--user-tag=v2.5.11]
+
+It will be built on last master commit if no \"--git-commit\" argument."
 
 echo "Parse CLI arguments ..."
 user_tag=""
