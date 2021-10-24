@@ -15,7 +15,7 @@ bash $0 \\
   --assets-version=v0.0.1
 "
 
-echo -e "\nParse CLI arguments ..."
+echo "Parse CLI arguments ..."
 version=""
 assets_path=""
 assets_version=""
