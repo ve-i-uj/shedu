@@ -70,6 +70,4 @@ docker build \
     --build-arg COMMIT_SHA="$git_commit" \
     --tag "$tag" \
     .
-echo -e "*** Done (the docker image of KBEngine compiled code) ***\n"
-
-echo "Done."
+echo "Done ($0)."

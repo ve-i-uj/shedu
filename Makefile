@@ -4,7 +4,7 @@ include contrib/colors.mk
 
 project := $(shell basename $$(pwd))
 
-config ?= $(shell realpath .env)
+config ?=
 ifneq ("$(wildcard $(config))","")
 	include $(config)
 	export $(shell sed 's/=.*//' $(config))
@@ -25,15 +25,15 @@ endif
 .DEFAULT:
 	@echo Use \"make help\"
 
+.check-config:
+ifeq (,$(wildcard $(config)))
+	$(error [ERROR] No config file. Use "make help")
+endif
+
 .check-git-sha:
 ifeq ($(KBE_GIT_COMMIT),)
 	$(error [ERROR] No kbe git commit (no value in the variable "KBE_GIT_COMMIT" \
 	and the script cannot request the latest sha))
-endif
-
-.check-config:
-ifeq (,$(wildcard $(config)))
-	$(error [ERROR] No file "$(config)". Use "make help")
 endif
 
 all: build
@@ -56,6 +56,9 @@ start_game: .check-config build  ## Run the docker image contained the game (con
 	@scripts/start_game.sh \
 		--image=$(project)/kbe-assets-$(kbe_image_tag):$(KBE_ASSETS_VERSION)
 
+check_config: .check-config  ## Check configuration file (config file required)
+	@scripts/misc/check_config.sh $(config) > /dev/null
+
 clean:  ## Delete artefacts connected with the projects (containers, volumes, docker networks, etc)
 	@scripts/clean.sh
 
@@ -67,20 +70,17 @@ print:  ## List built kbe images
 	@scripts/misc/list_images.sh
 	@echo
 
-
 define HELP_TEXT
 *** [$(project)] Help ***
 
 The project builds, packages and starts kbengine and kbe environment in the docker containers.
 
 Some rules required a config file. Use path to the config file in the "config" \
-cli argument. Example:
-make build config=configs/example.env
+cli argument. The build of the project will be aborted if no "config" argument \
+or the file doesn't exist.
 
-If "config" argument is absent it try to read .env file from the root \
-directory of the project. \
-The build of the project will be aborted if no "config" argument or the file \
-doesn't exist.
+Example:
+make build config=configs/example.env
 
 endef
 
