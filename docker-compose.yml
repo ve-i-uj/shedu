@@ -13,8 +13,6 @@ services:
     volumes:
       - kbe-mariadb-volume:/var/lib/mysql
     container_name: "kbe-mariadb"
-    ports:
-       - 3306:3306
     networks:
       - kbe-net
 
