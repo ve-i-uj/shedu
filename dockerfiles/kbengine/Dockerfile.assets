@@ -4,7 +4,6 @@ LABEL maintainer="Aleksei Burov <burov_alexey@mail.ru>"
 # We assume the context is the assets directory
 COPY . /opt/kbengine/assets
 # Modify kbengine.xml file KBEngine works with the docker environment
-ARG HOST_ADDR
-RUN HOST_ADDR=${HOST_ADDR} python3 /opt/kbengine/assets/modify_kbe_config.py
+RUN python3 /opt/kbengine/assets/modify_kbe_config.py
 WORKDIR /opt/kbengine/assets/
 ENTRYPOINT bash /opt/kbengine/assets/docker-entrypoint.sh

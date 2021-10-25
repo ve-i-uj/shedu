@@ -68,6 +68,5 @@ cd "$assets_path"
 docker build \
     --file "$ASSETS_DOCKERFILE_PATH" \
     --build-arg FROM_IMAGE_NAME="$PRE_ASSETS_IMAGE_NAME:$version" \
-    --build-arg HOST_ADDR="0.0.0.0" \
     --tag "$ASSETS_IMAGE_NAME-$version:$assets_version" \
     .

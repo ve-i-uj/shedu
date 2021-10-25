@@ -6,9 +6,7 @@ This script would be placed in the root directory of a project.
 import os
 import xml.etree.ElementTree as ET
 
-HOST_ADDR = os.environ.get('HOST_ADDR')
-if not HOST_ADDR:
-    raise SystemError('"HOST_ADDR" is not set')
+HOST_ADDR = '0.0.0.0'
 
 
 def main():
