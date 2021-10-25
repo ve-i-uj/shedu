@@ -1,5 +1,7 @@
 SHELL := /bin/bash
 
+include contrib/colors.mk
+
 project := $(shell basename $$(pwd))
 
 config ?= $(shell realpath .env)
@@ -71,18 +73,11 @@ define HELP_TEXT
 
 The project builds, packages and starts kbengine and kbe environment in the docker containers.
 
-The main goal of the project is to simplify kbengine deploy. It doesn't need \
-to know how to build a C++ project or what library you need to install for. \
-Moreover all kbe infrastructure (database, smtp server etc) can be built and started \
-just in one command too. You can choose a kbe commit for your kbe build and easy \
-link assets to the chosen kbe version. Change variables in "configs/example.env" \
-and save the file like a new one with your configuration.
-
 Some rules required a config file. Use path to the config file in the "config" \
 cli argument. Example:
 make build config=configs/example.env
 
-If no "config" argument presented it try to read .env file from the root \
+If "config" argument is absent it try to read .env file from the root \
 directory of the project. \
 The build of the project will be aborted if no "config" argument or the file \
 doesn't exist.
@@ -92,6 +87,6 @@ endef
 export HELP_TEXT
 help:  ## This help
 	@echo "$$HELP_TEXT"
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $$(echo ${MAKEFILE_LIST} | cut -d " " -f1) \
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $$(echo $(MAKEFILE_LIST) | cut -d " " -f1) \
 		| awk 'BEGIN {FS = ":.*?## "}; {printf "%-15s %s\n", $$1, $$2}'
 	@echo
