@@ -32,4 +32,4 @@ git commit -a -m "Set the version \"$version\" (auto commit)"
 git push origin develop
 git push --tags
 
-echo "Done"
+echo "Done ($0)"

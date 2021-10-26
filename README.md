@@ -8,21 +8,14 @@ The main goal of the project is to simplify kbengine deploy. It doesn't need to 
 Start KBEngine + DB
 
 ```
-PROJECT_DIR=<YOUR_PROJECT_DIR>
-cd $PROJECT_DIR
-bash scripts/docker/build_kbe.sh
-docker-compose --env-file configs/dev.env build
-docker-compose --env-file configs/dev.env up --remove-orphans --force-recreate
+cd <YOUR_REPO_DIR>
+git clone https://github.com/ve-i-uj/shedu
+cd shedu
+make start_game config=configs/example.env
 ```
 
 Full cleanup
 
 ```
-docker-compose --env-file configs/dev.env down -v
-```
-
-Restart
-
-```
-docker-compose --env-file configs/dev.env up --remove-orphans --force-recreate --build
+make clean
 ```
