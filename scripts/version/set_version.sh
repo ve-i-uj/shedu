@@ -8,7 +8,7 @@ Example:\nbash $0 v1.2.3\n"
 
 # Import global constants of the project
 curr_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-source $( realpath "$curr_dir"/init.sh )
+source $( realpath "$curr_dir"/../init.sh )
 
 VERSION_PATH="$PROJECT_DIR/version.txt"
 
