@@ -53,7 +53,7 @@ for var_name in "${all_vars[@]}"; do
         continue
     fi
     if [[ " ${optional_vars[*]} " =~ " ${var_name} " ]]; then
-        echo "[WARNING] $var_name is unset (it's an optional variable)" >&2
+        echo "[INFO] $var_name is unset (it's an optional variable)" >&2
         continue
     fi
     if [ -z "${!var_name}" ]; then
