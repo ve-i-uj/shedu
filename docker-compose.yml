@@ -13,19 +13,11 @@ services:
     volumes:
       - kbe-mariadb-volume:/var/lib/mysql
     container_name: "kbe-mariadb"
-    ports:
-       - 3306:3306
     networks:
       - kbe-net
 
   kbe-assets:
-    build:
-      context: ${ASSETS_PATH}
-      dockerfile: ${PROJECT_DIR}/dockerfiles/kbengine/Dockerfile.assets
-      args:
-        FROM_IMAGE_NAME: ${KBE_IMAGE}
-        HOST_ADDR: ${HOST_ADDR}
-    image: ${TAG}
+    image: ${IMAGE}
     restart: always
     container_name: kbe-assets
     ports:
