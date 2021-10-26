@@ -20,7 +20,7 @@ WORKDIR /opt/kbe/src/
 RUN make
 
 FROM centos:centos7 AS pre_assets
-# "net-tools" for debuging to view network state of a running container
+# "net-tools" for debugging to view network state of a running container
 RUN yum install python3 -y \
     && yum install net-tools -y \
     && yum install mariadb-devel -y \

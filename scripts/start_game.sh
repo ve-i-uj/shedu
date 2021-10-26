@@ -51,14 +51,14 @@ echo "The game image exists"
 
 cd "$PROJECT_DIR"
 echo "Delete old containers ..."
-docker-compose --env-file "$PROJECT_DIR/configs/dev.env" rm -fsv
+docker-compose rm -fsv
 echo "Start the assets container ..."
 export IMAGE="$image"
 echo -e "*** Run the game image (from \"$image\") ***"
-docker-compose --env-file "$PROJECT_DIR/configs/dev.env" up
+docker-compose up
 # We don't need containers because the db has its own docker volume
 # and apps don't store state.
 echo "Delete containers ..."
-docker-compose --env-file "$PROJECT_DIR/configs/dev.env" rm -fsv
+docker-compose rm -fsv
 
 echo "Done"

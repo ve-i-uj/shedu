@@ -12,6 +12,8 @@ HOST_ADDR = '0.0.0.0'
 def main():
     proj_dir = os.path.dirname(__file__)
     conf_path = os.path.join(proj_dir, 'res', 'server', 'kbengine.xml')
+    # TODO: [26.10.2021 burov_alexey@mail.ru]:
+    # Проверка, что путь существует иначе запись в лог и выход с ошибкой (exit 1)
     tree = ET.parse(conf_path)
     root = tree.getroot()
     
@@ -19,19 +21,21 @@ def main():
     # configure username, pwd, db name
     databaseInterface_el = root.find('dbmgr/databaseInterfaces')  # noqa
     default_el = root.find('dbmgr/databaseInterfaces/default')
+    # TODO: [26.10.2021 burov_alexey@mail.ru]:
+    # Элемент нужно обновлять, а не удалять. Другие настройки должны остаться
+    # не тронутыми.
     databaseInterface_el.remove(default_el)
     
     new_default_el = ET.fromstring("""
         <default>
             <type> mysql </type>
             <host> kbe-mariadb </host>
+            <port> 0 </port>
             <auth>  
                 <username> kbe </username>
                 <password> pwd123456 </password>
-                <encrypt> true </encrypt>
             </auth>
             <databaseName> kbe </databaseName>
-            <numConnections> 5 </numConnections>
         </default>
     """)
     
@@ -49,7 +53,7 @@ def main():
         externalAddress_el.text = HOST_ADDR
     
     tree.write(conf_path)
-    
+
     print('The config "kbengine.xml" has been updated')
 
 

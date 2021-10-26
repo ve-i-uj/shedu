@@ -8,18 +8,18 @@ source $( realpath "$curr_dir"/../init.sh )
 USAGE="The script checks a configuration file of the project. \
 Use absolute path to the configuration file in the first argument.
 
-Usage: bash $0 $PROJECT_DIR/configs/example.env
+Usage: bash $0 $PROJECT_DIR/configs/<YOUR CONFIG NAME>.env
 "
 
 required_vars=(KBE_ASSETS_PATH KBE_ASSETS_VERSION)
 optional_vars=(KBE_GIT_COMMIT KBE_USER_TAG)
 
-# The example config file contains all necessary variable. Let get all variable
+# The example config file contains all necessary variable. Read all variable
 # names from it.
 all_vars=()
 while IFS= read -r line; do
     case $line in
-        ''|\#*) continue ;;         # skip blank lines and lines starting with #
+        ''|\#*) continue ;;
     esac
     all_vars+=( $(echo "$line" | cut -d= -f1) )
 done < configs/example.env
@@ -52,7 +52,7 @@ for var_name in "${all_vars[@]}"; do
     if [[ " ${required_vars[*]} " =~ " ${var_name} " ]]; then
         continue
     fi
-    if [[ " ${optional_vars[*]} " =~ " ${var_name} " ]]; then
+    if [[ " ${optional_vars[*]} " =~ " ${var_name} " ]] && [ -z "${!var_name}" ]; then
         echo "[INFO] $var_name is unset (it's an optional variable)" >&2
         continue
     fi

@@ -40,13 +40,13 @@ echo "    --assets-path=$assets_path"
 echo "    --assets-version=$assets_version"
 
 if [ -z "$version" ] || [ -z "$assets_path" ] || [ -z "$assets_version" ] || [ "$help" = true ]; then
-    echo "[ERROR] Not all arguments presented"
+    echo "[ERROR] Not all arguments passed" >&2
     echo -e "$USAGE"
     exit 1
 fi
 
 if [ ! -d "$assets_path" ]; then
-    echo "[ERROR] There is NO directory \"$assets_path\""
+    echo "[ERROR] There is NO directory \"$assets_path\"" >&2
     echo "$USAGE"
     exit 1
 fi
@@ -56,7 +56,7 @@ echo "The KBEngine commit \"$sha\" is needed. Checking the docker image of compi
 existed=$( docker images --format "{{.Repository}}:{{.Tag}}" \
     | grep "$PRE_ASSETS_IMAGE_NAME:$version" )
 if [ -z "$existed"  ]; then
-    echo -e "[ERROR] There is NO compiled KBEngine with the version \"$version\". Use \"build_kbe.sh\" at first."
+    echo -e "[ERROR] There is NO compiled KBEngine with the version \"$version\". Build compiled kbe at first." >&2
     choice_set=$( docker images --format "{{.Tag}} ({{.Repository}}:{{.Tag}})" | grep "$PRE_ASSETS_IMAGE_NAME" )
     echo -e "\nAvailable kbe versions:\n$choice_set"
     echo "$USAGE"
@@ -70,3 +70,5 @@ docker build \
     --build-arg FROM_IMAGE_NAME="$PRE_ASSETS_IMAGE_NAME:$version" \
     --tag "$ASSETS_IMAGE_NAME-$version:$assets_version" \
     .
+
+echo "Done ($0)"
