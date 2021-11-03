@@ -63,14 +63,6 @@ stop_game:  ## Stop the docker container contained the game
 clean:  ## Delete artefacts connected with the projects (containers, volumes, docker networks, etc)
 	@scripts/clean.sh
 
-version:  ## Current version of the project
-	@scripts/version/get_version.sh
-
-print:  ## List built kbe images
-	@echo -e "Built kbe images:"
-	@scripts/misc/list_images.sh
-	@echo
-
 define HELP_TEXT
 *** [$(project)] Help ***
 
@@ -90,4 +82,20 @@ help:  ## This help
 	@echo "$$HELP_TEXT"
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $$(echo $(MAKEFILE_LIST) | cut -d " " -f1) \
 		| awk 'BEGIN {FS = ":.*?## "}; {printf "%-15s %s\n", $$1, $$2}'
+	@echo
+
+# Debug rules
+
+go_into:  ## [Debug] Go into the running game container
+	@scripts/misc/go_into_container.sh
+
+check_config: .check-config  ## [Debug] Check configuration file (config file required)
+	@scripts/misc/check_config.sh $(config) > /dev/null
+
+version:  ## [Debug] Current version of the project
+	@scripts/version/get_version.sh
+
+print:  ## [Debug] List built kbe images
+	@echo -e "Built kbe images:"
+	@scripts/misc/list_images.sh
 	@echo
