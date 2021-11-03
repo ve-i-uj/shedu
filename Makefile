@@ -57,8 +57,8 @@ start_game: .check-config build_game  ## Run the docker image contained the game
 	@scripts/start_game.sh \
 		--image=$(project)/kbe-assets-$(kbe_image_tag):$(KBE_ASSETS_VERSION)
 
-check_config: .check-config  ## Check configuration file (config file required)
-	@scripts/misc/check_config.sh $(config) > /dev/null
+stop_game:  ## Stop the docker container contained the game
+	@scripts/stop_game.sh > /dev/null
 
 clean:  ## Delete artefacts connected with the projects (containers, volumes, docker networks, etc)
 	@scripts/clean.sh
