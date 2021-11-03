@@ -54,11 +54,8 @@ echo "Delete old containers ..."
 docker-compose rm -fsv
 echo "Start the assets container ..."
 export IMAGE="$image"
+export CONTAINER_NAME="$CONTAINER_NAME"
 echo -e "*** Run the game image (from \"$image\") ***"
-docker-compose up
-# We don't need containers because the db has its own docker volume
-# and apps don't store state.
-echo "Delete containers ..."
-docker-compose rm -fsv
+docker-compose up -d
 
 echo "Done"
