@@ -99,3 +99,6 @@ print:  ## [Debug] List built kbe images
 	@echo -e "Built kbe images:"
 	@scripts/misc/list_images.sh
 	@echo
+
+logs:  ## [Debug] Show actual log records of the game
+	@scripts/misc/tail_logs.sh
