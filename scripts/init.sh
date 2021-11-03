@@ -9,3 +9,5 @@ ASSETS_IMAGE_NAME="$PROJECT_NAME/kbe-assets"
 
 KBE_DOCKERFILE_PATH="$PROJECT_DIR/dockerfiles/kbengine/Dockerfile.kbe"
 ASSETS_DOCKERFILE_PATH="$PROJECT_DIR/dockerfiles/kbengine/Dockerfile.assets"
+
+CONTAINER_NAME=kbe-assets
