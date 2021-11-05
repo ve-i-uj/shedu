@@ -60,6 +60,9 @@ start_game: .check-config build_game  ## Run the docker image contained the game
 stop_game:  ## Stop the docker container contained the game
 	@scripts/stop_game.sh > /dev/null
 
+game_status:  ## Return the game status ("running" or "stopped")
+	@scripts/get_game_status.sh
+
 clean:  ## Delete artefacts connected with the projects (containers, volumes, docker networks, etc)
 	@scripts/clean.sh
 
@@ -101,4 +104,4 @@ print:  ## [Debug] List built kbe images
 	@echo
 
 logs:  ## [Debug] Show actual log records of the game
-	@scripts/misc/tail_logs.sh
+	-@scripts/misc/tail_logs.sh
