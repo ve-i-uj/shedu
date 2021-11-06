@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.4.0] - 2021-11-06
+### Added
+- Added a new script to check logs of the game.
+
+
 ## [0.3.0] - 2021-11-03
 ### Added
 - Added a new script to check the game container is running.
