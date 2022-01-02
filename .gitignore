@@ -5,3 +5,9 @@
 # Idea settings
 .idea
 
+# VSCode settings
+.vscode
+
+# Local custom settings
+.env
+
