@@ -51,7 +51,7 @@ build_game: .check-config .check-git-sha build_kbe  ## Build a kbengine docker i
 		--kbe-version=$(kbe_image_tag) \
 		--assets-path=$(KBE_ASSETS_PATH) \
 		--assets-version=$(KBE_ASSETS_VERSION) \
-		> /dev/null
+		# > /dev/null
 
 start_game: .check-config build_game  ## Run the docker image contained the game (config file required)
 	@scripts/start_game.sh \
@@ -104,4 +104,5 @@ print:  ## [Debug] List built kbe images
 	@echo
 
 logs:  ## [Debug] Show actual log records of the game
-	-@scripts/misc/tail_logs.sh
+	-@scripts/misc/tail_logs.sh \
+		--image=$(project)/kbe-assets-$(kbe_image_tag):$(KBE_ASSETS_VERSION)
