@@ -14,11 +14,7 @@ ifeq ($(KBE_GIT_COMMIT),)
 	override KBE_GIT_COMMIT := $(shell scripts/misc/get_latest_kbe_sha.sh)
 endif
 
-ifeq ($(KBE_USER_TAG),)
-	kbe_image_tag = $(KBE_GIT_COMMIT)
-else
-	kbe_image_tag = "$(KBE_GIT_COMMIT)-$(KBE_USER_TAG)"
-endif
+kbe_image_tag = $(shell scripts/misc/get_kbe_image_tag.sh --git-commit=$(KBE_GIT_COMMIT) --user-tag=$(KBE_USER_TAG))
 
 .PHONY : all help build_kbe clean build_game start_game list version
 

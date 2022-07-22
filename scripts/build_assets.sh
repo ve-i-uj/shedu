@@ -17,7 +17,7 @@ bash $0 \\
 
 echo -e "*** Build a docker image of compiled KBEngine with assets ***"
 
-echo "Parse CLI arguments ..."
+echo "[DEBUG] Parse CLI arguments ..."
 kbe_version=""
 assets_path=""
 assets_version=""
@@ -41,10 +41,7 @@ if [ "$help" = true ]; then
     exit 0
 fi
 
-echo "CLI arguments: "
-echo "    --kbe-version=$kbe_version"
-echo "    --assets-path=$assets_path"
-echo "    --assets-version=$assets_version"
+echo "[DEBUG] Command: $0 --kbe-version=$kbe_version --assets-path=$assets_path --assets-version=$assets_version" &>2
 
 if [ -z "$kbe_version" ] || [ -z "$assets_path" ] || [ -z "$assets_version" ]; then
     echo "[ERROR] Not all arguments passed" >&2

@@ -11,7 +11,7 @@ USAGE="\nUsage. Build KBEngine. Example:\nbash $0 [--git-commit=7d379b9f] [--use
 
 It will be built on last master commit if no \"--git-commit\" argument."
 
-echo "Parse CLI arguments ..."
+echo "[DEBUG] Parse CLI arguments ..."
 user_tag=""
 git_commit=""
 for arg in "$@"
@@ -33,12 +33,9 @@ do
         *)
     esac
 done
+echo "[DEBUG] Command: $0 --git-commit=$git_commit --user-tag=$user_tag"
 
-echo "CLI arguments: "
-echo "    --user-tag=$user_tag"
-echo "    --git-commit=$git_commit"
-
-echo "Request the last commit sha of the kbengine master branch ..."
+echo "[INFO] Request the last commit sha of the kbengine master branch ..."
 last_sha=$( bash "$curr_dir/misc/get_latest_kbe_sha.sh" )
 if [ -z "$last_sha" ]; then
     echo -e "[ERROR] Last commit sha cannot be requested. Json = \n$json"
@@ -70,4 +67,5 @@ docker build \
     --build-arg COMMIT_SHA="$git_commit" \
     --tag "$tag" \
     .
+
 echo "Done ($0)."
