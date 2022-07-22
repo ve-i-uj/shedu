@@ -41,6 +41,6 @@ if [ "$?" -ne 0 ]; then
 fi
 
 cd "$PROJECT_DIR"
-export IMAGE="$image"
-export CONTAINER_NAME="$CONTAINER_NAME"
+export KBE_ASSETS_IMAGE="$image"
+export KBE_ASSETS_CONTAINER_NAME="$KBE_ASSETS_CONTAINER_NAME"
 docker-compose logs --timestamps --follow

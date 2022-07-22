@@ -47,15 +47,14 @@ if [ -z "$existed"  ]; then
     echo "$USAGE"
     exit 1
 fi
-echo "The game image exists"
+echo "[INFO] The game image exists"
 
 cd "$PROJECT_DIR"
-echo "Delete old containers ..."
+export KBE_ASSETS_IMAGE="$image"
+export KBE_ASSETS_CONTAINER_NAME="$KBE_ASSETS_CONTAINER_NAME"
+echo "[INFO] Delete old containers ..."
 docker-compose rm -fsv
-echo "Start the assets container ..."
-export IMAGE="$image"
-export CONTAINER_NAME="$CONTAINER_NAME"
-echo -e "*** Run the game image (from \"$image\") ***"
+echo "[INFO] Start the assets container (from \"$image\") ..."
 docker-compose up -d
 
-echo "Done"
+echo "[INFO] Done ($0)"
