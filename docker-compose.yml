@@ -17,9 +17,9 @@ services:
       - kbe-net
 
   kbe-assets:
-    image: ${IMAGE}
+    image: ${KBE_ASSETS_IMAGE}
     restart: always
-    container_name: ${CONTAINER_NAME}
+    container_name: ${KBE_ASSETS_CONTAINER_NAME}
     ports:
       # LoginApp
       - 20013:20013
@@ -40,4 +40,3 @@ volumes:
 
 networks:
   kbe-net:
-  

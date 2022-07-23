@@ -41,15 +41,10 @@ fi
 source "$config_path"
 
 error=false
-for var_name in "${required_vars[@]}"; do
-    if [ -z "${!var_name}" ]; then
+for var_name in "${all_vars[@]}"; do
+    if [[ " ${required_vars[*]} " =~ " ${var_name} " ]] && [ -z "${!var_name}" ]; then
         echo "[ERROR] $var_name is unset (non-empty variable value is required)" >&2
         error=true
-    fi
-done
-
-for var_name in "${all_vars[@]}"; do
-    if [[ " ${required_vars[*]} " =~ " ${var_name} " ]]; then
         continue
     fi
     if [[ " ${optional_vars[*]} " =~ " ${var_name} " ]] && [ -z "${!var_name}" ]; then
@@ -63,6 +58,7 @@ for var_name in "${all_vars[@]}"; do
 done
 
 if [ "$error" == true ]; then
+    echo "[INFO] See the doc <$DOC_CONFIG_URL>" >&2
     echo "$USAGE"
     exit 1
 fi

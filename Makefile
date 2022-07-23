@@ -14,12 +14,6 @@ ifeq ($(KBE_GIT_COMMIT),)
 	override KBE_GIT_COMMIT := $(shell scripts/misc/get_latest_kbe_sha.sh)
 endif
 
-ifeq ($(KBE_USER_TAG),)
-	kbe_image_tag = $(KBE_GIT_COMMIT)
-else
-	kbe_image_tag = "$(KBE_GIT_COMMIT)-$(KBE_USER_TAG)"
-endif
-
 .PHONY : all help build_kbe clean build_game start_game list version
 
 .DEFAULT:
@@ -48,14 +42,17 @@ build_kbe: .check-config .check-git-sha  ## Build a docker image of KBEngine (co
 
 build_game: .check-config .check-git-sha build_kbe  ## Build a kbengine docker image contained assets. It binds "assets" with the built kbengine image (config file required)
 	@scripts/build_assets.sh \
-		--kbe-version=$(kbe_image_tag) \
+		--kbe-git-commit=$(KBE_GIT_COMMIT) \
+		--kbe-user-tag=$(KBE_USER_TAG) \
 		--assets-path=$(KBE_ASSETS_PATH) \
 		--assets-version=$(KBE_ASSETS_VERSION) \
-		> /dev/null
+		# > /dev/null
 
 start_game: .check-config build_game  ## Run the docker image contained the game (config file required)
 	@scripts/start_game.sh \
-		--image=$(project)/kbe-assets-$(kbe_image_tag):$(KBE_ASSETS_VERSION)
+		--kbe-git-commit=$(KBE_GIT_COMMIT) \
+		--kbe-user-tag=$(KBE_USER_TAG) \
+		--assets-version=$(KBE_ASSETS_VERSION)
 
 stop_game:  ## Stop the docker container contained the game
 	@scripts/stop_game.sh > /dev/null
@@ -103,5 +100,8 @@ print:  ## [Debug] List built kbe images
 	@scripts/misc/list_images.sh
 	@echo
 
-logs:  ## [Debug] Show actual log records of the game
-	-@scripts/misc/tail_logs.sh
+logs:  ## [Debug] Show actual log records of the game (config file required)
+	-@scripts/misc/tail_logs.sh \
+		--kbe-git-commit=$(KBE_GIT_COMMIT) \
+		--kbe-user-tag=$(KBE_USER_TAG) \
+		--assets-version=$(KBE_ASSETS_VERSION)

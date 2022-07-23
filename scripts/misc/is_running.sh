@@ -11,6 +11,9 @@ if [ -z "$assets_image" ]; then
     exit 1
 fi
 
+# TODO: --filter name=kbe-assets . Имя контейнера передаётся строкой.
+# Нужно, чтобы константа была из переменной.
+# А если здесь два контейнера одной игры запущены. Нужно проверить этот момент.
 container_id=$( docker ps --filter name=kbe-assets --filter status=running -q )
 if [ -z "$container_id" ]; then
     echo "[ERROR] No running game container. Start the game at first"

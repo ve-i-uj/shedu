@@ -15,4 +15,4 @@ if [ "$?" -ne 0 ]; then
     exit 1
 fi
 
-docker exec --interactive --tty "$CONTAINER_NAME" /bin/bash
+docker exec --interactive --tty "$KBE_ASSETS_CONTAINER_NAME" /bin/bash

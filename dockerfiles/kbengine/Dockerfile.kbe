@@ -11,6 +11,7 @@ ADD https://api.github.com/repos/kbengine/kbengine/git/refs/heads/master /tmp/kb
 RUN git clone https://github.com/kbengine/kbengine.git --progress /opt
 
 FROM kbe_latest AS kbe_src
+# COMMIT_SHA - the user chosen sha or the latest kbe commit of the master branch
 ARG COMMIT_SHA
 WORKDIR /opt
 RUN git checkout ${COMMIT_SHA} -b kbe-deploy-branch-${COMMIT_SHA}
