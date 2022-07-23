@@ -3,7 +3,8 @@
 
 set -e
 
-USAGE="Usage. Return the tag for the kbe image. Example:
+USAGE="
+Usage. Return the tag for the kbe image. Example:
 bash $0 --git-commit=7d379b9f --user-tag=v2.5.12"
 
 echo "[DEBUG] Parse CLI arguments ..." &>2
@@ -33,7 +34,7 @@ echo "[DEBUG] Command: $0 --git-commit=$git_commit --user-tag=$user_tag" &>2
 
 if [ -z "$git_commit" ]; then
     echo "[ERROR] The argument \"--git-commit\" is am empty string"
-    echo -e $USAGE
+    echo -e "$USAGE"
     exit 1
 fi
 
