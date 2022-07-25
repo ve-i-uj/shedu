@@ -70,7 +70,7 @@ The project builds, packages and starts kbengine and kbe environment in the dock
 
 Some rules required a config file. Use path to the config file in the "config" \
 cli argument. The build of the project will be aborted if no "config" argument \
-or the file doesn't exist.
+or the file doesn't exist. For more information visit the page <https://github.com/ve-i-uj/shedu>
 
 Example:
 make build config=configs/example.env
