@@ -1,6 +1,11 @@
 
 # Changelog
 
+## [0.5.1] - 2022-07-25
+### Fixed
+- The "start_game.sh" script cannot find the built kbe demo image. It was fixed.
+
+
 ## [0.5.0] - 2022-07-23
 ### Added
 - Added a new script "configure" to install dependencies
