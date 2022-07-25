@@ -1,4 +1,18 @@
+
 # Changelog
+
+## [0.5.0] - 2022-07-23
+### Added
+- Added a new script "configure" to install dependencies
+- The build_assets.sh can download kbe assets demo
+
+### Changed
+- README was updated to describe how to deploy the project.
+- Added prefixes "KBE_" and "KBE_ASSETS_" for the two env. variables.
+
+### Fixed
+- The rule "make logs" was fixed: there was no game image name to attach to the container.
+
 
 ## [0.4.0] - 2021-11-06
 ### Added
