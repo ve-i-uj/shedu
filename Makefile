@@ -52,6 +52,7 @@ start_game: .check-config build_game  ## Run the docker image contained the game
 	@scripts/start_game.sh \
 		--kbe-git-commit=$(KBE_GIT_COMMIT) \
 		--kbe-user-tag=$(KBE_USER_TAG) \
+		--assets-path=$(KBE_ASSETS_PATH) \
 		--assets-version=$(KBE_ASSETS_VERSION)
 
 stop_game:  ## Stop the docker container contained the game
@@ -61,7 +62,11 @@ game_status:  ## Return the game status ("running" or "stopped")
 	@scripts/get_game_status.sh
 
 clean:  ## Delete artefacts connected with the projects (containers, volumes, docker networks, etc)
-	@scripts/clean.sh
+	@scripts/clean.sh \
+		--kbe-git-commit=$(KBE_GIT_COMMIT) \
+		--kbe-user-tag=$(KBE_USER_TAG) \
+		--assets-path=$(KBE_ASSETS_PATH) \
+		--assets-version=$(KBE_ASSETS_VERSION) \
 
 define HELP_TEXT
 *** [$(project)] Help ***

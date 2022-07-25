@@ -9,12 +9,14 @@ USAGE="
 bash $0 \\
   --kbe-git-commit=7d379b9f \\
   --kbe-user-tag=v2.5.12 \\
+  --assets-path=/tmp/assets \\
   --assets-version=v0.0.1
 "
 
 echo "[DEBUG] Parse CLI arguments ..."
 kbe_git_commit=""
 kbe_user_tag=""
+assets_path=""
 assets_version=""
 help=false
 for arg in "$@"
@@ -24,6 +26,7 @@ do
     case "$key" in
         --kbe-git-commit)  kbe_git_commit=${value} ;;
         --kbe-user-tag)  kbe_user_tag=${value} ;;
+        --assets-path)  assets_path=${value} ;;
         --assets-version)   assets_version=${value} ;;
         --help)         help=true ;;
         -h)             help=true ;;
@@ -36,16 +39,27 @@ if [ "$help" = true ]; then
     exit 0
 fi
 
-echo "[DEBUG] Command: $0 --kbe-git-commit=$kbe_git_commit --kbe-user-tag=$kbe_user_tag --assets-version=$assets_version"
+echo "[DEBUG] Command: $0 --kbe-git-commit=$kbe_git_commit --kbe-user-tag=$kbe_user_tag --assets-path=$assets_path --assets-version=$assets_version"
+
+if [ -z "$kbe_git_commit" ] || [ -z "$assets_path" ] || [ -z "$assets_version" ]; then
+    echo "[ERROR] Not all arguments passed" >&2
+    echo -e "$USAGE"
+    exit 1
+fi
+
+if [ "$assets_path" == "demo" ]; then
+    assets_version="kbe-demo-$assets_version"
+fi
 
 kbe_image_tag=$(
     bash $curr_dir/misc/get_kbe_image_tag.sh \
         --git-commit=$kbe_git_commit \
         --user-tag=$kbe_user_tag
 )
+
 image="$ASSETS_IMAGE_NAME-$kbe_image_tag:$assets_version"
 
-echo "It needs \"$image\" image. Checking this docker image exists ..."
+echo "[DEBUG] It needs \"$image\" image. Checking this docker image exists ..."
 existed=$(docker images --filter reference="$image" -q)
 if [ -z "$existed"  ]; then
     echo -e "[ERROR] There is NO \"$image\" image. Use \"build_assets.sh\" at first."
