@@ -1,0 +1,26 @@
+FROM centos:centos7 AS kbe_pre_build
+LABEL maintainer="Aleksei Burov <burov_alexey@mail.ru>"
+RUN yum groupinstall 'Development Tools' -y \
+    && yum install mariadb-devel -y \
+    && yum clean all \
+    && rm -rf /var/cache/yum
+
+FROM kbe_pre_build AS kbe_latest
+# Download latest sha to be ensure the latest kbe source is up to date.
+ADD https://api.github.com/repos/kbengine/kbengine/git/refs/heads/master /tmp/kbe_version.json
+RUN git clone https://github.com/kbengine/kbengine.git --progress /opt
+
+FROM kbe_latest AS kbe_src
+# COMMIT_SHA - the user chosen sha or the latest kbe commit of the master branch
+ARG COMMIT_SHA
+WORKDIR /opt
+RUN git checkout ${COMMIT_SHA} -b kbe-deploy-branch-${COMMIT_SHA}
+
+FROM kbe_src AS kbe_compiled
+WORKDIR /opt/kbe/src/
+RUN make
+
+FROM centos:centos7
+# Copy only the compiled binary files and the resources
+COPY --from=kbe_compiled /opt/kbe/bin/ /opt/kbengine/kbe/bin/
+COPY --from=kbe_compiled /opt/kbe/res/ /opt/kbengine/kbe/res/
