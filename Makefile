@@ -37,8 +37,8 @@ build: build_kbe build_game  ## Build a game (config file required)
 
 build_kbe: .check-config .check-git-sha  ## Build a docker image of KBEngine (config file required)
 	@scripts/build_kbe.sh \
-		--git-commit=$(KBE_GIT_COMMIT) \
-		--user-tag=$(KBE_USER_TAG)
+		--kbe-git-commit=$(KBE_GIT_COMMIT) \
+		--kbe-user-tag=$(KBE_USER_TAG)
 
 build_game: .check-config .check-git-sha build_kbe  ## Build a kbengine docker image contained assets. It binds "assets" with the built kbengine image (config file required)
 	@scripts/build_assets.sh \
@@ -61,7 +61,7 @@ stop_game:  ## Stop the docker container contained the game
 game_status:  ## Return the game status ("running" or "stopped")
 	@scripts/get_game_status.sh
 
-clean:  ## Delete artefacts connected with the projects (containers, volumes, docker networks, etc)
+clean: .check-config  ## Delete artefacts connected with the projects (containers, volumes, docker networks, etc)
 	@scripts/clean.sh \
 		--kbe-git-commit=$(KBE_GIT_COMMIT) \
 		--kbe-user-tag=$(KBE_USER_TAG) \

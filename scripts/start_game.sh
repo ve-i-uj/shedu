@@ -53,8 +53,8 @@ fi
 
 kbe_image_tag=$(
     bash $curr_dir/misc/get_kbe_image_tag.sh \
-        --git-commit=$kbe_git_commit \
-        --user-tag=$kbe_user_tag
+        --kbe-git-commit=$kbe_git_commit \
+        --kbe-user-tag=$kbe_user_tag
 )
 
 image="$ASSETS_IMAGE_NAME-$kbe_image_tag:$assets_version"

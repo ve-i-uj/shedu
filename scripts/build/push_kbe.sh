@@ -1,9 +1,4 @@
 #!/bin/bash
-# Push the compiled kbe image to the docker hub.
-
-# Import global constants of the project
-curr_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-source $( realpath "$curr_dir/../init.sh" )
 
 USAGE="
 Usage. Push the compiled kbe image to the docker hub. Example:
@@ -11,6 +6,10 @@ bash $0 \\
   --kbe-git-commit=7d379b9f \\
   --kbe-user-tag=v2.5.12
 "
+
+# Import global constants of the project
+curr_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+source $( realpath "$curr_dir/../init.sh" )
 
 echo "[DEBUG] Parse CLI arguments ..."
 kbe_user_tag=""
@@ -49,8 +48,8 @@ fi
 
 kbe_image_tag=$(
     bash $PROJECT_DIR/scripts/misc/get_kbe_image_tag.sh \
-        --git-commit=$kbe_git_commit \
-        --user-tag=$kbe_user_tag
+        --kbe-git-commit=$kbe_git_commit \
+        --kbe-user-tag=$kbe_user_tag
 )
 kbe_compiled_image="$IMAGE_NAME_KBE_COMPILED:$kbe_image_tag"
 if [[ "$(docker images -q $kbe_compiled_image 2> /dev/null)" == "" ]]; then
