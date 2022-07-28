@@ -1,0 +1,8 @@
+FROM centos:centos7
+COPY deploy-scripts/* /opt/kbengine/assets/
+RUN chmod +x /opt/kbengine/assets/wait-for-it.sh
+
+# "net-tools" for debugging to view network state of a running container
+RUN yum install net-tools -y \
+    && yum clean all \
+    && rm -rf /var/cache/yum

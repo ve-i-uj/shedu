@@ -6,7 +6,7 @@ USAGE="
 Usage. Return the tag for the kbe image. Example:
 bash $0 --kbe-git-commit=7d379b9f --kbe-user-tag=v2.5.12"
 
-echo "[DEBUG] Parse CLI arguments ..." &>2
+echo "[DEBUG] Parse CLI arguments ..." >&2
 kbe_user_tag=""
 kbe_git_commit=""
 for arg in "$@"
@@ -29,10 +29,10 @@ do
     esac
 done
 
-echo "[DEBUG] Command: $0 --kbe-git-commit=$kbe_git_commit --kbe-user-tag=$kbe_user_tag" &>2
+echo "[DEBUG] Command: $(basename ${0}) --kbe-git-commit=$kbe_git_commit --kbe-user-tag=$kbe_user_tag" >&2
 
 if [ -z "$kbe_git_commit" ]; then
-    echo "[ERROR] The argument \"--kbe-git-commit\" is am empty string"
+    echo "[ERROR] The argument \"--kbe-git-commit\" is am empty string" >&2
     echo -e "$USAGE"
     exit 1
 fi
