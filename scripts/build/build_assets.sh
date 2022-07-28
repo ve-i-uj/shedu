@@ -1,11 +1,8 @@
 #!/bin/bash
-# Build a kbengine docker image contained assets.
-#
-# It binds "assets" with the built kbengine image.
 
 # Import global constants of the project
 curr_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-source $( realpath "$curr_dir/init.sh" )
+source $( realpath "$curr_dir/../init.sh" )
 
 USAGE="
 Usage. Build a docker image of compiled KBEngine with assets (game logic). Example:
@@ -15,8 +12,6 @@ bash $0 \\
   --assets-path=/tmp/assets \\
   --assets-version=v0.0.1
 "
-
-echo -e "*** Build a docker image of compiled KBEngine with assets ***"
 
 echo "[DEBUG] Parse CLI arguments ..."
 kbe_git_commit=""
@@ -58,7 +53,8 @@ if [ "$assets_path" == "demo" ]; then
     if [ -d "$assets_path" ]; then
         rm -rf "$assets_path"
     fi
-    git clone "$ASSETS_DEMO_URL" $assets_path
+    echo "[INFO] Download the demo assets ..."
+    git clone "$KBE_ASSETS_DEMO_URL" $assets_path
     assets_version="kbe-demo-$assets_version"
 fi
 
@@ -68,24 +64,36 @@ if [ ! -d "$assets_path" ]; then
     exit 1
 fi
 
-echo "Checking the docker images containing compiled KBE ..."
-kbe_tag=$(bash $PROJECT_DIR/scripts/misc/get_kbe_image_tag.sh --git-commit=$kbe_git_commit --user-tag=$kbe_user_tag)
-sha=$( echo "$kbe_tag" | cut -d '-' -f 1 )
-existed=$( docker images --format "{{.Repository}}:{{.Tag}}" | grep "$sha" )
+echo "[INFO] Checking the docker images containing pre-assets ..."
+kbe_pre_assets_tag="$IMAGE_NAME_PRE_ASSETS:$($SCRIPTS/version/get_version.sh)"
+
+existed=$( docker images --format "{{.Repository}}:{{.Tag}}" | grep "$kbe_pre_assets_tag" )
 if [ -z "$existed"  ]; then
-    echo -e "[ERROR] There is NO compiled KBEngine with the version \"$kbe_tag\". Build compiled kbe at first." >&2
-    choice_set=$( docker images --format "{{.Tag}} ({{.Repository}}:{{.Tag}})" | grep "$PRE_ASSETS_IMAGE_NAME" )
-    echo -e "\nAvailable kbe versions:\n$choice_set"
-    echo "$USAGE"
+    echo -e "[ERROR] There is NO pre-assets image \"$kbe_pre_assets_tag\". Build pre-assets af first. Exit"
     exit 1
 fi
-echo "The compiled KBEngine image exists"
+echo "[INFO] The \"$kbe_pre_assets_tag\" image exists"
+
+echo "[INFO] Check the compiled kbengine image ..."
+kbe_image_tag=$(
+    bash $SCRIPTS/misc/get_kbe_image_tag.sh \
+        --kbe-git-commit=$kbe_git_commit \
+        --kbe-user-tag=$kbe_user_tag
+) 2>/dev/null
+kbe_compiled_tag="$IMAGE_NAME_KBE_COMPILED:$kbe_image_tag"
+existed=$( docker images --format "{{.Repository}}:{{.Tag}}" | grep "$kbe_compiled_tag" )
+if [ -z "$existed"  ]; then
+    echo "[ERROR] There is NO compiled KBEngine \"$kbe_compiled_tag\". Build compiled kbe at first." >&2
+    exit 1
+fi
+echo "[INFO] The \"$kbe_compiled_tag\" image exists"
 
 cd "$assets_path"
 docker build \
-    --file "$ASSETS_DOCKERFILE_PATH" \
-    --build-arg FROM_IMAGE_NAME="$PRE_ASSETS_IMAGE_NAME:$kbe_tag" \
-    --tag "$ASSETS_IMAGE_NAME-$kbe_tag:$assets_version" \
+    --file "$DOCKERFILE_KBE_ASSETS" \
+    --build-arg IMAGE_NAME_KBE_COMPILED="$kbe_compiled_tag" \
+    --build-arg IMAGE_NAME_PRE_ASSETS="$kbe_pre_assets_tag" \
+    --tag "$IMAGE_NAME_ASSETS-$kbe_image_tag:$assets_version" \
     .
 
 echo "Done ($0)"
