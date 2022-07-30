@@ -47,17 +47,13 @@ if [ -z "$kbe_git_commit" ] || [ -z "$assets_path" ] || [ -z "$assets_version" ]
     exit 1
 fi
 
-if [ "$assets_path" == "demo" ]; then
-    assets_version="kbe-demo-$assets_version"
-fi
-
+assets_version=$( bash "$SCRIPTS/misc/get_assets_version_tag.sh" $assets_path $assets_version )
 kbe_image_tag=$(
     bash $curr_dir/misc/get_kbe_image_tag.sh \
         --kbe-git-commit=$kbe_git_commit \
         --kbe-user-tag=$kbe_user_tag
 )
-
-image="$ASSETS_IMAGE_NAME-$kbe_image_tag:$assets_version"
+image="$IMAGE_NAME_ASSETS-$kbe_image_tag:$assets_version"
 export KBE_ASSETS_IMAGE="$image"
 export KBE_ASSETS_CONTAINER_NAME="$KBE_ASSETS_CONTAINER_NAME"
 

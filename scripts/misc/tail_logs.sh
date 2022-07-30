@@ -60,6 +60,6 @@ kbe_image_tag=$(
         --kbe-user-tag=$kbe_user_tag
 )
 cd "$PROJECT_DIR"
-export KBE_ASSETS_IMAGE="$ASSETS_IMAGE_NAME-$kbe_image_tag:$assets_version"
+export KBE_ASSETS_IMAGE="$IMAGE_NAME_ASSETS-$kbe_image_tag:$assets_version"
 export KBE_ASSETS_CONTAINER_NAME="$KBE_ASSETS_CONTAINER_NAME"
 docker-compose logs --timestamps --follow

@@ -49,13 +49,13 @@ fi
 
 if [ "$assets_path" == "demo" ]; then
     echo "[WARNING] The game will be created based on demo assets"
+    assets_version=$( bash "$SCRIPTS/misc/get_assets_version_tag.sh" $assets_path $assets_version )
     assets_path=/tmp/kbe-demo-assets
     if [ -d "$assets_path" ]; then
         rm -rf "$assets_path"
     fi
     echo "[INFO] Download the demo assets ..."
     git clone "$KBE_ASSETS_DEMO_URL" $assets_path
-    assets_version="kbe-demo-$assets_version"
 fi
 
 if [ ! -d "$assets_path" ]; then
