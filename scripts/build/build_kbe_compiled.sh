@@ -53,11 +53,11 @@ fi
 commit_info=$(
     curl -s \
         -H "Accept: application/vnd.github.v3+json" \
-        "https://api.github.com/repos/kbengine/kbengine/commits/$kbe_git_commit" \
+        "$KBE_GITHUB_API_URL/commits/$kbe_git_commit" \
     | jq .sha
 )
 if [[ "$commit_info" == null ]]; then
-    echo "[ERROR] There is NO sha commit \"$kbe_git_commit\" in the KBE repository <$KBE_REPO>)"
+    echo "[ERROR] There is NO sha commit \"$kbe_git_commit\" in the KBE repository <$KBE_GITHUB_URL>)"
     exit 1
 fi
 
