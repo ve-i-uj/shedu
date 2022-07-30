@@ -58,8 +58,11 @@ if [[ "$(docker images -q $kbe_compiled_image 2> /dev/null)" == "" ]]; then
 fi
 
 tag="$IMAGE_NAME_KBE_COMPILED:$kbe_image_tag"
+only_sha_tag="$IMAGE_NAME_KBE_COMPILED:$kbe_git_commit"
+docker tag "$tag" "$only_sha_tag"
 echo -e "[INFO] Push the image contained compiled KBEngine (tag = \"$tag\") ..."
 cd "$PROJECT_DIR"
 docker push "$tag"
+docker push "$only_sha_tag"
 
 echo "Done ($0)"
