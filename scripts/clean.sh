@@ -55,7 +55,6 @@ kbe_image_tag=$(
 )
 image="$IMAGE_NAME_ASSETS-$kbe_image_tag:$assets_version"
 export KBE_ASSETS_IMAGE="$image"
-export KBE_ASSETS_CONTAINER_NAME="$KBE_ASSETS_CONTAINER_NAME"
 
 docker-compose down -v
 images=$( docker images | grep "$PROJECT_NAME/kbe-" | awk '{print $1 ":" $2}' )

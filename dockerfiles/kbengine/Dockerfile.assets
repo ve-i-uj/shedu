@@ -8,17 +8,18 @@ LABEL maintainer="Aleksei Burov <burov_alexey@mail.ru>"
 FROM ${IMAGE_NAME_KBE_COMPILED}
 COPY --from=pre_assets /opt/kbengine/assets/ /opt/kbengine/assets/
 
-# We assume the context is the assets directory
-COPY . /opt/kbengine/assets
-# Modify kbengine.xml file KBEngine works with the docker environment
-RUN yum install python3 -y \
-    && yum clean all \
-    && rm -rf /var/cache/yum
-RUN python3 /opt/kbengine/assets/modify_kbe_config.py
-WORKDIR /opt/kbengine/assets/
-ENTRYPOINT bash /opt/kbengine/assets/docker-entrypoint.sh
-
 # "net-tools" for debugging to view network state of a running container
 RUN yum install net-tools -y \
     && yum clean all \
     && rm -rf /var/cache/yum
+
+# We need python to a run script modifing kbengine.xml .
+# The script sets some settings to work with docker.
+RUN yum install python3 -y \
+    && yum clean all \
+    && rm -rf /var/cache/yum
+# We assume the context is the assets directory
+COPY . /opt/kbengine/assets
+RUN python3 /opt/kbengine/assets/modify_kbe_config.py
+WORKDIR /opt/kbengine/assets/
+ENTRYPOINT bash /opt/kbengine/assets/docker-entrypoint.sh
