@@ -24,31 +24,25 @@ ifeq (,$(wildcard $(config)))
 	$(error [ERROR] No config file. Use "make help")
 endif
 
-.check-git-sha:
-ifeq ($(KBE_GIT_COMMIT),)
-	$(error [ERROR] No kbe git commit (no value in the variable "KBE_GIT_COMMIT" \
-	and the script cannot request the latest sha))
-endif
-
 all: build
 
-build: build_kbe build_game  ## Build a game (config file required)
+build: build_kbe build_game  ## Build a game
 	@echo -e "\nDone.\n"
 
-build_kbe: .check-config .check-git-sha  ## Build a docker image of KBEngine (config file required)
-	@scripts/build_kbe.sh \
+build_kbe: .check-config ## Build a docker image of KBEngine
+	@scripts/build/build_kbe_compiled.sh \
 		--kbe-git-commit=$(KBE_GIT_COMMIT) \
 		--kbe-user-tag=$(KBE_USER_TAG)
 
-build_game: .check-config .check-git-sha build_kbe  ## Build a kbengine docker image contained assets. It binds "assets" with the built kbengine image (config file required)
-	@scripts/build_assets.sh \
+build_game: .check-config build_kbe  ## Build a kbengine docker image contained assets. It binds "assets" with the built kbengine image
+	@scripts/build/build_pre_assets.sh
+	@scripts/build/build_assets.sh \
 		--kbe-git-commit=$(KBE_GIT_COMMIT) \
 		--kbe-user-tag=$(KBE_USER_TAG) \
 		--assets-path=$(KBE_ASSETS_PATH) \
-		--assets-version=$(KBE_ASSETS_VERSION) \
-		# > /dev/null
+		--assets-version=$(KBE_ASSETS_VERSION)
 
-start_game: .check-config build_game  ## Run the docker image contained the game (config file required)
+start_game: .check-config build_game  ## Run the docker image contained the game
 	@scripts/start_game.sh \
 		--kbe-git-commit=$(KBE_GIT_COMMIT) \
 		--kbe-user-tag=$(KBE_USER_TAG) \
@@ -100,7 +94,7 @@ help:  ## This help
 go_into:  ## [Debug] Go into the running game container
 	@scripts/misc/go_into_container.sh
 
-check_config: .check-config  ## [Debug] Check configuration file (config file required)
+check_config: .check-config  ## [Debug] Check configuration file
 	@scripts/misc/check_config.sh $(config) > /dev/null
 
 version:  ## [Debug] Current version of the project
@@ -111,7 +105,7 @@ print:  ## [Debug] List built kbe images
 	@scripts/misc/list_images.sh
 	@echo
 
-logs:  ## [Debug] Show actual log records of the game (config file required)
+logs: .check-config ## [Debug] Show actual log records of the game
 	-@scripts/misc/tail_logs.sh \
 		--kbe-git-commit=$(KBE_GIT_COMMIT) \
 		--kbe-user-tag=$(KBE_USER_TAG) \

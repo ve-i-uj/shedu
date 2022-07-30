@@ -48,6 +48,12 @@ cp configs/example.env configs/develop.env
 
 Set the required [settings](#configuration-file) in the new config. The path to this config is required to execute some commands. By default, without changing the settings, the game server will be launched with [kbengine_demos_assets](https://github.com/kbengine/kbengine_demos_assets).
 
+Build KBEngine
+
+```bash
+make build_kbe config=configs/develop.env
+```
+
 Build the game
 
 ```bash
