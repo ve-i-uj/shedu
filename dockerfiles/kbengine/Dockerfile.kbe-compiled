@@ -20,7 +20,7 @@ FROM kbe_src AS kbe_compiled
 WORKDIR /opt/kbe/src/
 RUN make
 
-FROM centos:centos7
+FROM kbe_pre_build
 # Copy only the compiled binary files and the resources
 COPY --from=kbe_compiled /opt/kbe/bin/ /opt/kbengine/kbe/bin/
 COPY --from=kbe_compiled /opt/kbe/res/ /opt/kbengine/kbe/res/
