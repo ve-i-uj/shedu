@@ -16,7 +16,7 @@ def main():
     # Проверка, что путь существует иначе запись в лог и выход с ошибкой (exit 1)
     tree = ET.parse(conf_path)
     root = tree.getroot()
-    
+
     # TODO: (3 nov. 2020 г. 12:16:40 burov_alexey@mail.ru)
     # configure username, pwd, db name
     databaseInterface_el = root.find('dbmgr/databaseInterfaces')  # noqa
@@ -25,33 +25,35 @@ def main():
     # Элемент нужно обновлять, а не удалять. Другие настройки должны остаться
     # не тронутыми.
     databaseInterface_el.remove(default_el)
-    
+
+    # TODO: (22.07.2022 burov_alexey@mail.ru)
+    # Нужно, чтобы это были значения из переменных окружения (настройки БД)
     new_default_el = ET.fromstring("""
         <default>
             <type> mysql </type>
             <host> kbe-mariadb </host>
             <port> 0 </port>
-            <auth>  
+            <auth>
                 <username> kbe </username>
                 <password> pwd123456 </password>
             </auth>
             <databaseName> kbe </databaseName>
         </default>
     """)
-    
+
     databaseInterface_el.append(new_default_el)
-    
+
     dbmgr_el = root.find('dbmgr')
     # TODO: (3 nov. 2020 г. 12:35:19 burov_alexey@mail.ru)
     # Check node exists
     shareDB_el = ET.SubElement(dbmgr_el, 'shareDB')  # noqa
     shareDB_el.text = 'true'
-    
+
     for name in ('baseapp', 'loginapp'):
         app_el = root.find(name)
         externalAddress_el = ET.SubElement(app_el, 'externalAddress')  # noqa
         externalAddress_el.text = HOST_ADDR
-    
+
     tree.write(conf_path)
 
     print('The config "kbengine.xml" has been updated')
