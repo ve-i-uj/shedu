@@ -19,7 +19,7 @@ services:
   kbe-assets:
     image: ${KBE_ASSETS_IMAGE}
     restart: always
-    container_name: ${KBE_ASSETS_CONTAINER_NAME}
+    container_name: kbe-assets
     ports:
       # LoginApp
       - 20013:20013

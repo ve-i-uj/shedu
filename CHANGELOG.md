@@ -1,19 +1,29 @@
 
 # Changelog
 
+Minor fixes: 1) unused constants were deleted 2) dockerfile commands were switched	Aleksei Burov	2022-07-30 10:06
+Make build of a kbengine image is using a new build script	Aleksei Burov	2022-07-30 07:51
+
+## [0.6.0] - 2022-07-30
+### Changed
+- The script building the assets image was updated: changed the order of image layers
+- Added prefix --kbe to parameter names in bash scripts
+- Make build of a kbengine image is using a new build script
+
+### Added
+- New scripts to build and to push the compiled kbe image on the docker hub were added
+- A new script building the pre-assets image was added
+- Force building of the kbengine without cache was added ("build_force" make rule)
+
 ## [0.5.1] - 2022-07-25
 ### Fixed
 - The "start_game.sh" script cannot find the built kbe demo image. It was fixed.
-
 
 ## [0.5.0] - 2022-07-23
 ### Added
 - Added a new script "configure" to install dependencies
 - The build_assets.sh can download kbe assets demo
 
-### Changed
-- README was updated to describe how to deploy the project.
-- Added prefixes "KBE_" and "KBE_ASSETS_" for the two env. variables.
 
 ### Fixed
 - The rule "make logs" was fixed: there was no game image name to attach to the container.

@@ -1,9 +1,25 @@
-ARG FROM_IMAGE_NAME
-FROM ${FROM_IMAGE_NAME}
+
+ARG IMAGE_NAME_KBE_COMPILED
+ARG IMAGE_NAME_PRE_ASSETS
+FROM ${IMAGE_NAME_PRE_ASSETS} as pre_assets
 LABEL maintainer="Aleksei Burov <burov_alexey@mail.ru>"
+
+# Copy pre-assets
+FROM ${IMAGE_NAME_KBE_COMPILED}
+COPY --from=pre_assets /opt/kbengine/assets/ /opt/kbengine/assets/
+
+# "net-tools" for debugging to view network state of a running container
+RUN yum install net-tools -y \
+    && yum clean all \
+    && rm -rf /var/cache/yum
+
+# We need python to a run script modifing kbengine.xml .
+# The script sets some settings to work with docker.
+RUN yum install python3 -y \
+    && yum clean all \
+    && rm -rf /var/cache/yum
 # We assume the context is the assets directory
 COPY . /opt/kbengine/assets
-# Modify kbengine.xml file KBEngine works with the docker environment
 RUN python3 /opt/kbengine/assets/modify_kbe_config.py
 WORKDIR /opt/kbengine/assets/
 ENTRYPOINT bash /opt/kbengine/assets/docker-entrypoint.sh
