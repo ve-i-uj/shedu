@@ -68,6 +68,12 @@ clean: .check-config  ## Delete artefacts connected with the projects (container
 		--assets-path=$(KBE_ASSETS_PATH) \
 		--assets-version=$(KBE_ASSETS_VERSION) \
 
+build_force: .check-config ## Build a docker image of compiled KBEngine without using of cache
+	@scripts/build/build_kbe_compiled.sh \
+		--kbe-git-commit=$(KBE_GIT_COMMIT) \
+		--kbe-user-tag=$(KBE_USER_TAG) \
+		--force
+
 define HELP_TEXT
 *** [$(project)] Help ***
 
