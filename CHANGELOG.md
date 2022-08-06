@@ -1,8 +1,12 @@
 
 # Changelog
 
-Minor fixes: 1) unused constants were deleted 2) dockerfile commands were switched	Aleksei Burov	2022-07-30 10:06
-Make build of a kbengine image is using a new build script	Aleksei Burov	2022-07-30 07:51
+## [0.6.1] - 2022-08-06
+### Added
+- A new script for compiling KBEngine on Ubuntu was added
+
+### Fixed
+- Default kbe db settings were using. It was fixed
 
 ## [0.6.0] - 2022-07-30
 ### Changed
