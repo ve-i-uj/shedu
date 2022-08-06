@@ -1,6 +1,6 @@
-"""Modifies the kbengine.xml configuration file before start of a kbe server.
+"""The script modifies the kbengine.xml configuration file so KBEngine can work with docker.
 
-This script would be placed in the root directory of a project.
+It would be placed in the root directory of the assets.
 """
 
 import os
@@ -8,17 +8,26 @@ import xml.etree.ElementTree as ET
 
 HOST_ADDR = '0.0.0.0'
 
+MYSQL_DATABASE = os.environ['MYSQL_DATABASE']
+MYSQL_USER = os.environ['MYSQL_USER']
+MYSQL_PASSWORD = os.environ['MYSQL_PASSWORD']
+
+# TODO: [30.07.2022 burov_alexey@mail.ru]:
+# 1. Общий перехватчик ошибки?
+# 2. Запиусть под дебагом
+# 3. Смотреть под дебагом xml, которую удаляю
+
+
+
 
 def main():
-    proj_dir = os.path.dirname(__file__)
-    conf_path = os.path.join(proj_dir, 'res', 'server', 'kbengine.xml')
+    curr_dir = os.path.dirname(__file__)
+    conf_path = os.path.join(curr_dir, 'res', 'server', 'kbengine.xml')
     # TODO: [26.10.2021 burov_alexey@mail.ru]:
     # Проверка, что путь существует иначе запись в лог и выход с ошибкой (exit 1)
     tree = ET.parse(conf_path)
     root = tree.getroot()
 
-    # TODO: (3 nov. 2020 г. 12:16:40 burov_alexey@mail.ru)
-    # configure username, pwd, db name
     databaseInterface_el = root.find('dbmgr/databaseInterfaces')  # noqa
     default_el = root.find('dbmgr/databaseInterfaces/default')
     # TODO: [26.10.2021 burov_alexey@mail.ru]:
@@ -26,20 +35,29 @@ def main():
     # не тронутыми.
     databaseInterface_el.remove(default_el)
 
-    # TODO: (22.07.2022 burov_alexey@mail.ru)
-    # Нужно, чтобы это были значения из переменных окружения (настройки БД)
-    new_default_el = ET.fromstring("""
+#     print(
+#         f'MYSQL_USER={MYSQL_USER}',
+#         f'MYSQL_PASSWORD={MYSQL_PASSWORD}',
+#         f'MYSQL_DATABASE={MYSQL_DATABASE}',
+#         sep='\n'
+#     )
+
+    assert MYSQL_USER and MYSQL_PASSWORD and MYSQL_DATABASE
+
+    new_default_el = ET.fromstring(f"""
         <default>
             <type> mysql </type>
             <host> kbe-mariadb </host>
             <port> 0 </port>
             <auth>
-                <username> kbe </username>
-                <password> pwd123456 </password>
+                <username> {MYSQL_USER} </username>
+                <password> {MYSQL_PASSWORD} </password>
             </auth>
-            <databaseName> kbe </databaseName>
+            <databaseName> {MYSQL_DATABASE} </databaseName>
         </default>
     """)
+
+#   print(ET.tostring(new_default_el, encoding='utf8', method='xml'))
 
     databaseInterface_el.append(new_default_el)
 

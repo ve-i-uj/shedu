@@ -93,6 +93,9 @@ docker build \
     --file "$DOCKERFILE_KBE_ASSETS" \
     --build-arg IMAGE_NAME_KBE_COMPILED="$kbe_compiled_tag" \
     --build-arg IMAGE_NAME_PRE_ASSETS="$kbe_pre_assets_tag" \
+    --build-arg MYSQL_DATABASE=${MYSQL_DATABASE} \
+    --build-arg MYSQL_USER=${MYSQL_USER} \
+    --build-arg MYSQL_PASSWORD=${MYSQL_PASSWORD} \
     --tag "$IMAGE_NAME_ASSETS-$kbe_image_tag:$assets_version" \
     .
 
