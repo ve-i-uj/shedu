@@ -1,3 +1,4 @@
 FROM centos:centos7
 COPY deploy-scripts/* /opt/kbengine/assets/
+COPY .env /opt/kbengine/assets/shedu/.env
 RUN chmod +x /opt/kbengine/assets/wait-for-it.sh

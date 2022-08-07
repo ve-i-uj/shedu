@@ -9,13 +9,11 @@ FROM ${IMAGE_NAME_KBE_COMPILED}
 RUN yum install python3 -y \
     && yum clean all \
     && rm -rf /var/cache/yum
-# We assume the context is the assets directory
 COPY --from=pre_assets /opt/kbengine/assets/ /opt/kbengine/assets/
 
 COPY . /opt/kbengine/assets
-ARG ENV_FILE
 RUN python3 /opt/kbengine/assets/modify_kbe_config.py \
-    --env-file=${ENV_FILE} \
+    --env-file=/opt/kbengine/assets/shedu/.env \
     --kbe-assets-path=/opt/kbengine/assets/
 WORKDIR /opt/kbengine/assets/
 ENTRYPOINT bash /opt/kbengine/assets/docker-entrypoint.sh
