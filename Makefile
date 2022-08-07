@@ -4,7 +4,7 @@ include contrib/colors.mk
 
 project := $(shell basename $$(pwd))
 
-config ?=
+config ?= .env
 ifneq ("$(wildcard $(config))","")
 	include $(config)
 	export $(shell sed 's/=.*//' $(config))
@@ -22,6 +22,8 @@ endif
 .check-config:
 ifeq (,$(wildcard $(config)))
 	$(error [ERROR] No config file. Use "make help")
+else
+	$(info [INFO] The config file path is "$(config)")
 endif
 
 all: build
