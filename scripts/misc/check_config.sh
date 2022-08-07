@@ -26,14 +26,16 @@ done < configs/example.env
 
 config_path="$1"
 
+echo "[INFO] Check the config file \"$config_path\" ..."
+
 if [ -z "$config_path" ]; then
-    echo "[ERROR] No config file in the first argument" >&2
+    echo "[ERROR] No config file in the first argument"
     echo "$USAGE"
     exit 1
 fi
 
 if [ ! -f "$config_path" ]; then
-    echo "[ERROR] The config file does not exist (path = \"$config_path\")" >&2
+    echo "[ERROR] The config file does not exist (path = \"$config_path\")"
     echo "$USAGE"
     exit 1
 fi
@@ -43,24 +45,24 @@ source "$config_path"
 error=false
 for var_name in "${all_vars[@]}"; do
     if [[ " ${required_vars[*]} " =~ " ${var_name} " ]] && [ -z "${!var_name}" ]; then
-        echo "[ERROR] $var_name is unset (non-empty variable value is required)" >&2
+        echo "[ERROR] $var_name is unset (non-empty variable value is required)"
         error=true
         continue
     fi
     if [[ " ${optional_vars[*]} " =~ " ${var_name} " ]] && [ -z "${!var_name}" ]; then
-        echo "[INFO] $var_name is unset (it's an optional variable)" >&2
+        echo "[INFO] $var_name is unset (it's an optional variable)"
         continue
     fi
     if [ -z "${!var_name}" ]; then
-        echo "[ERROR] $var_name is unset" >&2
+        echo "[ERROR] $var_name is unset"
         error=true
     fi
 done
 
 if [ "$error" == true ]; then
-    echo "[INFO] See the doc <$DOC_CONFIG_URL>" >&2
+    echo "[INFO] See the doc <$DOC_CONFIG_URL>"
     echo "$USAGE"
     exit 1
 fi
 
-echo Ok 1>&2
+echo "[INFO] The config file is Ok"
