@@ -9,6 +9,7 @@ Usage. Build a docker image of compiled KBEngine with assets (game logic). Examp
 bash $0 \\
   --kbe-git-commit=7d379b9f \\
   --kbe-user-tag=v2.5.12 \\
+  --kbe-assets-sha=81f7249b \\
   --assets-path=/tmp/assets \\
   --assets-version=v0.0.1 \\
   --env-file=$PROJECT_DIR/.env
@@ -17,6 +18,7 @@ bash $0 \\
 echo "[DEBUG] Parse CLI arguments ..."
 kbe_git_commit=""
 kbe_user_tag=""
+kbe_assets_sha=""
 assets_path=""
 assets_version=""
 env_file=""
@@ -28,6 +30,7 @@ do
     case "$key" in
         --kbe-git-commit)  kbe_git_commit=${value} ;;
         --kbe-user-tag)  kbe_user_tag=${value} ;;
+        --kbe-assets-sha)  kbe_assets_sha=${value} ;;
         --assets-path)  assets_path=${value} ;;
         --assets-version)   assets_version=${value} ;;
         --env-file)   env_file=${value} ;;
@@ -100,6 +103,7 @@ docker build \
     --file "$DOCKERFILE_KBE_ASSETS" \
     --build-arg IMAGE_NAME_KBE_COMPILED="$kbe_compiled_tag" \
     --build-arg IMAGE_NAME_PRE_ASSETS="$kbe_pre_assets_tag" \
+    --build-arg KBE_ASSETS_SHA="$kbe_assets_sha" \
     --build-arg ENV_FILE="$env_file" \
     --tag "$IMAGE_NAME_ASSETS-$kbe_image_tag:$assets_version" \
     .

@@ -30,6 +30,6 @@ echo "$version" | tee >( xargs git tag ) > "$VERSION_PATH"
 
 git commit -a -m "Set the version \"$version\" (auto commit)"
 git push origin develop
-git push --tags
+git push --tags -f
 
 echo "Done ($0)"

@@ -1,8 +1,8 @@
-Shedu
+Shedu - Easy deploy of a KBEngine cluster
 
 # Overview
 
-The project builds, packages and starts [kbengine](https://github.com/kbengine/kbengine "An open source MMOG server engine") and kbe environment in the docker containers.
+The project builds, packages and starts [KBEngine](https://github.com/kbengine/kbengine "An open source MMOG server engine") and kbe environment in the docker containers.
 
 The main goal of the project is to simplify kbengine deploy. It doesn't need to know how to build a C++ project or what library you need to install for. Moreover all kbe infrastructure (database, smtp server etc) can be built and started just in one command too. You can choose a kbe commit for your kbe build and easy link assets to the chosen kbe version. Change variables in "configs/example.env" and save the file like a new one with your configuration.
 
@@ -76,10 +76,9 @@ Other operations
 make help
 ```
 
-
 # Configuration file
 
-Set the path to the assets folder to the [KBE_ASSETS_PATH](#configuration-file) variable in the config. The path to the assets should be an absolute path that points to your assets folder on your host. This assets folder will be copied to the game image. The default value for this variable is the empty string. In this case the latest version of [kbengine_demos_assets](https://github.com/kbengine/kbengine_demos_assets) will be downloaded and be used (these assets are suitable for use in kbengine client demos)
+The configuration file should be placed in the project root and has the name ".env". Set the path to the assets folder to the [KBE_ASSETS_PATH](#configuration-file) variable in the config. The path to the assets should be an absolute path that points to your assets folder on your host. This assets folder will be copied to the game image. The default value for this variable is the empty string. In this case the latest version of [kbengine_demos_assets](https://github.com/kbengine/kbengine_demos_assets) will be downloaded and be used (these assets are suitable for use in kbengine client demos)
 
 #### KBE build settings
 
@@ -96,6 +95,7 @@ Set the path to the assets folder to the [KBE_ASSETS_PATH](#configuration-file) 
 #### Game assets settings
 
 * KBE_ASSETS_PATH - The absolute path to the assets director. If it has the "demo" value the [kbengine_demos_assets](https://github.com/kbengine/kbengine_demos_assets "The demo settings provided by KBEngine developers") will be used as an assets
+* KBE_ASSETS_SHA - The commit of the assets
 * KBE_ASSETS_VERSION - The version of the assets. This variable labels the finaly game image. It cannot be empty. Set any non-empty string if your project has no version.
 
 # Deployment artifacts
