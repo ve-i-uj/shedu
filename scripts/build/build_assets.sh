@@ -10,7 +10,8 @@ bash $0 \\
   --kbe-git-commit=7d379b9f \\
   --kbe-user-tag=v2.5.12 \\
   --assets-path=/tmp/assets \\
-  --assets-version=v0.0.1
+  --assets-version=v0.0.1 \\
+  --env-file=$PROJECT_DIR/.env
 "
 
 echo "[DEBUG] Parse CLI arguments ..."
@@ -18,6 +19,7 @@ kbe_git_commit=""
 kbe_user_tag=""
 assets_path=""
 assets_version=""
+env_file=""
 help=false
 for arg in "$@"
 do
@@ -28,6 +30,7 @@ do
         --kbe-user-tag)  kbe_user_tag=${value} ;;
         --assets-path)  assets_path=${value} ;;
         --assets-version)   assets_version=${value} ;;
+        --env-file)   env_file=${value} ;;
         --help)         help=true ;;
         -h)             help=true ;;
         *)
@@ -39,9 +42,13 @@ if [ "$help" = true ]; then
     exit 0
 fi
 
-echo "[DEBUG] Command: $0 --kbe-git-commit=$kbe_git_commit --kbe-user-tag=$kbe_user_tag --assets-path=$assets_path --assets-version=$assets_version"
+echo "\
+[DEBUG] Command: $0 --kbe-git-commit=$kbe_git_commit \
+--kbe-user-tag=$kbe_user_tag --assets-path=$assets_path \
+--assets-version=$assets_version --env-file=$env_file"
 
-if [ -z "$kbe_git_commit" ] || [ -z "$assets_path" ] || [ -z "$assets_version" ]; then
+if [ -z "$kbe_git_commit" ] || [ -z "$assets_path" ] \
+        || [ -z "$assets_version" ] || [ -z "$env_file" ]; then
     echo "[ERROR] Not all arguments passed" >&2
     echo -e "$USAGE"
     exit 1
@@ -93,9 +100,7 @@ docker build \
     --file "$DOCKERFILE_KBE_ASSETS" \
     --build-arg IMAGE_NAME_KBE_COMPILED="$kbe_compiled_tag" \
     --build-arg IMAGE_NAME_PRE_ASSETS="$kbe_pre_assets_tag" \
-    --build-arg MYSQL_DATABASE=${MYSQL_DATABASE} \
-    --build-arg MYSQL_USER=${MYSQL_USER} \
-    --build-arg MYSQL_PASSWORD=${MYSQL_PASSWORD} \
+    --build-arg ENV_FILE="$env_file" \
     --tag "$IMAGE_NAME_ASSETS-$kbe_image_tag:$assets_version" \
     .
 

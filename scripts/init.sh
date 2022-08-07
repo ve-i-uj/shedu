@@ -8,7 +8,7 @@ SCRIPTS="$PROJECT_DIR/scripts"
 
 IMAGE_NAME_ASSETS="$PROJECT_NAME/kbe-assets"
 IMAGE_NAME_KBE_COMPILED="$PROJECT_NAME/kbe-compiled"
-IMAGE_NAME_PRE_ASSETS="$PROJECT_NAME/kbe-pre-assets"
+IMAGE_NAME_PRE_ASSETS="$PROJECT_NAME/kbe-pre-assets-$PROJECT_NAME"
 
 DOCKERFILE_KBE_ASSETS="$PROJECT_DIR/dockerfiles/kbengine/Dockerfile.assets"
 DOCKERFILE_KBE_COMPILED="$PROJECT_DIR/dockerfiles/kbengine/Dockerfile.kbe-compiled"
