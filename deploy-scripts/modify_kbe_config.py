@@ -13,7 +13,7 @@ from pathlib import Path
 HOST_ADDR = '0.0.0.0'
 TITLE = ('The script modifies the kbengine.xml configuration file so KBEngine '
          'can work with docker.')
-FORMAT = '%(levelname)-7s %(asctime)s [%(filename)s:%(lineno)s - %(funcName)s()] %(message)s'
+FORMAT = '[%(levelname)s] %(asctime)s [%(filename)s:%(lineno)s - %(funcName)s()] %(message)s'
 
 logger = logging.getLogger(__file__)
 
