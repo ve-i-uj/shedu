@@ -30,7 +30,6 @@ do
     case "$key" in
         --kbe-user-tag)             kbe_user_tag=${value} ;;
         --kbe-git-commit)           kbe_git_commit=${value} ;;
-        --kbe-git-commit)           kbe_git_commit=${value} ;;
         --force)                    force=true ;;
         --help)                     help=true ;;
         -h)                         help=true ;;
