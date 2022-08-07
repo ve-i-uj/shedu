@@ -1,6 +1,11 @@
 
 # Changelog
 
+## [0.7.0] - 2022-08-07
+### Changed
+- The shedu/.env settings file is mandatory
+- Shedu settings in the assets are located in .env file
+
 ## [0.6.1] - 2022-08-06
 ### Added
 - A new script for compiling KBEngine on Ubuntu was added
