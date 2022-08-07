@@ -151,9 +151,9 @@ def main():
 
         logger.info(f'Updated {name} "externalAddress"')
 
-    tree.write(kbengine_xml_path.with_suffix(kbengine_xml_path.suffix + '.new'))
+    tree.write(kbengine_xml_path)
 
-    print('The config "kbengine.xml" has been updated')
+    logger.info(f'The config "{kbengine_xml_path}" has been updated')
 
 
 if __name__ == '__main__':

@@ -4,14 +4,17 @@ include contrib/colors.mk
 
 project := $(shell basename $$(pwd))
 
-config ?= .env
-ifneq ("$(wildcard $(config))","")
-	include $(config)
-	export $(shell sed 's/=.*//' $(config))
+# Check the .env file exists
+ifneq ("$(wildcard .env)","")
+	include .env
+	export $(shell sed 's/=.*//' .env)
 endif
 
 ifeq ($(KBE_GIT_COMMIT),)
 	override KBE_GIT_COMMIT := $(shell scripts/misc/get_latest_kbe_sha.sh)
+		ifeq ($(KBE_GIT_COMMIT),)
+			override KBE_GIT_COMMIT := 7d379b9f
+		endif
 endif
 
 .PHONY : all help build_kbe clean build_game start_game list version
@@ -20,15 +23,13 @@ endif
 	@echo Use \"make help\"
 
 .check-config:
-ifeq (,$(wildcard $(config)))
-	$(error [ERROR] No config file. Use "make help")
-else
-	$(info [INFO] The config file path is "$(config)")
+ifeq (,$(wildcard .env))
+	$(error [ERROR] No config file "$(project)/.env". Use "make help")
 endif
 
 all: build
 
-build: build_kbe build_game  ## Build a game
+build: build_kbe build_game  ## Build all
 	@echo -e "\nDone.\n"
 
 build_kbe: .check-config ## Build a docker image of KBEngine
@@ -42,7 +43,8 @@ build_game: .check-config build_kbe  ## Build a kbengine docker image contained 
 		--kbe-git-commit=$(KBE_GIT_COMMIT) \
 		--kbe-user-tag=$(KBE_USER_TAG) \
 		--assets-path=$(KBE_ASSETS_PATH) \
-		--assets-version=$(KBE_ASSETS_VERSION)
+		--assets-version=$(KBE_ASSETS_VERSION) \
+		--env-file=.env
 
 start_game: .check-config build_game  ## Run the docker image contained the game
 	@scripts/start_game.sh \
@@ -73,14 +75,18 @@ build_force: .check-config ## Build a docker image of compiled KBEngine without 
 define HELP_TEXT
 *** [$(project)] Help ***
 
-The project builds, packages and starts kbengine and kbe environment in the docker containers.
+The project builds, packages and starts kbengine and kbe environment \
+in the docker.
 
-Some rules required a config file. Use path to the config file in the "config" \
-cli argument. The build of the project will be aborted if no "config" argument \
-or the file doesn't exist. For more information visit the page <https://github.com/ve-i-uj/shedu>
+Some rules required a config file. Copy config from the "configs" directory \
+or set your own settings in the "<project_dir>/.env" settings file.
+The build of the project will be aborted if no .env file in the project \
+root directory.
+For more information visit the page <https://github.com/ve-i-uj/shedu>
 
 Example:
-make build config=configs/example.env
+cp configs/example.env .env
+make build
 
 endef
 
@@ -97,7 +103,7 @@ go_into:  ## [Debug] Go into the running game container
 	@scripts/misc/go_into_container.sh
 
 check_config: .check-config  ## [Debug] Check configuration file
-	@scripts/misc/check_config.sh $(config) > /dev/null
+	@scripts/misc/check_config.sh .env
 
 version:  ## [Debug] Current version of the project
 	@scripts/version/get_version.sh
@@ -107,7 +113,7 @@ print:  ## [Debug] List built kbe images
 	@scripts/misc/list_images.sh
 	@echo
 
-logs: .check-config ## [Debug] Show actual log records of the game
+logs: check_config ## [Debug] Show actual log records of the game
 	-@scripts/misc/tail_logs.sh \
 		--kbe-git-commit=$(KBE_GIT_COMMIT) \
 		--kbe-user-tag=$(KBE_USER_TAG) \

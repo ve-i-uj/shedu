@@ -40,30 +40,28 @@ Install Dependencies
 ./configure
 ```
 
-Create a new config file
+The project reads the settings from the ".env" file located in the root directory. There are example of .env files in the "configs" director. By default, without changing the settings, the game server will be launched with [kbengine_demos_assets](https://github.com/kbengine/kbengine_demos_assets). You can start the kbe server with your assets just point in the .env file the directory of your assets. For more information see settings [described here](#configuration-file). Copy an example env file to the root directory and change it if you want set your custom settings.
 
 ```bash
-cp configs/example.env configs/develop.env
+cp configs/example.env .env
 ```
-
-Set the required [settings](#configuration-file) in the new config. The path to this config is required to execute some commands. By default, without changing the settings, the game server will be launched with [kbengine_demos_assets](https://github.com/kbengine/kbengine_demos_assets).
 
 Build KBEngine
 
 ```bash
-make build_kbe config=configs/develop.env
+make build_kbe
 ```
 
 Build the game
 
 ```bash
-make build_game config=configs/develop.env
+make build_game
 ```
 
 Launch the game
 
 ```bash
-make start_game config=configs/develop.env
+make start_game
 ```
 
 View logs from the console
@@ -78,37 +76,6 @@ Other operations
 make help
 ```
 
-```
-virtual@ubuntu20:~/shared/shedu$ make help
-*** [shedu] Help ***
-
-The project builds, packages and starts kbengine and kbe environment in the docker containers.
-
-Some rules required a config file. Use path to the config file in the "config" cli argument. The build of the project will be aborted if no "config" argument or the file doesn't exist.
-
-Example:
-make build config=configs/example.env
-
-build           Build a game (config file required)
-build_kbe       Build a docker image of KBEngine (config file required)
-build_game      Build a kbengine docker image contained assets. It binds "assets" with the built kbengine image (config file required)
-start_game      Run the docker image contained the game (config file required)
-stop_game       Stop the docker container contained the game
-game_status     Return the game status ("running" or "stopped")
-clean           Delete artefacts connected with the projects (containers, volumes, docker networks, etc)
-help            This help
-go_into         [Debug] Go into the running game container
-check_config    [Debug] Check configuration file (config file required)
-version         [Debug] Current version of the project
-print           [Debug] List built kbe images
-logs            [Debug] Show actual log records of the game (config file required)
-```
-
-Full cleanup
-
-```bash
-make clean
-```
 
 # Configuration file
 

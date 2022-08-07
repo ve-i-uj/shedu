@@ -13,13 +13,10 @@ RUN yum install python3 -y \
 COPY --from=pre_assets /opt/kbengine/assets/ /opt/kbengine/assets/
 
 COPY . /opt/kbengine/assets
-ARG MYSQL_DATABASE
-ARG MYSQL_USER
-ARG MYSQL_PASSWORD
-RUN MYSQL_DATABASE=${MYSQL_DATABASE} \
-    MYSQL_USER=${MYSQL_USER} \
-    MYSQL_PASSWORD=${MYSQL_PASSWORD} \
-    python3 /opt/kbengine/assets/modify_kbe_config.py
+ARG ENV_FILE
+RUN python3 /opt/kbengine/assets/modify_kbe_config.py \
+    --env-file=${ENV_FILE} \
+    --kbe-assets-path=/opt/kbengine/assets/
 WORKDIR /opt/kbengine/assets/
 ENTRYPOINT bash /opt/kbengine/assets/docker-entrypoint.sh
 
