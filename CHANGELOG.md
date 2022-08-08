@@ -1,6 +1,11 @@
 
 # Changelog
 
+## [0.8.0] - 2022-08-08
+### Added
+- A new setting variable "KBE_ASSETS_SHA" was added to the config file. You can build the game based on the assets git commit
+- Two example configs were added to the project
+
 ## [0.7.0] - 2022-08-07
 ### Changed
 - The shedu/.env settings file is mandatory

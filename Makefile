@@ -37,16 +37,17 @@ build_kbe: .check-config ## Build a docker image of KBEngine
 		--kbe-git-commit=$(KBE_GIT_COMMIT) \
 		--kbe-user-tag=$(KBE_USER_TAG)
 
-build_game: .check-config build_kbe  ## Build a kbengine docker image contained assets. It binds "assets" with the built kbengine image
+build_game: .check-config  ## Build a kbengine docker image contained assets. It binds "assets" with the built kbengine image
 	@scripts/build/build_pre_assets.sh
 	@scripts/build/build_assets.sh \
 		--kbe-git-commit=$(KBE_GIT_COMMIT) \
 		--kbe-user-tag=$(KBE_USER_TAG) \
+		--kbe-assets-sha=$(KBE_ASSETS_SHA) \
 		--assets-path=$(KBE_ASSETS_PATH) \
 		--assets-version=$(KBE_ASSETS_VERSION) \
 		--env-file=.env
 
-start_game: .check-config build_game  ## Run the docker image contained the game
+start_game: .check-config  ## Run the docker image contained the game
 	@scripts/start_game.sh \
 		--kbe-git-commit=$(KBE_GIT_COMMIT) \
 		--kbe-user-tag=$(KBE_USER_TAG) \

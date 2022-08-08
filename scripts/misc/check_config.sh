@@ -12,7 +12,7 @@ Usage: bash $0 $PROJECT_DIR/configs/<YOUR CONFIG NAME>.env
 "
 
 required_vars=(KBE_ASSETS_PATH KBE_ASSETS_VERSION)
-optional_vars=(KBE_GIT_COMMIT KBE_USER_TAG)
+optional_vars=(KBE_GIT_COMMIT KBE_USER_TAG KBE_ASSETS_SHA)
 
 # The example config file contains all necessary variable. Read all variable
 # names from it.
