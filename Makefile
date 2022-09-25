@@ -17,7 +17,7 @@ ifeq ($(KBE_GIT_COMMIT),)
 		endif
 endif
 
-.PHONY : all help build_kbe clean build_game start_game list version
+.PHONY : all help build_kbe clean build_game start list version
 
 .DEFAULT:
 	@echo Use \"make help\"
@@ -47,17 +47,17 @@ build_game: .check-config  ## Build a kbengine docker image contained assets. It
 		--assets-version=$(KBE_ASSETS_VERSION) \
 		--env-file=.env
 
-start_game: .check-config  ## Run the docker image contained the game
+start: .check-config  ## Run the docker image contained the game
 	@scripts/start_game.sh \
 		--kbe-git-commit=$(KBE_GIT_COMMIT) \
 		--kbe-user-tag=$(KBE_USER_TAG) \
 		--assets-path=$(KBE_ASSETS_PATH) \
 		--assets-version=$(KBE_ASSETS_VERSION)
 
-stop_game:  ## Stop the docker container contained the game
+stop:  ## Stop the docker container contained the game
 	@scripts/stop_game.sh > /dev/null
 
-game_status:  ## Return the game status ("running" or "stopped")
+status:  ## Return the game status ("running" or "stopped")
 	@scripts/get_game_status.sh
 
 clean: .check-config  ## Delete artefacts connected with the projects (containers, volumes, docker networks, etc)

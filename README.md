@@ -61,7 +61,7 @@ make build_game
 Launch the game
 
 ```bash
-make start_game
+make start
 ```
 
 View logs from the console
