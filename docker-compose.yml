@@ -13,8 +13,11 @@ services:
     volumes:
       - kbe-mariadb-volume:/var/lib/mysql
     container_name: "kbe-mariadb"
+    ports:
+      - 3306:3306
     networks:
       - kbe-net
+    command: --log_warnings=9
 
   kbe-assets:
     image: ${KBE_ASSETS_IMAGE}
@@ -28,6 +31,7 @@ services:
       - 20005-20009:20005-20009/udp
       # telnet
       - 40000-40009:40000-40009
+      - 50000-50009:50000-50009
       # Bots
       # telnet
       - 51000:51000
