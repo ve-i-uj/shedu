@@ -1,3 +1,5 @@
+![Logo](https://github.com/ve-i-uj/shedu/blob/develop/doc/pictures/shedu-640-320-pixelated.bmp?raw=true)
+
 Shedu - Easy deploy of a KBEngine cluster
 
 # Overview
@@ -15,8 +17,8 @@ The main goal of the project is to simplify kbengine deploy. It doesn't need to 
 * assets - game logic in Python + user server settings
 * Game - KBEngine + assets
 
-* Engine image - docker image containing only built KBEngine
-* Game image - docker image containing KBEngine + assets
+* Engine image - a docker image containing only built KBEngine
+* Game image - a docker image containing KBEngine + assets
 
 # Deploy
 
@@ -40,13 +42,13 @@ Install Dependencies
 ./configure
 ```
 
-The project reads the settings from the ".env" file located in the root directory. There are example of .env files in the "configs" director. By default, without changing the settings, the game server will be launched with [kbengine_demos_assets](https://github.com/kbengine/kbengine_demos_assets). You can start the kbe server with your assets just point in the .env file the directory of your assets. For more information see settings [described here](#configuration-file). Copy an example env file to the root directory and change it if you want set your custom settings.
+The project reads the settings from the ".env" file located in the root directory. There are example of .env files in the "configs" directory. By default, without changing the settings, the game server will be launched with [kbengine_demos_assets](https://github.com/kbengine/kbengine_demos_assets). You can start the kbe server with your assets just point in the .env file the directory of your assets. For more information see settings [described here](#configuration-file). Copy an example env file to the root directory and change it if you want set your custom settings.
 
 ```bash
 cp configs/example.env .env
 ```
 
-Build KBEngine
+Build KBEngine. There are several already built kbe images on [Docker Hub](https://hub.docker.com/repository/registry-1.docker.io/shedu/kbe-compiled/), so building a kbe might only take a few minutes.
 
 ```bash
 make build_kbe
@@ -94,7 +96,7 @@ The configuration file should be placed in the project root and has the name ".e
 
 #### Game assets settings
 
-* KBE_ASSETS_PATH - The absolute path to the assets director. If it has the "demo" value the [kbengine_demos_assets](https://github.com/kbengine/kbengine_demos_assets "The demo settings provided by KBEngine developers") will be used as an assets
+* KBE_ASSETS_PATH - The absolute path to the assets directory. If it has the "demo" value the [kbengine_demos_assets](https://github.com/kbengine/kbengine_demos_assets "The demo settings provided by KBEngine developers") will be used as an assets
 * KBE_ASSETS_SHA - The commit of the assets
 * KBE_ASSETS_VERSION - The version of the assets. This variable labels the finaly game image. It cannot be empty. Set any non-empty string if your project has no version.
 
