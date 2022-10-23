@@ -10,6 +10,7 @@ import sys
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
+
 HOST_ADDR = '0.0.0.0'
 TITLE = ('The script modifies the kbengine.xml configuration file so KBEngine '
          'can work with docker.')
@@ -30,6 +31,8 @@ def read_args():
                         default='DEBUG',
                         choices=logging._nameToLevel.keys(),
                         help='Settings file')
+    parser.add_argument('--set', dest='custom_settings', type=str, action='append',
+                        help='This field will be modified in kbengine.xml')
 
     return parser.parse_args()
 
@@ -63,39 +66,11 @@ def check_settings(settings: dict) -> bool:
     return res
 
 
-def main():
-    namespace = read_args()
-    setup_root_logger(level_name=namespace.log_level)
-    kbengine_xml_path = Path(namespace.kbe_assets_path) / 'res' / 'server' / 'kbengine.xml'
-    if not kbengine_xml_path.exists():
-        logger.error('There is no kbengine.xml by path "%s"', kbengine_xml_path)
-        sys.exit(1)
-
-    settings_path = Path(namespace.env_file_path)
-    if not settings_path.exists():
-        logger.error('There is no settings env file by path "%s"', settings_path)
-        sys.exit(1)
-
-    settings: dict[str, str] = {}
-    for line in settings_path.open():
-        if not line.strip() or line.strip().startswith('#'):
-            continue
-        var_name, value = line.split('=', 1)
-        if not var_name:
-            logger.warning('A strange line is in config file ("%s")', line)
-            continue
-        settings[var_name] = value
-
-    if not check_settings(settings):
-        sys.exit(1)
-
-    logger.info('Copy origin "kbengine.xml" (to "kbengine.xml.bak") ')
-    shutil.copyfile(kbengine_xml_path,
-                    kbengine_xml_path.with_suffix(kbengine_xml_path.suffix + '.bak'))
-
-    tree = ET.parse(kbengine_xml_path)
-    root = tree.getroot()
-
+def set_shedu_net_settings(root: ET.Element, settings: dict):
+    """
+    Set the necessary net settings to the kbengine.xml config to work
+    with the "shedu" project.
+    """
     dbmgr_el = root.find('dbmgr')
     if dbmgr_el is None:
         dbmgr_el = ET.SubElement(root, 'dbmgr')
@@ -114,10 +89,10 @@ def main():
             <host> kbe-mariadb </host>
             <port> 0 </port>
             <auth>
-                <username> {settings['MYSQL_USER']} </username>
-                <password> {settings['MYSQL_PASSWORD']} </password>
+                <username> {settings['MYSQL_USER'].strip()} </username>
+                <password> {settings['MYSQL_PASSWORD'].strip()} </password>
             </auth>
-            <databaseName> {settings['MYSQL_DATABASE']} </databaseName>
+            <databaseName> {settings['MYSQL_DATABASE'].strip()} </databaseName>
         </default>
     """)
 
@@ -151,6 +126,85 @@ def main():
 
         logger.info(f'Updated {name} "externalAddress"')
 
+
+def _add_element(root: ET.Element, path: str) -> ET.Element:
+    for tag in path.split('/')[1:]:
+        elem = root.find(tag)
+        if elem is None:
+            elem = ET.SubElement(root, tag)
+        root = elem
+    return root
+
+
+def set_custom_settings(root: ET.Element, settings: list[str]):
+    """Set user settings to the kbengine.xml ."""
+    error = False
+    for s in settings:
+        pair = s.split('=')
+        if len(pair) != 2:
+            logger.warning(f'Invalid format of settings value ("{s}")')
+            error = True
+            continue
+        path, value = pair
+        path = path.replace('.', '/')
+        elems = root.find(path)
+        if elems is None:
+            logger.info(f'There is no element "{path}". It will be added')
+            elem = _add_element(root, path)
+            elems = [elem]
+        if len(elems) > 1:
+            logger.warning(f'Updating of element list is not implemented ("{s}")')
+            error = True
+            continue
+
+        elem = elems[0]
+        elem.text = f' {value.strip()} '
+
+    if error:
+        logger.error('Some custom settings values were incorrect')
+        sys.exit(1)
+
+
+def main():
+    namespace = read_args()
+    setup_root_logger(level_name=namespace.log_level)
+    kbengine_xml_path = Path(namespace.kbe_assets_path) / 'res' / 'server' / 'kbengine.xml'
+    if not kbengine_xml_path.exists():
+        logger.error('There is no kbengine.xml by path "%s"', kbengine_xml_path)
+        sys.exit(1)
+
+    settings_path = Path(namespace.env_file_path)
+    if not settings_path.exists():
+        logger.error('There is no settings env file by path "%s"', settings_path)
+        sys.exit(1)
+
+    settings: dict[str, str] = {}
+    for line in settings_path.open():
+        if not line.strip() or line.strip().startswith('#'):
+            continue
+        var_name, value = line.split('=', 1)
+        if not var_name:
+            logger.warning('A strange line is in the config file ("%s")', line)
+            continue
+        settings[var_name] = value
+
+    if not check_settings(settings):
+        sys.exit(1)
+
+    logger.info('Copy origin "kbengine.xml" (to "kbengine.xml.bak") ')
+    shutil.copyfile(kbengine_xml_path,
+                    kbengine_xml_path.with_suffix(kbengine_xml_path.suffix + '.bak'))
+
+    tree: ET.ElementTree = ET.parse(kbengine_xml_path)
+    root = tree.getroot()
+    if root is None:
+        logger.error(f'There is no "root" element in the kbengine.xml')
+        return
+
+    set_custom_settings(root, namespace.custom_settings)
+    set_shedu_net_settings(root, settings)
+
+    ET.indent(tree, space="\t", level=0)
     tree.write(kbengine_xml_path)
 
     logger.info(f'The config "{kbengine_xml_path}" has been updated')
