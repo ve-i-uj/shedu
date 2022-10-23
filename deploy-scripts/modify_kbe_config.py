@@ -8,8 +8,10 @@ import datetime
 import logging
 import shutil
 import sys
+import xml.dom.minidom
 import xml.etree.ElementTree as ET
 from pathlib import Path
+from typing import List
 
 
 HOST_ADDR = '0.0.0.0'
@@ -32,7 +34,7 @@ def read_args():
                         default='DEBUG',
                         choices=logging._nameToLevel.keys(),
                         help='Settings file')
-    parser.add_argument('--set', dest='custom_settings', type=str, action='append',
+    parser.add_argument('--kbengine-xml-args', dest='custom_settings', type=str,
                         help='This field will be modified in kbengine.xml')
 
     return parser.parse_args()
@@ -159,14 +161,12 @@ def _add_signature(root: ET.Element, settings: dict, namespace: argparse.Namespa
     root.append(sign_elem)
 
 
-def set_custom_settings(root: ET.Element, settings: list[str]):
+def set_custom_settings(root: ET.Element, settings: List[str]):
     """Set user settings to the kbengine.xml ."""
-    error = False
     for s in settings:
-        pair = s.split('=')
+        pair = s.split('=', 1)
         if len(pair) != 2:
-            logger.warning(f'Invalid format of settings value ("{s}")')
-            error = True
+            logger.warning(f'Invalid format of settings value ("{s}"). Skip')
             continue
         path, value = pair
         path = path.replace('.', '/')
@@ -176,16 +176,21 @@ def set_custom_settings(root: ET.Element, settings: list[str]):
             elem = _add_element(root, path)
             elems = [elem]
         if len(elems) > 1:
-            logger.warning(f'Updating of element list is not implemented ("{s}")')
-            error = True
+            logger.warning(f'Updating of element list is not implemented ("{s}"). Skip')
             continue
 
         elem = elems[0]
+        priv_text = elem.text
         elem.text = f' {value.strip()} '
+        logger.info(f'Updated: {elem.tag} = {elem.text} (old = {priv_text})')
 
-    if error:
-        logger.error('Some custom settings values were incorrect')
-        sys.exit(1)
+
+def _prettify_xml(elem: ET.Element) -> str:
+    """Return a pretty-printed XML string for the Element.
+    """
+    rough_string = ET.tostring(elem, 'unicode')
+    rough_string = ''.join(line.strip() for line in rough_string.split('\n') if line.strip())
+    return xml.dom.minidom.parseString(rough_string).toprettyxml(indent="\t")
 
 
 def main():
@@ -224,13 +229,15 @@ def main():
         logger.error(f'There is no "root" element in the kbengine.xml')
         return
 
-    set_custom_settings(root, namespace.custom_settings)
+    if namespace.custom_settings != '':
+        set_custom_settings(root, namespace.custom_settings.split(';'))
     set_shedu_net_settings(root, settings)
 
     _add_signature(root, settings, namespace)
 
-    ET.indent(tree, space="\t", level=0)
-    tree.write(kbengine_xml_path)
+    root_str = _prettify_xml(root)
+    with open(kbengine_xml_path, 'w') as fh:
+        fh.write(root_str)
 
     logger.info(f'The config "{kbengine_xml_path}" has been updated')
 
