@@ -170,8 +170,9 @@ def set_custom_settings(root: ET.Element, settings: List[str]):
             continue
         path, value = pair
         path = path.replace('.', '/')
-        elems = root.find(path)
-        if elems is None:
+        path = path.split('/', 1)[1]
+        elems = root.findall(path)
+        if not elems:
             logger.info(f'There is no element "{path}". It will be added')
             elem = _add_element(root, path)
             elems = [elem]
@@ -229,8 +230,10 @@ def main():
         logger.error(f'There is no "root" element in the kbengine.xml')
         return
 
+    custom_settings = namespace.custom_settings.split(';')
+    logger.debug(f'Custom settings: {custom_settings}')
     if namespace.custom_settings != '':
-        set_custom_settings(root, namespace.custom_settings.split(';'))
+        set_custom_settings(root, custom_settings)
     set_shedu_net_settings(root, settings)
 
     _add_signature(root, settings, namespace)

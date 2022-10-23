@@ -18,7 +18,9 @@ RUN if [ -d ${ASSETS_DIR}/.git ]; then \
         git checkout ${KBE_ASSETS_SHA} -b kbe-deploy-branch-${KBE_ASSETS_SHA}; \
     fi
 COPY --from=pre_assets /opt/kbengine/pre-assets/ /opt/kbengine/assets
+ARG KBENGINE_XML_ARGS
 RUN python3 ${ASSETS_DIR}/modify_kbe_config.py \
+    --kbengine-xml-args=${KBENGINE_XML_ARGS} \
     --env-file=${ASSETS_DIR}/shedu/.env \
     --kbe-assets-path=${ASSETS_DIR}
 

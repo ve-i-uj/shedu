@@ -45,7 +45,8 @@ build_game: .check-config  ## Build a kbengine docker image contained assets. It
 		--kbe-assets-sha=$(KBE_ASSETS_SHA) \
 		--assets-path=$(KBE_ASSETS_PATH) \
 		--assets-version=$(KBE_ASSETS_VERSION) \
-		--env-file=.env
+		--env-file=.env \
+		--kbengine-xml-args=$(kbengine_xml_args)
 
 start: .check-config  ## Run the docker image contained the game
 	@scripts/start_game.sh \

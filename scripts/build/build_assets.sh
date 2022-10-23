@@ -12,7 +12,8 @@ bash $0 \\
   --kbe-assets-sha=81f7249b \\
   --assets-path=/tmp/assets \\
   --assets-version=v0.0.1 \\
-  --env-file=$PROJECT_DIR/.env
+  --env-file=$PROJECT_DIR/.env \\
+  --kbengine-xml-args=root.dbmgr.account_system.account_registration.loginAutoCreate=true;root.whatever=123
 "
 
 echo "[DEBUG] Parse CLI arguments ..."
@@ -22,11 +23,12 @@ kbe_assets_sha=""
 assets_path=""
 assets_version=""
 env_file=""
+kbengine_xml_args=""
 help=false
 for arg in "$@"
 do
     key=$( echo "$arg" | cut -f1 -d= )
-    value=$( echo "$arg" | cut -f2 -d= )
+    value=$( echo "$arg" | cut -f2- -d= )
     case "$key" in
         --kbe-git-commit)  kbe_git_commit=${value} ;;
         --kbe-user-tag)  kbe_user_tag=${value} ;;
@@ -34,6 +36,7 @@ do
         --assets-path)  assets_path=${value} ;;
         --assets-version)   assets_version=${value} ;;
         --env-file)   env_file=${value} ;;
+        --kbengine-xml-args)   kbengine_xml_args=${value} ;;
         --help)         help=true ;;
         -h)             help=true ;;
         *)
@@ -48,7 +51,8 @@ fi
 echo "\
 [DEBUG] Command: $0 --kbe-git-commit=$kbe_git_commit \
 --kbe-user-tag=$kbe_user_tag --assets-path=$assets_path \
---assets-version=$assets_version --env-file=$env_file"
+--assets-version=$assets_version --env-file=$env_file \
+--kbengine-xml-args=$kbengine_xml_args"
 
 if [ -z "$kbe_git_commit" ] || [ -z "$assets_path" ] \
         || [ -z "$assets_version" ] || [ -z "$env_file" ]; then
@@ -105,6 +109,7 @@ docker build \
     --build-arg IMAGE_NAME_PRE_ASSETS="$kbe_pre_assets_tag" \
     --build-arg KBE_ASSETS_SHA="$kbe_assets_sha" \
     --build-arg ENV_FILE="$env_file" \
+    --build-arg KBENGINE_XML_ARGS="$kbengine_xml_args" \
     --tag "$IMAGE_NAME_ASSETS-$kbe_image_tag:$assets_version" \
     .
 
