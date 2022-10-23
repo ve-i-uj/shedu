@@ -4,6 +4,7 @@ It would be placed in the root directory of the assets.
 """
 
 import argparse
+import datetime
 import logging
 import shutil
 import sys
@@ -136,6 +137,28 @@ def _add_element(root: ET.Element, path: str) -> ET.Element:
     return root
 
 
+def _add_signature(root: ET.Element, settings: dict, namespace: argparse.Namespace):
+    sign_elem = ET.fromstring(f"""
+    <shedu>
+        <comment> This configuration file has been updated by the "Shedu" project </comment>
+        <shedu_site> https://github.com/ve-i-uj/shedu </shedu_site>
+        <build_data>
+            <assets_path> {namespace.kbe_assets_path.strip()} </assets_path>
+            <env_file_path> {namespace.env_file_path.strip()} </env_file_path>
+            <utc_date> {datetime.datetime.utcnow()} </utc_date>
+            <env_variables>
+                <KBE_GIT_COMMIT> {settings['KBE_GIT_COMMIT'].strip()} </KBE_GIT_COMMIT>
+                <KBE_USER_TAG> {settings['KBE_USER_TAG'].strip()} </KBE_USER_TAG>
+                <KBE_ASSETS_SHA> {settings['KBE_ASSETS_SHA'].strip()} </KBE_ASSETS_SHA>
+                <KBE_ASSETS_VERSION> {settings['KBE_ASSETS_VERSION'].strip()} </KBE_ASSETS_VERSION>
+                <KBE_ASSETS_PATH> {settings['KBE_ASSETS_PATH'].strip()} </KBE_ASSETS_PATH>
+            </env_variables>
+        </build_data>
+    </shedu>
+    """)
+    root.append(sign_elem)
+
+
 def set_custom_settings(root: ET.Element, settings: list[str]):
     """Set user settings to the kbengine.xml ."""
     error = False
@@ -203,6 +226,8 @@ def main():
 
     set_custom_settings(root, namespace.custom_settings)
     set_shedu_net_settings(root, settings)
+
+    _add_signature(root, settings, namespace)
 
     ET.indent(tree, space="\t", level=0)
     tree.write(kbengine_xml_path)
