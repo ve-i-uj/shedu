@@ -5,6 +5,6 @@ cd "$PROJECT_DIR"
 
 make stop
 cp configs/kbe-v2.5.12-demo.env .env
-make build_game
+make build
 make start
 make logs

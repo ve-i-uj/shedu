@@ -63,7 +63,6 @@ fi
 
 if [ "$assets_path" == "demo" ]; then
     echo "[WARNING] The game will be created based on demo assets"
-    assets_version=$( bash "$SCRIPTS/misc/get_assets_version_tag.sh" $assets_path $assets_version )
     assets_path=/tmp/kbe-demo-assets
     if [ -d "$assets_path" ]; then
         rm -rf "$assets_path"
