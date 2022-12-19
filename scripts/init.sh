@@ -29,6 +29,7 @@ export DOC_CONFIG_URL=https://github.com/ve-i-uj/shedu
 # TODO: Большинство переменных можно вынести в папку для ELK (легче потом будет переносить)
 
 export ELK_VERSION=8.5.3
+export COMPOSE_PROJECT_NAME=$PROJECT_NAME
 
 export ELK_PROJECT_NAME=kbe-log-elk
 export ELK_I_NAME_PREFIX=$PROJECT_NAME/$ELK_PROJECT_NAME
@@ -49,5 +50,3 @@ export ELK_FILEBEAT_CONTATINER_NAME=$ELK_C_NAME_PREFIX-filebeat-$GAME_UNIQUE_NAM
 export ELK_KIBANA_IMAGA_NAME=kibana:$ELK_VERSION
 export ELK_KIBANA_IMAGE_TAG=$ELK_I_NAME_PREFIX-kibana-$ELK_VERSION:$GAME_UNIQUE_NAME
 export ELK_KIBANA_CONTATINER_NAME=$ELK_C_NAME_PREFIX-kibana-$GAME_UNIQUE_NAME
-
-export COMPOSE_PROJECT_NAME=$PROJECT_NAME
