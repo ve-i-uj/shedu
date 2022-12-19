@@ -1,0 +1,57 @@
+version: '3'
+
+services:
+
+  kbe-log-elk-elastic:
+    image: ${ELK_ES_IMAGE_TAG}
+    container_name: ${ELK_ES_CONTATINER_NAME}
+    restart: always
+    environment:
+      discovery.type: single-node
+      xpack.security.enabled: "false"
+      xpack.license.self_generated.type: basic
+    volumes:
+      - kbe-log-elk-elastic:/var/lib/mysql
+    ports:
+      - 9200:9200
+    networks:
+      - kbe-net
+
+  kbe-log-elk-kibana:
+    image: ${ELK_KIBANA_IMAGE_TAG}
+    container_name: ${ELK_KIBANA_CONTATINER_NAME}
+    restart: always
+    environment:
+      XPACK_MONITORING_ELASTICSEARCH_HOSTS: "[http://kbe-log-elk-elastic:9200]"
+      ELASTICSEARCH_HOSTS: http://kbe-log-elk-elastic:9200
+      network.host: 0.0.0.0
+    ports:
+      - 5601:5601
+    networks:
+      - kbe-net
+    depends_on:
+      - kbe-log-elk-elastic
+
+  kbe-log-elk-logstash:
+    image: ${ELK_LOGSTASH_IMAGE_TAG}
+    container_name: ${ELK_LOGSTASH_CONTATINER_NAME}
+    restart: always
+    environment:
+      XPACK_MONITORING_ELASTICSEARCH_HOSTS: "[http://kbe-log-elk-elastic:9200]"
+      XPACK_MONITORING_ELASTICSEARCH_SSL_VERIFICATION_MODE: none
+    ports:
+      - 5044:5044
+    volumes:
+      - kbe-log-kbeengine:/opt/kbengine/assets/logs
+      - ./logstash/data/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+    networks:
+      - kbe-net
+    depends_on:
+      - kbe-log-elk-elastic
+
+volumes:
+  kbe-log-kbeengine:
+  kbe-log-elk-elastic:
+
+networks:
+  kbe-net:
