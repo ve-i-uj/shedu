@@ -35,12 +35,15 @@ services:
       # Bots
       # telnet
       - 51000:51000
-    entrypoint: ["./wait-for-it.sh", "kbe-mariadb:3306", "--", "/bin/bash", "docker-entrypoint.sh"]
+    volumes:
+      - kbe-log-kbeengine:/opt/kbengine/assets/logs
     networks:
       - kbe-net
+    entrypoint: ["./wait-for-it.sh", "kbe-mariadb:3306", "--", "/bin/bash", "docker-entrypoint.sh"]
 
 volumes:
   kbe-mariadb-volume:
+  kbe-log-kbeengine:
 
 networks:
   kbe-net:
