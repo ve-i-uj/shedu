@@ -6,8 +6,6 @@ set -e
 curr_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 source "$( realpath "$curr_dir/../init.sh" )"
 
-bash "$curr_dir/stop_elk.sh"
-
 echo "[INFO] Stop containers"
 # docker ps --filter name="$ELK_C_NAME_PREFIX*" --filter status=running -aq \
 #     | xargs docker stop
