@@ -2,9 +2,6 @@ SHELL := /bin/bash
 
 ROOT_DIR:=$(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 
-export $(shell sed 's/=.*//' ../init.sh)
-
-
 .PHONY : all help build clean start stop
 
 .DEFAULT:
@@ -12,34 +9,49 @@ export $(shell sed 's/=.*//' ../init.sh)
 
 all: help
 
-build: clean  ## Build ELK images
+# Это правило нужно поместить ДО импорта переменных окружения
+.check-env:
+ifeq ($(GAME_UNIQUE_NAME), )
+	$(error The env. variable "GAME_UNIQUE_NAME" is undefined)
+endif
+
+# Импорт переменых окружения из инициализационного файла для скриптов
+$(shell . $(ROOT_DIR)/../init.sh;	\
+	envsubst < $(ROOT_DIR)/../init.sh \
+	| grep -v '^\s*\#\|^\s*_' \
+	| cut -c8- > /tmp/shedu-elk-init.sh \
+)
+include /tmp/shedu-elk-init.sh
+export $(shell sed 's/=.*//' /tmp/shedu-elk-init.sh)
+
+build: .check-env clean  ## Build ELK images
 	@$(ROOT_DIR)/build_elk.sh
 
-start: stop  ## Start ELK
-	@$(ROOT_DIR)/start_elk.sh
+start: .check-env stop  ## Start ELK
+	@docker-compose up -d
 
-stop:  ## Stop ELK
-	@$(ROOT_DIR)/stop_elk.sh
+stop: .check-env ## Stop ELK
+	@docker-compose rm -fsv
 
-clean: stop  ## Delete artefacts (containers, volumes, docker networks, etc)
+clean: .check-env stop  ## Delete artefacts (containers, volumes, docker networks, etc)
 	@$(ROOT_DIR)/clean_elk.sh
 
-help:  ## This help
+help: .check-env ## This help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $$(echo $(MAKEFILE_LIST) | cut -d " " -f1) \
 		| awk 'BEGIN {FS = ":.*?## "}; {printf "%-15s %s\n", $$1, $$2}'
 	@echo
 
-# TODO: переменные не удаётся получить из файла (и не получится скорей всего.
-# Проверять можно по правилу echo
-# go_into_kibana:  ## [Debug] Go into the running Kibana container
-# 	@docker exec --interactive --tty ${ELK_KIBANA_CONTATINER_NAME} /bin/bash
+go_into_kibana:  ## [Debug] Go into the running Kibana container
+	@docker exec --interactive --tty ${ELK_KIBANA_CONTATINER_NAME} /bin/bash
 
-# go_into_elastic:  ## [Debug] Go into the running ElasticSearch container
-# 	@docker exec --interactive --tty ${ELK_ES_CONTATINER_NAME} /bin/bash
+go_into_elastic:  ## [Debug] Go into the running ElasticSearch container
+	@docker exec --interactive --tty ${ELK_ES_CONTATINER_NAME} /bin/bash
 
 logs:  ## [Debug] Show log records
-	@$(ROOT_DIR)/log_elk.sh
+	@docker-compose logs -f
 
-
-echo:
-	@echo ${ELK_KIBANA_CONTATINER_NAME}
+echo: .check-env  ## [Debug] Check import of the environment variables
+	@echo ELK_KIBANA_CONTATINER_NAME=${ELK_KIBANA_CONTATINER_NAME}
+	@echo TEST=${TEST}
+	@echo GAME_UNIQUE_NAME=\"${GAME_UNIQUE_NAME}\"
+	@echo ELK_LOGSTASH_IMAGE_TAG=\"${ELK_LOGSTASH_IMAGE_TAG}\"

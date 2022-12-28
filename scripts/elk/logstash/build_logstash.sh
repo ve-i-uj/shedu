@@ -1,9 +1,5 @@
 #!/bin/bash
 
-# Import global constants of the project
-curr_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-source $( realpath "$curr_dir/../../init.sh" )
-
 cd "$PROJECT_DIR"
 docker pull $ELK_LOGSTASH_IMAGA_NAME
 docker tag $ELK_LOGSTASH_IMAGA_NAME "$ELK_LOGSTASH_IMAGE_TAG"
