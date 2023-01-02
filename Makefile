@@ -115,11 +115,13 @@ print:  ## [Debug] List built kbe images
 	@scripts/misc/list_images.sh
 	@echo
 
-logs_console: check_config ## [Debug] Show actual log records of the game
+logs_console: .check_config ## [Debug] Show actual log records of the game in the console
 	-@scripts/misc/tail_logs.sh \
 		--kbe-git-commit=$(KBE_GIT_COMMIT) \
 		--kbe-user-tag=$(KBE_USER_TAG) \
 		--assets-version=$(KBE_ASSETS_VERSION)
 
-logs: check_config ## [Debug] Show the log viewer in the web interface
-	-@python3 -c "import webbrowser; webbrowser.open('http://localhost:1358/')"
+restart: stop start
+
+echo:
+	@echo MYSQL_ROOT_PASSWORD=$(MYSQL_ROOT_PASSWORD)

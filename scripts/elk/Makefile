@@ -41,13 +41,16 @@ help: .check-env ## This help
 		| awk 'BEGIN {FS = ":.*?## "}; {printf "%-15s %s\n", $$1, $$2}'
 	@echo
 
-go_into_kibana:  ## [Debug] Go into the running Kibana container
+go_into_kibana:  .check-env  ## [Debug] Go into the running Kibana container
 	@docker exec --interactive --tty ${ELK_KIBANA_CONTATINER_NAME} /bin/bash
 
-go_into_elastic:  ## [Debug] Go into the running ElasticSearch container
+go_into_elastic:   .check-env ## [Debug] Go into the running ElasticSearch container
 	@docker exec --interactive --tty ${ELK_ES_CONTATINER_NAME} /bin/bash
 
-logs:  ## [Debug] Show log records
+go_into_logstash:  .check-env  ## [Debug] Go into the running LogStash container
+	@docker exec --interactive --tty ${ELK_LOGSTASH_CONTATINER_NAME} /bin/bash
+
+logs_compose:  .check-env  ## [Debug] Show log records
 	@docker-compose logs -f
 
 echo: .check-env  ## [Debug] Check import of the environment variables
@@ -55,3 +58,16 @@ echo: .check-env  ## [Debug] Check import of the environment variables
 	@echo TEST=${TEST}
 	@echo GAME_UNIQUE_NAME=\"${GAME_UNIQUE_NAME}\"
 	@echo ELK_LOGSTASH_IMAGE_TAG=\"${ELK_LOGSTASH_IMAGE_TAG}\"
+
+logs_dejavu:  ## [Debug] Show the log viewer in the web interface (Dejavu)
+	-@python3 -c "import webbrowser; webbrowser.open('http://localhost:1358/')"
+
+logs_kibana:  ## [Debug] Show the log viewer in the web interface (Kibana)
+	-@python3 -c "import webbrowser; webbrowser.open('http://localhost:5601/')"
+
+restart: stop start
+
+restart_logstash:
+	-@docker-compose restart kbe-log-elk-logstash
+
+full_restart: clean build start  ## [Debug] Clean, build and start
