@@ -19,7 +19,7 @@ services:
       # Чтобы без авторизации
       xpack.security.enabled: "false"
       xpack.license.self_generated.type: basic
-      ES_JAVA_OPTS: "-Xms512m -Xmx512m"
+      # ES_JAVA_OPTS: "-Xms512m -Xmx512m"
     volumes:
       - kbe-log-elk-elastic-volume:/var/lib/mysql
     ports:

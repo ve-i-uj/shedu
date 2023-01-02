@@ -70,4 +70,13 @@ restart: stop start
 restart_logstash:
 	-@docker-compose restart kbe-log-elk-logstash
 
+stop_logstash:
+	-@docker-compose stop kbe-log-elk-logstash
+
+debug_logstash:
+	-@docker-compose run \
+		-i \
+		 kbe-log-elk-logstash \
+		 /bin/bash
+
 full_restart: clean build start  ## [Debug] Clean, build and start
