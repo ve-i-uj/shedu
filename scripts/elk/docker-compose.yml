@@ -21,7 +21,7 @@ services:
       xpack.license.self_generated.type: basic
       ES_JAVA_OPTS: "-Xms512m -Xmx512m"
     volumes:
-      - kbe-log-elk-elastic:/var/lib/mysql
+      - kbe-log-elk-elastic-volume:/var/lib/mysql
     ports:
       - 9200:9200
     networks:
@@ -38,20 +38,20 @@ services:
     depends_on:
       - kbe-log-elk-elastic
 
-  # kbe-log-elk-kibana:
-  #   image: ${ELK_KIBANA_IMAGE_TAG}
-  #   container_name: ${ELK_KIBANA_CONTATINER_NAME}
-  #   restart: always
-  #   environment:
-  #     XPACK_MONITORING_ELASTICSEARCH_HOSTS: "[http://kbe-log-elk-elastic:9200]"
-  #     ELASTICSEARCH_HOSTS: http://kbe-log-elk-elastic:9200
-  #     network.host: 0.0.0.0
-  #   ports:
-  #     - 5601:5601
-  #   networks:
-  #     - kbe-net
-  #   depends_on:
-  #     - kbe-log-elk-elastic
+  kbe-log-elk-kibana:
+    image: ${ELK_KIBANA_IMAGE_TAG}
+    container_name: ${ELK_KIBANA_CONTATINER_NAME}
+    restart: always
+    environment:
+      XPACK_MONITORING_ELASTICSEARCH_HOSTS: "[http://kbe-log-elk-elastic:9200]"
+      ELASTICSEARCH_HOSTS: http://kbe-log-elk-elastic:9200
+      network.host: 0.0.0.0
+    ports:
+      - 5601:5601
+    networks:
+      - kbe-net
+    depends_on:
+      - kbe-log-elk-elastic
 
   kbe-log-elk-logstash:
     image: ${ELK_LOGSTASH_IMAGE_TAG}
@@ -65,6 +65,7 @@ services:
     volumes:
       - kbe-log-kbeengine:/opt/kbengine/assets/logs
       - ./logstash/data/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+      - ./logstash/data/kbe_patterns:/usr/share/logstash/config/patterns/kbe
     networks:
       - kbe-net
     depends_on:
@@ -72,7 +73,7 @@ services:
 
 volumes:
   kbe-log-kbeengine:
-  kbe-log-elk-elastic:
+  kbe-log-elk-elastic-volume:
 
 networks:
   kbe-net:
