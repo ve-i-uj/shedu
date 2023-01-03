@@ -1,7 +1,0 @@
-filebeat.inputs:
-  - type: log
-    paths:
-      - /opt/kbengine/assets/logs/**/*.log
-
-output.logstash:
-  hosts: ["127.0.0.1:5044"]

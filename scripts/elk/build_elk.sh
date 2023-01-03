@@ -5,9 +5,20 @@ set -e
 # Import global constants of the project
 curr_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
-bash "$curr_dir/elastic/build_elastic.sh"
-bash "$curr_dir/kibana/build_kibana.sh"
-bash "$curr_dir/logstash/build_logstash.sh"
-bash "$curr_dir/dejavu/build_dejavu.sh"
+docker pull $ELK_ES_IMAGE_NAME 1>/dev/null
+docker tag $ELK_ES_IMAGE_NAME "$ELK_ES_IMAGE_TAG"
+echo "[INFO] The image \"$ELK_ES_IMAGE_TAG\" have been created"
 
-echo -e "\nDone ($0)"
+docker pull $ELK_KIBANA_IMAGA_NAME 1>/dev/null
+docker tag $ELK_KIBANA_IMAGA_NAME "$ELK_KIBANA_IMAGE_TAG"
+echo "[INFO] The image \"$ELK_KIBANA_IMAGE_TAG\" have been created"
+
+docker pull $ELK_LOGSTASH_IMAGA_NAME 1>/dev/null
+docker tag $ELK_LOGSTASH_IMAGA_NAME "$ELK_LOGSTASH_IMAGE_TAG"
+echo "[INFO] The image \"$ELK_LOGSTASH_IMAGE_TAG\" have been created"
+
+docker pull $ELK_DEJAVU_IMAGA_NAME 1>/dev/null
+docker tag $ELK_DEJAVU_IMAGA_NAME "$ELK_DEJAVU_IMAGE_TAG"
+echo "[INFO] The image \"$ELK_DEJAVU_IMAGE_TAG\" have been created"
+
+echo -e "\nDone ($0)\n"
