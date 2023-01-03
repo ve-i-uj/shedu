@@ -28,13 +28,20 @@ build: .check-env clean  ## Build ELK images
 	@$(ROOT_DIR)/build_elk.sh
 
 start: .check-env stop  ## Start ELK
+	@$(ROOT_DIR)/is_built.sh --print-error 1>/dev/null
 	@docker-compose up -d
 
 stop: .check-env ## Stop ELK
-	@docker-compose rm -fsv
+	@docker-compose rm -fsv 2>/dev/null
 
 clean: .check-env stop  ## Delete artefacts (containers, volumes, docker networks, etc)
 	@$(ROOT_DIR)/clean_elk.sh
+
+is_running:  ## Is the ELK running?
+	@$(ROOT_DIR)/is_running.sh
+
+is_built:  ## Are the ELK images built?
+	@$(ROOT_DIR)/is_built.sh
 
 help: .check-env ## This help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $$(echo $(MAKEFILE_LIST) | cut -d " " -f1) \
@@ -60,10 +67,12 @@ echo: .check-env  ## [Debug] Check import of the environment variables
 	@echo ELK_LOGSTASH_IMAGE_TAG=\"${ELK_LOGSTASH_IMAGE_TAG}\"
 
 logs_dejavu:  ## [Debug] Show the log viewer in the web interface (Dejavu)
-	-@python3 -c "import webbrowser; webbrowser.open('http://localhost:1358/')"
+	@$(ROOT_DIR)/is_running.sh --print-error 1>/dev/null
+	@python3 -c "import webbrowser; webbrowser.open('http://localhost:1358/')"
 
 logs_kibana:  ## [Debug] Show the log viewer in the web interface (Kibana)
-	-@python3 -c "import webbrowser; webbrowser.open('http://localhost:5601/')"
+	@$(ROOT_DIR)/is_running.sh --print-error 1>/dev/null
+	@python3 -c "import webbrowser; webbrowser.open('http://localhost:5601/')"
 
 restart: stop start
 

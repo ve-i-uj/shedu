@@ -2,6 +2,9 @@
 
 set -e
 
+# Import global constants of the project
+curr_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+
 res=$( docker ps --filter name="$ELK_C_NAME_PREFIX*" -q )
 if [ ! -z $res ]; then
     echo "[INFO] Delete containers"
@@ -31,4 +34,4 @@ if [ ! -z $res ]; then
     docker volume rm "$res" 1>/dev/null
 fi
 
-echo -e "\nDone ($0)"
+echo -e "\nDone ($0)\n"
