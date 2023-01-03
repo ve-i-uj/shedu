@@ -76,6 +76,7 @@ stop_logstash:
 debug_logstash:
 	-@docker-compose run \
 		-i \
+		--rm \
 		 kbe-log-elk-logstash \
 		 /bin/bash
 
