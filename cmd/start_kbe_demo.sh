@@ -7,4 +7,4 @@ make stop
 cp configs/kbe-v2.5.12-demo.env .env
 make build
 make start
-make logs
+make logs_console

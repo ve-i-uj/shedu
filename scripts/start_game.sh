@@ -64,9 +64,11 @@ echo "[INFO] The game image exists"
 
 cd "$PROJECT_DIR"
 export KBE_ASSETS_IMAGE="$image"
-echo "[INFO] Delete old containers ..."
-docker-compose rm -fsv
+echo "[INFO] Delete old containers"
+docker-compose rm -fs kbe-mariadb
+docker-compose rm -fs kbe-assets
 echo "[INFO] Start the assets container (from \"$image\") ..."
-docker-compose up -d
+docker-compose up -d kbe-mariadb
+docker-compose up -d kbe-assets
 
 echo "[INFO] Done ($0)"

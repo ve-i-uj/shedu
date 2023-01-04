@@ -11,7 +11,7 @@ Use absolute path to the configuration file in the first argument.
 Usage: bash $0 $PROJECT_DIR/configs/<YOUR CONFIG NAME>.env
 "
 
-required_vars=(KBE_ASSETS_PATH KBE_ASSETS_VERSION)
+required_vars=(KBE_ASSETS_PATH KBE_ASSETS_VERSION GAME_UNIQUE_NAME)
 optional_vars=(KBE_GIT_COMMIT KBE_USER_TAG KBE_ASSETS_SHA)
 
 # The example config file contains all necessary variable. Read all variable
@@ -45,7 +45,7 @@ source "$config_path"
 error=false
 for var_name in "${all_vars[@]}"; do
     if [[ " ${required_vars[*]} " =~ " ${var_name} " ]] && [ -z "${!var_name}" ]; then
-        echo "[ERROR] $var_name is unset (non-empty variable value is required)"
+        >&2 echo "[ERROR] $var_name is unset (non-empty variable value is required)"
         error=true
         continue
     fi
@@ -54,15 +54,14 @@ for var_name in "${all_vars[@]}"; do
         continue
     fi
     if [ -z "${!var_name}" ]; then
-        echo "[ERROR] $var_name is unset"
+        >&2 echo "[ERROR] $var_name is unset"
         error=true
     fi
 done
 
 if [ "$error" == true ]; then
-    echo "[INFO] See the doc <$DOC_CONFIG_URL>"
-    echo "$USAGE"
     exit 1
 fi
 
 echo "[INFO] The config file is Ok"
+exit 0

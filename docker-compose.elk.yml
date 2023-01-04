@@ -64,14 +64,15 @@ services:
       - 5044:5044
     volumes:
       - kbe-log-kbeengine:/opt/kbengine/assets/logs
-      - ./logstash/data/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
-      - ./logstash/data/kbe_patterns:/usr/share/logstash/config/patterns/kbe
+      - ./data/logstash/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+      - ./data/logstash/kbe_patterns:/usr/share/logstash/config/patterns/kbe
     networks:
       - kbe-net
     depends_on:
       - kbe-log-elk-elastic
 
 volumes:
+  kbe-mariadb-volume:
   kbe-log-kbeengine:
   kbe-log-elk-elastic-volume:
 

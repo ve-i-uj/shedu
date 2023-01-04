@@ -62,7 +62,7 @@ only_sha_tag="$IMAGE_NAME_KBE_COMPILED:$kbe_git_commit"
 docker tag "$tag" "$only_sha_tag"
 echo -e "[INFO] Push the image contained compiled KBEngine (tag = \"$tag\") ..."
 cd "$PROJECT_DIR"
-docker push "$tag"
 docker push "$only_sha_tag"
+docker push "$tag"
 
 echo "Done ($0)"
