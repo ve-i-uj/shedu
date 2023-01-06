@@ -8,6 +8,8 @@ Example:
 bash $0 \\
   --kbe-git-commit=7d379b9f \\
   --kbe-user-tag=v2.5.12 \\
+  --kbe-compiled-image-tag-sha=0b27c18a \\
+  --kbe-compiled-image-tag-1=v1.3.8-0b27c18a \\
   [--force]
 "
 
@@ -30,43 +32,30 @@ do
     case "$key" in
         --kbe-user-tag)             kbe_user_tag=${value} ;;
         --kbe-git-commit)           kbe_git_commit=${value} ;;
+        --kbe-compiled-image-tag-sha)           kbe_compiled_image_tag_sha=${value} ;;
+        --kbe-compiled-image-tag-1)           kbe_compiled_image_tag_1=${value} ;;
+        --kbe-git-commit)           kbe_git_commit=${value} ;;
         --force)                    force=true ;;
         --help)                     help=true ;;
         -h)                         help=true ;;
         *)
     esac
 done
-echo "[DEBUG] Command: $(basename ${0}) --kbe-git-commit=$kbe_git_commit --kbe-user-tag=$kbe_user_tag --force=$force"
+echo "[DEBUG] Command: $(basename ${0}) --kbe-git-commit=$kbe_git_commit \
+--kbe-user-tag=$kbe_user_tag --kbe-compiled-image-tag-sha=$kbe_compiled_image_tag_sha \
+--kbe-compiled-image-tag-1=$kbe_compiled_image_tag_1 --force=$force"
 
 if [ "$help" = true ]; then
     echo -e "$USAGE"
     exit 0
 fi
 
-if [ -z "$kbe_git_commit" ]; then
+if [ -z "$kbe_git_commit" ] || [ -z "$kbe_compiled_image_tag_1" ] || [ -z "$kbe_compiled_image_tag_sha" ]; then
     echo "[ERROR] Not all arguments passed" >&2
-    echo -e "$USAGE"
     exit 1
 fi
 
-commit_info=$(
-    curl -s \
-        -H "Accept: application/vnd.github.v3+json" \
-        "$KBE_GITHUB_API_URL/commits/$kbe_git_commit" \
-    | jq .sha
-)
-if [[ "$commit_info" == null ]]; then
-    echo "[ERROR] There is NO sha commit \"$kbe_git_commit\" in the KBE repository <$KBE_GITHUB_URL>)"
-    exit 1
-fi
-
-kbe_image_tag=$(
-    bash $PROJECT_DIR/scripts/misc/get_kbe_image_tag.sh \
-        --kbe-git-commit=$kbe_git_commit \
-        --kbe-user-tag=$kbe_user_tag
-)
-kbe_compiled_image="$IMAGE_NAME_KBE_COMPILED:$kbe_image_tag"
-
+kbe_compiled_image="$KBE_COMPILED_IMAGE_NAME:$kbe_compiled_image_tag_sha"
 if ! $force; then
     if [ ! -z $(docker images -q "$kbe_compiled_image") ]; then
         echo "[INFO] The \"$kbe_compiled_image\" image already exists at the host. Exit"
@@ -74,7 +63,6 @@ if ! $force; then
     fi
     echo "[INFO] There is NO image \"$kbe_compiled_image\" at the host"
 fi
-
 if ! $force; then
     echo "[INFO] Trying to find the \"$kbe_compiled_image\" image on the docker hub ..."
     if docker manifest inspect $kbe_compiled_image > /dev/null; then
@@ -91,7 +79,8 @@ cd "$PROJECT_DIR"
 docker build \
     --file "$DOCKERFILE_KBE_COMPILED" \
     --build-arg COMMIT_SHA="$kbe_git_commit" \
-    --tag "$kbe_compiled_image" \
+    --tag "$KBE_COMPILED_IMAGE_NAME:$kbe_compiled_image_tag_sha" \
+    --tag "$KBE_COMPILED_IMAGE_NAME:$kbe_compiled_image_tag_1" \
     .
 
 echo "Done ($0)"

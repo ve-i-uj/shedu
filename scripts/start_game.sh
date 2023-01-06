@@ -7,27 +7,21 @@ source $( realpath "$curr_dir/init.sh" )
 
 USAGE="
 bash $0 \\
-  --kbe-git-commit=7d379b9f \\
-  --kbe-user-tag=v2.5.12 \\
   --assets-path=/tmp/assets \\
-  --assets-version=v0.0.1
+  --assets-image=v0.0.1
 "
 
 echo "[DEBUG] Parse CLI arguments ..."
-kbe_git_commit=""
-kbe_user_tag=""
 assets_path=""
-assets_version=""
+assets_image=""
 help=false
 for arg in "$@"
 do
     key=$( echo "$arg" | cut -f1 -d= )
     value=$( echo "$arg" | cut -f2 -d= )
     case "$key" in
-        --kbe-git-commit)  kbe_git_commit=${value} ;;
-        --kbe-user-tag)  kbe_user_tag=${value} ;;
         --assets-path)  assets_path=${value} ;;
-        --assets-version)   assets_version=${value} ;;
+        --assets-image)   assets_image=${value} ;;
         --help)         help=true ;;
         -h)             help=true ;;
         *)
@@ -39,35 +33,26 @@ if [ "$help" = true ]; then
     exit 0
 fi
 
-echo "[DEBUG] Command: $0 --kbe-git-commit=$kbe_git_commit --kbe-user-tag=$kbe_user_tag --assets-path=$assets_path --assets-version=$assets_version"
-
-if [ -z "$kbe_git_commit" ] || [ -z "$assets_path" ] || [ -z "$assets_version" ]; then
+if [ -z "$assets_path" ] || [ -z "$assets_image" ]; then
     echo "[ERROR] Not all arguments passed" >&2
     echo -e "$USAGE"
     exit 1
 fi
 
-kbe_image_tag=$(
-    bash $curr_dir/misc/get_kbe_image_tag.sh \
-        --kbe-git-commit=$kbe_git_commit \
-        --kbe-user-tag=$kbe_user_tag
-)
-image="$IMAGE_NAME_ASSETS-$kbe_image_tag:$assets_version"
-
-echo "[DEBUG] Check the \"$image\" image exists ..."
-existed=$(docker images --filter reference="$image" -q)
+echo "[DEBUG] Check the \"$assets_image\" image exists"
+existed=$(docker images --filter reference="$assets_image" -q)
 if [ -z "$existed"  ]; then
-    echo -e "[ERROR] There is NO \"$image\" image. Build assets at first."
+    echo -e "[ERROR] There is NO \"$assets_image\" image. Build assets at first."
     exit 1
 fi
 echo "[INFO] The game image exists"
 
 cd "$PROJECT_DIR"
-export KBE_ASSETS_IMAGE="$image"
+export KBE_ASSETS_IMAGE_NAME="$assets_image"
 echo "[INFO] Delete old containers"
-docker-compose rm -fs kbe-mariadb
-docker-compose rm -fs kbe-assets
-echo "[INFO] Start the assets container (from \"$image\") ..."
+docker-compose rm -fs kbe-mariadb >/dev/null
+docker-compose rm -fs kbe-assets >/dev/null
+echo "[INFO] Start the assets container (from \"$assets_image\") ..."
 docker-compose up -d kbe-mariadb
 docker-compose up -d kbe-assets
 

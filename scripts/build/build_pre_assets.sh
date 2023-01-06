@@ -10,7 +10,7 @@ curr_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 source $( realpath "$curr_dir/../init.sh" )
 
 cd "$PROJECT_DIR"
-tag="$IMAGE_NAME_PRE_ASSETS:$($SCRIPTS/version/get_version.sh)"
+tag="$PRE_ASSETS_IMAGE_NAME:$($SCRIPTS/version/get_version.sh)"
 echo "[INFO] Build the \"$tag\" image ..."
 docker build \
     --file "$DOCKERFILE_PRE_ASSETS" \

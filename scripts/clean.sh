@@ -52,8 +52,8 @@ kbe_image_tag=$(
         --kbe-git-commit=$kbe_git_commit \
         --kbe-user-tag=$kbe_user_tag
 )
-image="$IMAGE_NAME_ASSETS-$kbe_image_tag:$assets_version"
-export KBE_ASSETS_IMAGE="$image"
+image="$ASSETS_IMAGE_NAME-$kbe_image_tag:$assets_version"
+export KBE_ASSETS_IMAGE_NAME="$image"
 
 docker-compose down -v
 images=$( docker images | grep "$PROJECT_NAME/kbe-" | awk '{print $1 ":" $2}' )

@@ -2,21 +2,32 @@
 
 export GAME_UNIQUE_NAME=${GAME_UNIQUE_NAME}
 
-_curr_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-export PROJECT_DIR=${PROJECT_DIR:-$(realpath "$_curr_dir/..")}
-export PROJECT_NAME=${PROJECT_NAME:-$(basename "$PROJECT_DIR")}
+_curr_dir=$( realpath "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/.. )
+export _curr_dir=$_curr_dir  # С этой строкой PROJECT_DIR корректно прописывается envsubst (?)
+export PROJECT_DIR="$_curr_dir"
 export SCRIPTS="$PROJECT_DIR/scripts"
 
-export IMAGE_NAME_ASSETS="$PROJECT_NAME/kbe-assets-$GAME_UNIQUE_NAME"
-export IMAGE_NAME_KBE_COMPILED="$PROJECT_NAME/kbe-compiled"
-export IMAGE_NAME_PRE_ASSETS="$PROJECT_NAME/kbe-pre-assets-$PROJECT_NAME"
+export PROJECT_NAME=shedu
+export COMPOSE_PROJECT_NAME=$PROJECT_NAME
+
+# Для игр используется один и тот же образ KBE, привязанный к коммиту KBE
+export KBE_COMPILED_IMAGE_NAME="$PROJECT_NAME/kbe-compiled"
+export PRE_ASSETS_IMAGE_NAME="$PROJECT_NAME/kbe-pre-assets"
+# К имени образа добавляется имя игры
+export ASSETS_IMAGE_NAME="$PROJECT_NAME/kbe-assets-$GAME_UNIQUE_NAME"
 
 export DOCKERFILE_KBE_ASSETS="$PROJECT_DIR/dockerfiles/kbengine/Dockerfile.assets"
 export DOCKERFILE_KBE_COMPILED="$PROJECT_DIR/dockerfiles/kbengine/Dockerfile.kbe-compiled"
 export DOCKERFILE_PRE_ASSETS="$PROJECT_DIR/dockerfiles/kbengine/Dockerfile.pre-assets"
 
-# In docker-compose.yml the "container_name" field has the same name.
-export KBE_ASSETS_CONTAINER_NAME=kbe-assets
+# KBE_ASSETS_IMAGE_NAME is calculated from user tags from .env
+export KBE_ASSETS_IMAGE_NAME=${KBE_ASSETS_IMAGE_NAME}
+export KBE_ASSETS_IMAGE_TAG=$KBE_ASSETS_IMAGE_NAME-$GAME_UNIQUE_NAME
+export KBE_ASSETS_CONTAINER_NAME=kbe-assets-$GAME_UNIQUE_NAME
+
+export KBE_DB_IMAGE_NAME=mariadb:10.8
+export KBE_DB_IMAGE_TAG=$KBE_DB_IMAGE_NAME-$GAME_UNIQUE_NAME
+export KBE_DB_CONTAINER_NAME=kbe-mariadb-$GAME_UNIQUE_NAME
 
 export KBE_ASSETS_DEMO_URL=https://github.com/kbengine/kbengine_demos_assets.git
 export KBE_GITHUB_URL=https://github.com/kbengine/kbengine
@@ -28,7 +39,6 @@ export DOC_CONFIG_URL=https://github.com/ve-i-uj/shedu
 # TODO: Большинство переменных можно вынести в папку для ELK (легче потом будет переносить)
 
 export ELK_VERSION=8.5.3
-export COMPOSE_PROJECT_NAME=$PROJECT_NAME
 export ELK_PROJECT_NAME=kbe-log-elk
 
 export ELK_I_NAME_PREFIX=$PROJECT_NAME/$ELK_PROJECT_NAME

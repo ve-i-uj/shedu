@@ -10,16 +10,6 @@ ifneq ("$(wildcard .env)","")
 	export $(shell sed 's/=.*//' .env)
 endif
 
-# Импорт переменых окружения из инициализационного файла
-$(shell . $(SCRIPTS)/init.sh;	\
-	export GAME_UNIQUE_NAME=$(GAME_UNIQUE_NAME); \
-	envsubst < $(SCRIPTS)/init.sh \
-	| grep -v '^\s*\#\|^\s*_' \
-	| cut -c8- > /tmp/shedu-elk-init.sh \
-)
-include /tmp/shedu-elk-init.sh
-export $(shell sed 's/=.*//' /tmp/shedu-elk-init.sh)
-
 # Если хэш целевого комита не выставлен, то берётся последний комит из репозитория
 KBE_GIT_COMMIT := $(KBE_GIT_COMMIT)
 ifeq ($(KBE_GIT_COMMIT),)
@@ -29,6 +19,24 @@ ifeq ($(KBE_GIT_COMMIT),)
 		endif
 endif
 
+KBE_COMPILED_IMAGE_TAG_SHA := $(KBE_GIT_COMMIT)
+KBE_COMPILED_IMAGE_TAG_1 := $(KBE_GIT_COMMIT)
+ifneq ($(KBE_USER_TAG),)
+	override KBE_COMPILED_IMAGE_TAG_1 := $(KBE_USER_TAG)-$(KBE_COMPILED_IMAGE_TAG_1)
+endif
+
+# Импорт переменых окружения из инициализационного файла, чтобы иметь
+# возможность запускать здесь docker-compose
+$(shell mkdir /tmp/shedu 2>/dev/null; \
+	export GAME_UNIQUE_NAME=$(GAME_UNIQUE_NAME); \
+	source $(SCRIPTS)/init.sh; \
+	envsubst < $(SCRIPTS)/init.sh \
+	| grep -v '^\s*\#\|^\s*_' \
+	| cut -c8- > /tmp/shedu/environment.mk \
+)
+include /tmp/shedu/environment.mk
+export $(shell sed 's/=.*//' /tmp/shedu/environment.mk)
+
 .PHONY: *
 
 .DEFAULT:
@@ -36,56 +44,54 @@ endif
 
 all: help
 
-.check-config-exists:
+.check-config:
 ifeq (,$(wildcard .env))
 	$(error [ERROR] No config file "$(ROOT_DIR)/.env". Use "make help")
 endif
-
-.check-game-unique-name:
 ifeq ($(GAME_UNIQUE_NAME),)
-	$(error The env. variable "GAME_UNIQUE_NAME" is undefined)
+	$(error The env. variable "GAME_UNIQUE_NAME" is undefined or empty)
 endif
+	@$(SCRIPTS)/misc/is_kbe_commit.sh $(KBE_GIT_COMMIT)
 
 build: build_kbe build_game  ## Build all
 	@echo -e "\nDone.\n"
 
-build_kbe: .check-config-exists ## Build a docker image of KBEngine
+build_kbe: .check-config ## Build a docker image of KBEngine
 	@$(SCRIPTS)/build/build_kbe_compiled.sh \
 		--kbe-git-commit=$(KBE_GIT_COMMIT) \
-		--kbe-user-tag=$(KBE_USER_TAG)
+		--kbe-user-tag=$(KBE_USER_TAG) \
+		--kbe-compiled-image-tag-sha=$(KBE_COMPILED_IMAGE_TAG_SHA) \
+		--kbe-compiled-image-tag-1=$(KBE_COMPILED_IMAGE_TAG_1)
 
-build_game: .check-config-exists  ## Build a kbengine docker image contained assets. It binds "assets" with the built kbengine image
+build_game: .check-config  ## Build a kbengine docker image contained assets. It binds "assets" with the built kbengine image
 	@$(SCRIPTS)/build/build_pre_assets.sh
 	@$(SCRIPTS)/build/build_assets.sh \
-		--kbe-git-commit=$(KBE_GIT_COMMIT) \
-		--kbe-user-tag=$(KBE_USER_TAG) \
-		--kbe-assets-sha=$(KBE_ASSETS_SHA) \
+		--assets-sha=$(KBE_ASSETS_SHA) \
 		--assets-path=$(KBE_ASSETS_PATH) \
 		--assets-version=$(KBE_ASSETS_VERSION) \
 		--env-file=.env \
-		--kbengine-xml-args=$(kbengine_xml_args)
+		--kbengine-xml-args=$(kbengine_xml_args) \
+		--kbe-compiled-image-tag-sha=$(KBE_COMPILED_IMAGE_TAG_SHA)
 
-start: .check-config-exists  ## Run the docker image contained the game
+start: .check-config  ## Run the docker image contained the game
 	@$(SCRIPTS)/start_game.sh \
-		--kbe-git-commit=$(KBE_GIT_COMMIT) \
-		--kbe-user-tag=$(KBE_USER_TAG) \
 		--assets-path=$(KBE_ASSETS_PATH) \
-		--assets-version=$(KBE_ASSETS_VERSION)
+		--assets-image=$(ASSETS_IMAGE_NAME):$(KBE_ASSETS_VERSION)
 
 stop:  ## Stop the docker container contained the game
-	@$(ROOT_DIR)/scripts/stop_game.sh > /dev/null
+	@$(ROOT_DIR)/scripts/stop_game.sh
 
 status:  ## Return the game status ("running" or "stopped")
 	@$(ROOT_DIR)/scripts/get_game_status.sh
 
-clean: .check-config-exists  ## Delete artefacts connected with the projects (containers, volumes, docker networks, etc)
+clean: .check-config  ## Delete artefacts connected with the projects (containers, volumes, docker networks, etc)
 	@$(ROOT_DIR)/scripts/clean.sh \
 		--kbe-git-commit=$(KBE_GIT_COMMIT) \
 		--kbe-user-tag=$(KBE_USER_TAG) \
 		--assets-path=$(KBE_ASSETS_PATH) \
 		--assets-version=$(KBE_ASSETS_VERSION) \
 
-build_force: .check-config-exists ## Build a docker image of compiled KBEngine without using of cache
+build_force: .check-config ## Build a docker image of compiled KBEngine without using of cache
 	@$(ROOT_DIR)/scripts/build/build_kbe_compiled.sh \
 		--kbe-git-commit=$(KBE_GIT_COMMIT) \
 		--kbe-user-tag=$(KBE_USER_TAG) \
@@ -121,7 +127,7 @@ help:  ## This help
 go_into:  ## [Debug] Go into the running game container
 	@$(ROOT_DIR)/scripts/misc/go_into_container.sh
 
-check_config: .check-config-exists  ## [Debug] Check configuration file
+check_config: .check-config  ## [Debug] Check configuration file
 	@$(ROOT_DIR)/scripts/misc/check_config.sh .env
 
 version:  ## [Debug] Current version of the ROOT_DIR
@@ -201,11 +207,20 @@ elk_debug_logstash:
 		 kbe-log-elk-logstash \
 		 /bin/bash
 
-echo: .check-config-exists .check-game-unique-name  ## [Debug] Check import of the environment variables
+echo: .check-config  ## [Debug] Check import of the environment variables
 	@echo SCRIPTS=\"${SCRIPTS}\"
 	@echo GAME_UNIQUE_NAME=\"${GAME_UNIQUE_NAME}\"
-	@echo KBE_ASSETS_IMAGE=\"${KBE_ASSETS_IMAGE}\"
+	@echo
+
 	@echo KBE_GIT_COMMIT=\"${KBE_GIT_COMMIT}\"
+	@echo KBE_COMPILED_IMAGE_TAG_SHA=\"${KBE_COMPILED_IMAGE_TAG_SHA}\"
+	@echo KBE_COMPILED_IMAGE_TAG_1=\"${KBE_COMPILED_IMAGE_TAG_1}\"
+	@echo
+
+	@echo KBE_ASSETS_IMAGE_NAME=\"${ASSETS_IMAGE_NAME}:${KBE_ASSETS_VERSION}\"
+	@echo
+
 	@echo ELK_ES_IMAGE_NAME=${ELK_ES_IMAGE_NAME}
 	@echo ELK_ES_IMAGE_TAG=${ELK_ES_IMAGE_TAG}
 	@echo ELK_DEJAVU_IMAGA_NAME=${ELK_DEJAVU_IMAGA_NAME}
+

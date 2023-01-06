@@ -51,14 +51,14 @@ kbe_image_tag=$(
         --kbe-git-commit=$kbe_git_commit \
         --kbe-user-tag=$kbe_user_tag
 )
-kbe_compiled_image="$IMAGE_NAME_KBE_COMPILED:$kbe_image_tag"
+kbe_compiled_image="$KBE_COMPILED_IMAGE_NAME:$kbe_image_tag"
 if [[ "$(docker images -q $kbe_compiled_image 2> /dev/null)" == "" ]]; then
     echo "[INFO] There is NO image \"$kbe_compiled_image\" at the host. Build the \"$kbe_compiled_image\" image at first"
     exit 1
 fi
 
-tag="$IMAGE_NAME_KBE_COMPILED:$kbe_image_tag"
-only_sha_tag="$IMAGE_NAME_KBE_COMPILED:$kbe_git_commit"
+tag="$KBE_COMPILED_IMAGE_NAME:$kbe_image_tag"
+only_sha_tag="$KBE_COMPILED_IMAGE_NAME:$kbe_git_commit"
 docker tag "$tag" "$only_sha_tag"
 echo -e "[INFO] Push the image contained compiled KBEngine (tag = \"$tag\") ..."
 cd "$PROJECT_DIR"
