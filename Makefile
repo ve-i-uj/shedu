@@ -38,7 +38,7 @@ include /tmp/shedu/environment.mk
 export $(shell sed 's/=.*//' /tmp/shedu/environment.mk)
 
 .PHONY: *
-
+.EXPORT_ALL_VARIABLES:
 .DEFAULT:
 	@echo Use \"make help\"
 
@@ -53,13 +53,13 @@ ifeq ($(GAME_UNIQUE_NAME),)
 endif
 	@$(SCRIPTS)/misc/is_kbe_commit.sh $(KBE_GIT_COMMIT)
 
-build: build_elk build_kbe build_game  ## Build all
-	@echo -e "\nDone.\n"
+build: .check-config build_elk build_kbe build_game  ## Build all docker images (KBE, DB, ELK etc.)
+	@log info "Done.\n"
 
-start: .check-config start_elk start_game  ## Start the kbe infrastructure (DB, KBE components, ELK etc.)
-	@echo -e "\nDone.\n"
+start: .check-config start_elk start_game  ## Start the kbe game and the kbe infrastructure (DB, the KBE components, ELK etc.)
+	@log info "Done.\n"
 
-stop: stop_game  ## Stop the game (the ELK is not stopping)
+stop: .check-config stop_game  ## Stop the game (the ELK is not stopping)
 	@$(ROOT_DIR)/scripts/stop_game.sh
 
 clean: .check-config  ## Delete the artefacts connected with the projects (containers, volumes, docker networks, etc)
@@ -77,12 +77,6 @@ status:  ## Return the game status ("running" or "stopped")
 check_config: .check-config  ## Check the configuration file
 	@$(ROOT_DIR)/scripts/misc/check_config.sh .env
 
-build_force: .check-config ## Build a docker image of compiled KBEngine without using of cache
-	@$(ROOT_DIR)/scripts/build/build_kbe_compiled.sh \
-		--kbe-git-commit=$(KBE_GIT_COMMIT) \
-		--kbe-user-tag=$(KBE_USER_TAG) \
-		--force
-
 logs_kibana:  ## Show the log viewer in the web interface (Kibana)
 	@$(ELK_SCRIPTS)/is_running.sh --print-error 1>/dev/null
 	@python3 -c "import webbrowser; webbrowser.open('http://localhost:5601/')"
@@ -96,6 +90,11 @@ logs_console: .check_config  ## Show actual log records of the game in the conso
 		--kbe-git-commit=$(KBE_GIT_COMMIT) \
 		--kbe-user-tag=$(KBE_USER_TAG) \
 		--assets-version=$(KBE_ASSETS_VERSION)
+
+print:  ## List the built kbe images
+	@echo -e "Built kbe images:"
+	@$(ROOT_DIR)/scripts/misc/list_images.sh
+	@echo
 
 define HELP_TEXT
 *** [shedu] Help ***
@@ -140,7 +139,7 @@ build_kbe: .check-config ## Build a docker image of KBEngine
 		--kbe-compiled-image-tag-sha=$(KBE_COMPILED_IMAGE_TAG_SHA) \
 		--kbe-compiled-image-tag-1=$(KBE_COMPILED_IMAGE_TAG_1)
 
-build_game: .check-config  ## Build a kbengine docker image contained assets. It binds "assets" with the built kbengine image
+build_game: .check-config  ## Build a kbengine docker image contained assets. It binds "assets" with the compiled kbe image
 	@$(SCRIPTS)/build/build_pre_assets.sh
 	@$(SCRIPTS)/build/build_assets.sh \
 		--assets-sha=$(KBE_ASSETS_SHA) \
@@ -150,43 +149,98 @@ build_game: .check-config  ## Build a kbengine docker image contained assets. It
 		--kbengine-xml-args=$(kbengine_xml_args) \
 		--kbe-compiled-image-tag-sha=$(KBE_COMPILED_IMAGE_TAG_SHA)
 
-start_game: .check-config  ## Start the docker image contained the game
+start_game: .check-config  ## Start the docker containers contained the game and the DB
 	@$(SCRIPTS)/start_game.sh \
 		--assets-path=$(KBE_ASSETS_PATH) \
 		--assets-image=$(ASSETS_IMAGE_NAME):$(KBE_ASSETS_VERSION)
 
-stop_game:  ## Stop the docker container contained the game
+stop_game:  ## Stop the docker containers contained the game and the DB
 	@$(ROOT_DIR)/scripts/stop_game.sh
 
 # The strange way to set delimiter in the docs
 -----:  ## -----
 
-build_elk:  ## Build ELK images (Elasticsearch + Logstash + Kibana)
-	@export GAME_UNIQUE_NAME=$(GAME_UNIQUE_NAME); \
-		! $(ELK_SCRIPTS)/is_built.sh --print-error
+build_elk: elk_is_not_built elk_is_not_runnig  ## Build ELK images (Elasticsearch + Logstash + Kibana)
 	@$(ELK_SCRIPTS)/build_elk.sh
 
-start_elk: stop_elk  ## Start the game ELK (<https://www.elastic.co/what-is/elk-stack>)
-	@export GAME_UNIQUE_NAME=$(GAME_UNIQUE_NAME); \
-		$(ELK_SCRIPTS)/is_built.sh --print-error 1>/dev/null
-	@docker-compose -f $(ROOT_DIR)/docker-compose.elk.yml up -d
+start_elk: elk_is_not_runnig elk_is_built  ## Start the game ELK (<https://www.elastic.co/what-is/elk-stack>)
+	@docker-compose -f $(ROOT_DIR)/docker-compose.elk.yml up -d --no-build
 
-stop_elk: ## Stop the game ELK
-	@docker-compose -f $(ROOT_DIR)/docker-compose.elk.yml rm -fs
+stop_elk: elk_is_runnig ## Stop the game ELK
+	@docker-compose -f $(ROOT_DIR)/docker-compose.elk.yml rm -f
 
-clean_elk: stop_elk  ## Delete the game ELK artefacts
+clean_elk: elk_is_not_runnig elk_is_built ## Delete the game ELK artefacts
 	@$(ELK_SCRIPTS)/clean_elk.sh
 
-restart_elk: start_elk
+restart_elk: stop_elk start_elk
 
 is_elk_running:  ## Is the game ELK running?
-	@$(ELK_SCRIPTS)/is_running.sh --print-info-only
+	@$(ELK_SCRIPTS)/is_running.sh --info
 
 is_elk_built:  ## Are the game ELK images built?
-	@export GAME_UNIQUE_NAME=$(GAME_UNIQUE_NAME); \
-		$(ELK_SCRIPTS)/is_built.sh --print-info-only
+	@$(ELK_SCRIPTS)/is_built.sh --info
 
-restart_elk: start_elk
+# The strange way to set delimiter in the docs
+-----:  ## -----
+
+go_into:  ## [Dev] Go into the running game container
+	@$(ROOT_DIR)/scripts/misc/go_into_container.sh
+
+build_force: .check-config ## [Dev] Build a docker image of compiled KBEngine without using of cache
+	@$(ROOT_DIR)/scripts/build/build_kbe_compiled.sh \
+		--kbe-git-commit=$(KBE_GIT_COMMIT) \
+		--kbe-user-tag=$(KBE_USER_TAG) \
+		--force
+
+push_kbe: .check_config ## [Dev] Push the image to the docker hub repository
+	@$(ROOT_DIR)/scripts/build/push_kbe.sh \
+		--kbe-git-commit=$(KBE_GIT_COMMIT) \
+		--kbe-user-tag=$(KBE_USER_TAG)
+
+version:  ## [Dev] The current version of the shedu
+	@$(ROOT_DIR)/scripts/version/get_version.sh
+
+# Hidden debug rules (with one # in the doc string )
+
+elk_is_built: # [Debug] Check the ELK is built. Raise error otherwise
+	@source $(SCRIPTS)/log.sh; \
+	if ! $(ELK_SCRIPTS)/is_built.sh; then \
+		log error "The \"$(GAME_UNIQUE_NAME)\" ELK services is NOT built. Run \"make build_elk\" at first"; \
+		exit 1; \
+	fi
+
+elk_is_not_built: # [Debug] Check the ELK is NOT built. Raise error otherwise
+	@source $(SCRIPTS)/log.sh; \
+	if $(ELK_SCRIPTS)/is_built.sh; then \
+		log error "The \"$(GAME_UNIQUE_NAME)\" ELK images are already built. Run \"make clean_elk\" if you need to rebuild ELK"; \
+		exit 1; \
+	fi
+
+elk_is_runnig: # [Debug] Check the ELK is running. Raise error otherwise
+	@source $(SCRIPTS)/log.sh; \
+	if ! $(ELK_SCRIPTS)/is_running.sh; then \
+		log error  "The \"$(GAME_UNIQUE_NAME)\" ELK services are NOT running now. Run \"make start_elk\" at first"; \
+		exit 1; \
+	fi
+
+elk_is_not_runnig: # [Debug] Check the ELK is NOT running. Raise error otherwise
+	@source $(SCRIPTS)/log.sh; \
+	if $(ELK_SCRIPTS)/is_running.sh; then \
+		log error  "The \"$(GAME_UNIQUE_NAME)\" ELK services are running now. Run \"make stop_elk\" at first"; \
+		exit 1; \
+	fi
+
+go_into_kibana:  # [Debug] Go into the running Kibana container
+	@docker exec --interactive --tty ${ELK_KIBANA_CONTATINER_NAME} /bin/bash
+
+go_into_elastic:  # [Debug] Go into the running ElasticSearch container
+	@docker exec --interactive --tty ${ELK_ES_CONTATINER_NAME} /bin/bash
+
+go_into_logstash:  # [Debug] Go into the running LogStash container
+	@docker exec --interactive --tty ${ELK_LOGSTASH_CONTATINER_NAME} /bin/bash
+
+logs_elk_compose:  # [Debug] Show the ELK log records in the console
+	@docker-compose -f $(ROOT_DIR)/docker-compose.elk.yml logs -f
 
 elk_debug_restart_logstash:
 	-@docker-compose -f $(ROOT_DIR)/docker-compose.elk.yml restart kbe-log-elk-logstash
@@ -201,38 +255,6 @@ elk_debug_logstash:
 		 kbe-log-elk-logstash \
 		 /bin/bash
 
-# Public debug rules
-
-# The strange way to set delimiter in the docs
------:  ## -----
-
-go_into:  ## [Debug] Go into the running game container
-	@$(ROOT_DIR)/scripts/misc/go_into_container.sh
-
-print:  ## [Debug] List built kbe images
-	@echo -e "Built kbe images:"
-	@$(ROOT_DIR)/scripts/misc/list_images.sh
-	@echo
-
-push_kbe: .check_config  ## [Debug] Push the image to the docker hub repository
-	@$(ROOT_DIR)/scripts/build/push_kbe.sh \
-		--kbe-git-commit=$(KBE_GIT_COMMIT) \
-		--kbe-user-tag=$(KBE_USER_TAG)
-
-version:  ## [Debug] Current version of the shedu
-	@$(ROOT_DIR)/scripts/version/get_version.sh
-
-# Hidden debug rules (with one # in the doc string )
-
-go_into_kibana:  # [Debug] Go into the running Kibana container
-	@docker exec --interactive --tty ${ELK_KIBANA_CONTATINER_NAME} /bin/bash
-
-go_into_elastic:  # [Debug] Go into the running ElasticSearch container
-	@docker exec --interactive --tty ${ELK_ES_CONTATINER_NAME} /bin/bash
-
-go_into_logstash:  # [Debug] Go into the running LogStash container
-	@docker exec --interactive --tty ${ELK_LOGSTASH_CONTATINER_NAME} /bin/bash
-
-logs_elk_compose:  # [Debug] Show the ELK log records in the console
-	@docker-compose -f $(ROOT_DIR)/docker-compose.elk.yml logs -f
-
+echo:
+	@echo GAME_UNIQUE_NAME=$(GAME_UNIQUE_NAME)
+	@echo KBE_GIT_COMMIT=$(KBE_GIT_COMMIT)
