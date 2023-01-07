@@ -24,23 +24,21 @@ do
     fi
 done
 
-volume_name=shedu_kbe-log-kbeengine
-out=$( docker volume ls -q -f "name=$volume_name" )
-if [ -z $out ]; then
-    log debug "There is no volume \"$volume_name\""
+out=$( docker volume ls -q -f "name=$KBE_LOG_VOLUME_NAME" )
+if [ -z "$out" ]; then
+    log debug "There is no volume \"$KBE_LOG_VOLUME_NAME\""
     is_running=false
 fi
 
-volume_name=kbe-log-elk-elastic-volume
-out=$( docker volume ls -q -f "name=$volume_name" )
-if [ -z $out ]; then
-    log debug "There is no volume \"$volume_name\""
+out=$( docker volume ls -q -f "name=$KBE_LOG_ELASTIC_VOLUME_NAME" )
+if [ -z "$out" ]; then
+    log debug "There is no volume \"$KBE_LOG_ELASTIC_VOLUME_NAME\""
     is_running=false
 fi
 
 net_name=shedu_kbe-net
 out=$( docker network ls -q -f "name=$net_name" )
-if [ -z $out ]; then
+if [ -z "$out" ]; then
     log debug "There is no net \"$net_name\""
     is_running=false
 fi

@@ -6,7 +6,7 @@ curr_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 source $( realpath "$curr_dir/../init.sh" )
 source $( realpath $SCRIPTS/log.sh )
 
-log info "Pull and tag ELK images"
+log info "Pull and tag the ELK images"
 
 docker pull $ELK_ES_IMAGE_NAME 1>/dev/null
 docker tag $ELK_ES_IMAGE_NAME "$ELK_ES_IMAGE_TAG"
