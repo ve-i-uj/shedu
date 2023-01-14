@@ -165,7 +165,7 @@ start_elk: config_is_ok elk_is_not_runnig elk_is_built ## Start the game ELK (<h
 	@docker-compose -f $(ROOT_DIR)/docker-compose.elk.yml up -d --no-build
 
 stop_elk: config_is_ok elk_is_runnig ## Stop the game ELK
-	@docker-compose -f $(ROOT_DIR)/docker-compose.elk.yml rm --stop --force
+	@docker-compose -f $(ROOT_DIR)/docker-compose.elk.yml stop
 
 clean_elk: config_is_ok elk_is_not_runnig elk_is_built ## Delete the game ELK artefacts
 	@$(ELK_SCRIPTS)/clean_elk.sh
@@ -281,28 +281,48 @@ config_is_ok: # Check the .env config is ok. Raise error otherwise
 
 elk_is_built: # Check the ELK is built. Raise error otherwise
 	@source $(SCRIPTS)/log.sh; \
-	if ! $(ELK_SCRIPTS)/is_built.sh; then \
+	images="$(ELK_ES_IMAGE_TAG) $(ELK_KIBANA_IMAGE_TAG) $(ELK_LOGSTASH_IMAGE_TAG) $(ELK_DEJAVU_IMAGE_TAG) "; \
+	is_built=true; \
+    for image in $$images ; do \
+		if [ -z "$$( docker images --filter reference="$$image" -q )" ]; then \
+			log debug "There is no image \"$$image\""; \
+			is_built=false; \
+		fi \
+    done; \
+	if $$is_built; then \
+		exit 0; \
+	else \
 		log error "The ELK services is NOT built. Run \"make build_elk\" at first"; \
 		exit 1; \
 	fi
 
 elk_is_not_built: # Check the ELK is NOT built. Raise error otherwise
 	@source $(SCRIPTS)/log.sh; \
-	if $(ELK_SCRIPTS)/is_built.sh; then \
-		log error "The ELK images are already built. Run \"make clean_elk\" if you need to rebuild ELK"; \
+	images="$(ELK_ES_IMAGE_TAG) $(ELK_KIBANA_IMAGE_TAG) $(ELK_LOGSTASH_IMAGE_TAG) $(ELK_DEJAVU_IMAGE_TAG) "; \
+	is_built=true; \
+    for image in $$images ; do \
+		if [ ! -z "$$( docker images --filter reference="$$image" -q )" ]; then \
+			log debug "There is image \"$$image\""; \
+			is_built=false; \
+		fi \
+    done; \
+	if $$is_built; then \
 		exit 1; \
+	else \
+		log error "The ELK images are already built. Run \"make clean_elk\" if you need to rebuild ELK"; \
+		exit 0; \
 	fi
 
 elk_is_runnig: # Check the ELK is running. Raise error otherwise
 	@source $(SCRIPTS)/log.sh; \
-	if ! $(ELK_SCRIPTS)/is_running.sh; then \
+	if [ -z "$$(docker-compose -f $(ROOT_DIR)/docker-compose.elk.yml ps --status=running -q)" ]; then \
 		log error  "The ELK services are NOT running now. Run \"make start_elk\" at first"; \
 		exit 1; \
 	fi
 
 elk_is_not_runnig: # Check the ELK is NOT running. Raise error otherwise
 	@source $(SCRIPTS)/log.sh; \
-	if $(ELK_SCRIPTS)/is_running.sh; then \
+	if [ ! -z "$$(docker-compose -f $(ROOT_DIR)/docker-compose.elk.yml ps --status=running -q)" ]; then \
 		log error  "The ELK services are running now. Run \"make stop_elk\" at first"; \
 		exit 1; \
 	fi
