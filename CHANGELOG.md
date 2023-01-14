@@ -1,6 +1,25 @@
 
 # Changelog
 
+## [0.9.0] - 2022-09-25
+
+### Added
+
+- MVP of KBEngine + [ELK Stack](https://www.elastic.co/what-is/elk-stack) for kbe logging was added
+- Web interfaces (Kibana and Dejavu) for log viewing
+
+### Changed
+
+- Kbe docker volumes and nets have the names based on $GAME_UNIQUE_NAME
+- The build logic was moved to the Makefile, the unusing scripts were removed
+- The scripts are used the log.sh lib
+- The check_config.sh script checks all values are valid
+- Makefile overrides some variables
+- The status script was updated
+- Debug makefile targets moved to the separate file
+- the README file has more detail info about the project
+- Some optimization to reuse docker cache
+
 ## [0.8.1] - 2022-09-25
 
 ### Changed
