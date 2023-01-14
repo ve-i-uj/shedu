@@ -3,7 +3,8 @@ version: '3'
 services:
 
   kbe-mariadb:
-    image: mariadb:latest
+    image: ${KBE_DB_IMAGE_NAME}
+    container_name: ${KBE_DB_CONTAINER_NAME}
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
@@ -11,8 +12,7 @@ services:
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     volumes:
-      - kbe-mariadb-volume:/var/lib/mysql
-    container_name: "kbe-mariadb"
+      - kbe-mariadb-data:/var/lib/mysql
     ports:
       - 3306:3306
     networks:
@@ -20,27 +20,35 @@ services:
     command: --log_warnings=9
 
   kbe-assets:
-    image: ${KBE_ASSETS_IMAGE}
+    image: ${KBE_ASSETS_IMAGE_NAME}
+    build:
+      dockerfile: ${DOCKERFILE_KBE_ASSETS}
+    container_name: ${KBE_ASSETS_CONTAINER_NAME}
     restart: always
-    container_name: kbe-assets
     ports:
       # LoginApp
       - 20013:20013
       # BaseApp
       - 20015-20019:20015-20019
       - 20005-20009:20005-20009/udp
-      # telnet
+      # Baseapp telnet
       - 40000-40009:40000-40009
+      # Cellapp telnet
       - 50000-50009:50000-50009
-      # Bots
-      # telnet
+      # Bots telnet
       - 51000:51000
-    entrypoint: ["./wait-for-it.sh", "kbe-mariadb:3306", "--", "/bin/bash", "docker-entrypoint.sh"]
+    volumes:
+      - kbe-log-data:/opt/kbengine/assets/logs
     networks:
       - kbe-net
+    entrypoint: ["./wait-for-it.sh", "kbe-mariadb:3306", "--", "/bin/bash", "docker-entrypoint.sh"]
 
 volumes:
-  kbe-mariadb-volume:
+  kbe-mariadb-data:
+    name: ${KBE_DB_VOLUME_NAME}
+  kbe-log-data:
+    name: ${KBE_LOG_VOLUME_NAME}
 
 networks:
   kbe-net:
+    name: ${KBE_NET_NAME}

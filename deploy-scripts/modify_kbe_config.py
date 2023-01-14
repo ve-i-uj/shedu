@@ -208,7 +208,7 @@ def main():
         sys.exit(1)
 
     settings: dict[str, str] = {}
-    for line in settings_path.open():
+    for line in settings_path.open(encoding='utf-8'):
         if not line.strip() or line.strip().startswith('#'):
             continue
         var_name, value = line.split('=', 1)

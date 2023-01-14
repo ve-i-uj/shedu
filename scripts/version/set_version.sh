@@ -14,13 +14,13 @@ VERSION_PATH="$PROJECT_DIR/version.txt"
 
 version="$1"
 if [ -z "$version" ]; then
-    echo "[ERROR] There is no version in the first argument"
+    log error "There is no version in the first argument"
     echo -e "$USAGE"
     exit 1
 fi
 
 if [ $( git branch --show-current ) != "develop" ]; then
-    echo "[ERROR] The script works only on the \"develop\" branch."
+    log error "The script works only on the \"develop\" branch."
     echo -e "$USAGE"
     exit 1
 fi
@@ -32,4 +32,4 @@ git commit -a -m "Set the version \"$version\" (auto commit)"
 git push origin develop
 git push --tags -f
 
-echo "Done ($0)"
+log info "Done ($0)"

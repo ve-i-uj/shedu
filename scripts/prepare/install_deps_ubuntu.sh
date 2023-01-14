@@ -1,1 +1,1 @@
-sudo apt install -y jq make git
+sudo apt install -y jq make git python3

@@ -1,0 +1,82 @@
+version: '3'
+
+services:
+
+  kbe-log-elk-elastic:
+    image: ${ELK_ES_IMAGE_TAG}
+    container_name: ${ELK_ES_CONTATINER_NAME}
+    restart: always
+    environment:
+      discovery.type: single-node
+      # Нужно для Dejavu
+      http.port: 9200
+      http.max_content_length: 10MB
+      http.cors.enabled: "true"
+      http.cors.allow-origin: "'*'"
+      http.cors.allow-headers: X-Requested-With,X-Auth-Token,Content-Type,Content-Length,Authorization
+      http.cors.allow-credentials: "true"
+      network.publish_host: localhost
+      # Чтобы без авторизации
+      xpack.security.enabled: "false"
+      xpack.license.self_generated.type: basic
+      # ES_JAVA_OPTS: "-Xms512m -Xmx512m"
+    volumes:
+      - kbe-log-elastic-data:/var/lib/mysql
+    ports:
+      - 9200:9200
+    networks:
+      - kbe-net
+
+  kbe-log-elk-dejavu:
+    image: ${ELK_DEJAVU_IMAGE_TAG}
+    container_name: ${ELK_DEJAVU_CONTATINER_NAME}
+    restart: always
+    ports:
+      - 1358:1358
+    networks:
+      - kbe-net
+    depends_on:
+      - kbe-log-elk-elastic
+
+  kbe-log-elk-kibana:
+    image: ${ELK_KIBANA_IMAGE_TAG}
+    container_name: ${ELK_KIBANA_CONTATINER_NAME}
+    restart: always
+    environment:
+      XPACK_MONITORING_ELASTICSEARCH_HOSTS: "[http://kbe-log-elk-elastic:9200]"
+      ELASTICSEARCH_HOSTS: http://kbe-log-elk-elastic:9200
+      network.host: 0.0.0.0
+    ports:
+      - 5601:5601
+    networks:
+      - kbe-net
+    depends_on:
+      - kbe-log-elk-elastic
+
+  kbe-log-elk-logstash:
+    image: ${ELK_LOGSTASH_IMAGE_TAG}
+    container_name: ${ELK_LOGSTASH_CONTATINER_NAME}
+    restart: always
+    environment:
+      XPACK_MONITORING_ELASTICSEARCH_HOSTS: "[http://kbe-log-elk-elastic:9200]"
+      XPACK_MONITORING_ELASTICSEARCH_SSL_VERIFICATION_MODE: none
+    volumes:
+      - kbe-log-data:/opt/kbengine/assets/logs
+      - ./data/logstash/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+      - ./data/logstash/kbe_patterns:/usr/share/logstash/config/patterns/kbe
+    networks:
+      - kbe-net
+    depends_on:
+      - kbe-log-elk-elastic
+
+volumes:
+  kbe-mariadb-data:
+    name: ${KBE_DB_VOLUME_NAME}
+  kbe-log-data:
+    name: ${KBE_LOG_VOLUME_NAME}
+  kbe-log-elastic-data:
+    name: ${KBE_LOG_ELASTIC_VOLUME_NAME}
+
+networks:
+  kbe-net:
+    name: ${KBE_NET_NAME}

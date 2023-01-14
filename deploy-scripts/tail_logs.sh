@@ -3,8 +3,8 @@
 # Tails all log files in the directory "logs"
 #
 
-ASSETS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-LOGS_DIR="$ASSETS_DIR"/logs
+KBE_ASSETS_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+LOGS_DIR="$KBE_ASSETS_PATH"/logs
 
 function tail_log_files {
 	cd "$LOGS_DIR"
