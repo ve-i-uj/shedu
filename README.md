@@ -1,4 +1,4 @@
-![Logo](https://github.com/ve-i-uj/shedu/blob/develop/doc/pictures/shedu-640-320-pixelated.bmp?raw=true)
+![Logo](https://user-images.githubusercontent.com/6612371/212449601-6d62e862-5dbc-4d79-9a61-47230f0b61bf.jpg)
 
 Shedu - Easy deploy of a KBEngine cluster
 
