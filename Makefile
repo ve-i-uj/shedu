@@ -69,8 +69,8 @@ clean: config_is_ok clean_game clean_elk clean_kbe ## Delete the artefacts conne
 	@source $(SCRIPTS)/log.sh; log info "Done"
 
 clean_all: ## Delete the artefacts of all games (not only the current project)
-	@docker-compose stop &>/dev/null
-	@docker-compose down &>/dev/null
+	@docker-compose stop
+	@docker-compose down
 	@res=$$(docker network ls --filter "name=kbe-net-*" -q); \
 	if [ ! -z "$$res" ]; then \
 		echo $$res | xargs docker network rm; \
@@ -327,3 +327,9 @@ elk_is_not_runnig: # Check the ELK is NOT running. Raise error otherwise
 	fi
 
 include contrib/debug.mk
+
+hello:
+	@echo "Hello! (ROOT_DIR=$(ROOT_DIR))"
+
+test:
+	@$(ROOT_DIR)/tests/run_tests.sh
