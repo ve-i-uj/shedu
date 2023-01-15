@@ -3,7 +3,7 @@ version: '3'
 services:
 
   kbe-mariadb:
-    image: ${KBE_DB_IMAGE_NAME}
+    image: ${KBE_DB_IMAGE_TAGGED_NAME}
     container_name: ${KBE_DB_CONTAINER_NAME}
     restart: always
     environment:

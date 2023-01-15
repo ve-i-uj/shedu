@@ -54,36 +54,45 @@ endif
 all: help
 
 build: config_is_ok build_elk build_kbe build_game ## Build all docker images (KBE, DB, ELK etc.)
-	@source $(SCRIPTS)/log.sh; log info "Done"
 
-start: config_is_ok start_game start_elk ## Start the kbe game and the kbe infrastructure (DB, the KBE components, ELK etc.)
-	@source $(SCRIPTS)/log.sh; log info "Done"
+start: config_is_ok game_is_built elk_is_built ## Start the kbe game and the kbe infrastructure (DB, the KBE components, ELK etc.)
+	@docker-compose \
+		-f $(ROOT_DIR)/docker-compose.yml \
+		-f $(ROOT_DIR)/docker-compose.elk.yml \
+		up -d --no-build
 
 stop: config_is_ok ## Stop the kbe game and the kbe infrastructure
-	@if [ ! -z "$$(docker-compose -f $(ROOT_DIR)/docker-compose.elk.yml ps --filter "status=running" -q)" ]; then \
-		docker-compose -f $(ROOT_DIR)/docker-compose.elk.yml stop; \
-		docker-compose -f $(ROOT_DIR)/docker-compose.elk.yml rm -f; \
-	fi
-	@if [ ! -z "$$(docker-compose ps --filter "status=running" -q)" ]; then \
-		docker-compose stop; \
-		docker-compose rm -f; \
-	fi
+	@docker-compose \
+		-f $(ROOT_DIR)/docker-compose.yml \
+		-f $(ROOT_DIR)/docker-compose.elk.yml \
+		stop
+	@docker-compose \
+		-f $(ROOT_DIR)/docker-compose.yml \
+		-f $(ROOT_DIR)/docker-compose.elk.yml \
+		rm -f
 
 status: config_is_ok ## Return the game status ("running" or "stopped")
 	@$(SCRIPTS)/misc/get_status.sh
 
-clean: clean_elk clean_game clean_kbe ## Delete the artefacts connected with the project (containers, volumes, docker networks, etc)
-	@docker-compose down
-	@docker-compose -f $(ROOT_DIR)/docker-compose.elk.yml down
+clean: config_is_ok game_is_not_running elk_is_not_runnig ## Delete the artefacts connected with the project (containers, volumes, docker networks, etc)
+	@docker-compose \
+		--log-level ERROR \
+		-f $(ROOT_DIR)/docker-compose.yml \
+		-f $(ROOT_DIR)/docker-compose.elk.yml \
+		down -v --rmi all
+	@if [ ! -z "$$(docker images --filter "reference=$(KBE_COMPILED_IMAGE_NAME_SHA)" -q)" ]; then \
+		docker rmi $(KBE_COMPILED_IMAGE_NAME_SHA); \
+	fi
+	@if [ ! -z "$$(docker images --filter "reference=$(KBE_COMPILED_IMAGE_NAME_1)" -q)" ]; then \
+		docker rmi $(KBE_COMPILED_IMAGE_NAME_1); \
+	fi
 
-clean_all: config_is_ok game_is_not_running elk_is_not_runnig ## Delete the artefacts of all games (not only the current project)
-	@docker-compose down
-	@docker-compose -f $(ROOT_DIR)/docker-compose.elk.yml down
-	@res=$$(docker network ls --filter "name=kbe-net-*" -q); \
+clean_all: config_is_ok game_is_not_running elk_is_not_runnig clean ## Delete the artefacts of all games (not only the current project)
+	@res=$$(docker network ls --filter "name=*kbe-net*" -q); \
 	if [ ! -z "$$res" ]; then \
 		echo $$res | xargs docker network rm; \
 	fi
-	@res=$$(docker volume ls --filter name="kbe-*" -q); \
+	@res=$$(docker volume ls --filter name="*kbe*-data" -q); \
 	if [ ! -z "$$res" ]; then \
 		echo $$res | xargs docker volume rm; \
 	fi
@@ -148,16 +157,6 @@ stop_game: config_is_ok game_is_running ## Stop the docker containers contained 
 	@docker-compose stop
 	@docker-compose rm -f
 
-clean_game: config_is_ok game_is_built game_is_not_running ## Delete the game artefacts (db and kbe components)
-	@docker-compose stop
-	@docker-compose rm -f
-	@if [ ! -z "$$(docker images ls --filter reference=$(KBE_ASSETS_IMAGE_NAME) -q)" ]; then \
-		docker rmi $(KBE_ASSETS_IMAGE_NAME); \
-	fi
-	@if [ ! -z "$$(docker images ls --filter reference=$(KBE_DB_IMAGE_TAGGED_NAME) -q)" ]; then \
-		docker rmi $(KBE_DB_IMAGE_TAGGED_NAME); \
-	fi
-
 -----: ## -----
 
 build_elk: config_is_ok elk_is_not_built elk_is_not_runnig ## Build ELK images (Elasticsearch + Logstash + Kibana)
@@ -175,13 +174,7 @@ start_elk: config_is_ok elk_is_not_runnig elk_is_built ## Start the game ELK (<h
 
 stop_elk: config_is_ok elk_is_runnig ## Stop the game ELK
 	@docker-compose -f $(ROOT_DIR)/docker-compose.elk.yml stop
-	@docker-compose -f $(ROOT_DIR)/docker-compose.elk.yml rm
-
-clean_elk: config_is_ok elk_is_not_runnig elk_is_built ## Delete the game ELK artefacts
-	@docker rmi $(ELK_ES_IMAGE_TAG)
-	@docker rmi $(ELK_KIBANA_IMAGE_TAG)
-	@docker rmi $(ELK_LOGSTASH_IMAGE_TAG)
-	@docker rmi $(ELK_DEJAVU_IMAGE_TAG)
+	@docker-compose -f $(ROOT_DIR)/docker-compose.elk.yml rm -f
 
 restart_elk: stop_elk start_elk
 
@@ -332,7 +325,7 @@ elk_is_runnig: # Check the ELK is running. Raise error otherwise
 
 elk_is_not_runnig: # Check the ELK is NOT running. Raise error otherwise
 	@source $(SCRIPTS)/log.sh; \
-	if [ ! -z "$$(docker-compose -f $(ROOT_DIR)/docker-compose.elk.yml ps --filter="status=running" -q)" ]; then \
+	if [ ! -z "$$(docker-compose -f $(ROOT_DIR)/docker-compose.elk.yml ps -q)" ]; then \
 		log error  "The ELK services are running now. Run \"make stop_elk\" at first"; \
 		exit 1; \
 	fi
@@ -343,8 +336,6 @@ hello:
 	@echo "Hello! (ROOT_DIR=$(ROOT_DIR))"
 
 test:
+	@docker version
+	@docker-compose version
 	@$(ROOT_DIR)/tests/run_tests.sh
-
-
-echo:
-	@docker-compose up -d
