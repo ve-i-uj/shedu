@@ -40,11 +40,10 @@ override PRE_ASSETS_IMAGE_NAME := $(PRE_ASSETS_IMAGE_NAME):$(SHEDU_VERSION)
 override KBE_ASSETS_IMAGE_NAME := $(KBE_ASSETS_IMAGE_NAME):$(KBE_ASSETS_VERSION)
 
 ifeq ($(KBE_ASSETS_PATH), demo)
-    $(shell assets_path=/tmp/shedu/kbe-demo-assets-$$( date +"%Y-%m-%d" ); \
-	if [ ! -d $$assets_path ]; then \
-		git clone "$(KBE_ASSETS_DEMO_GIT_URL)" $$assets_path; \
+	override KBE_ASSETS_PATH := /tmp/shedu/kbe-demo-assets-$(shell date +"%Y-%m-%d")
+    $(shell if [ ! -d $(KBE_ASSETS_PATH) ]; then \
+		git clone "$(KBE_ASSETS_DEMO_GIT_URL)" $(KBE_ASSETS_PATH); \
 	fi)
-	override KBE_ASSETS_PATH := /tmp/shedu/kbe-demo-assets-$(shell date +"%Y-%m-%d" )
 endif
 
 .PHONY: *
