@@ -13,7 +13,7 @@ bash $0 \\
 "
 
 curr_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-source $( realpath "$curr_dir/../init.sh" )
+source $( realpath "$curr_dir/init.sh" )
 source $( realpath $SCRIPTS/log.sh )
 
 log info "Build a docker image of compiled KBEngine ..."
@@ -57,9 +57,7 @@ if ! $force; then
         exit 0
     fi
     log info "There is NO image \"$kbe_compiled_image_name_sha\" at the host"
-fi
 
-if ! $force; then
     log info "Trying to find the \"$kbe_compiled_image_name_sha\" image on the docker hub ..."
     if docker manifest inspect $kbe_compiled_image_name_sha > /dev/null; then
         log info "The image is found. Download the \"$kbe_compiled_image_name_sha\" image ..."

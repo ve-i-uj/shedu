@@ -21,8 +21,6 @@ services:
 
   kbe-assets:
     image: ${KBE_ASSETS_IMAGE_NAME}
-    build:
-      dockerfile: ${DOCKERFILE_KBE_ASSETS}
     container_name: ${KBE_ASSETS_CONTAINER_NAME}
     restart: always
     ports:
@@ -45,10 +43,7 @@ services:
 
 volumes:
   kbe-mariadb-data:
-    name: ${KBE_DB_VOLUME_NAME}
   kbe-log-data:
-    name: ${KBE_LOG_VOLUME_NAME}
 
 networks:
   kbe-net:
-    name: ${KBE_NET_NAME}

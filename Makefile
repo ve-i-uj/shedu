@@ -59,18 +59,26 @@ build: config_is_ok build_elk build_kbe build_game ## Build all docker images (K
 start: config_is_ok start_game start_elk ## Start the kbe game and the kbe infrastructure (DB, the KBE components, ELK etc.)
 	@source $(SCRIPTS)/log.sh; log info "Done"
 
-stop: config_is_ok stop_game stop_elk ## Stop the kbe game and the kbe infrastructure
-	@source $(SCRIPTS)/log.sh; log info "Done"
+stop: config_is_ok ## Stop the kbe game and the kbe infrastructure
+	@if [ ! -z "$$(docker-compose -f $(ROOT_DIR)/docker-compose.elk.yml ps --filter "status=running" -q)" ]; then \
+		docker-compose -f $(ROOT_DIR)/docker-compose.elk.yml stop; \
+		docker-compose -f $(ROOT_DIR)/docker-compose.elk.yml rm -f; \
+	fi
+	@if [ ! -z "$$(docker-compose ps --filter "status=running" -q)" ]; then \
+		docker-compose stop; \
+		docker-compose rm -f; \
+	fi
 
 status: config_is_ok ## Return the game status ("running" or "stopped")
 	@$(SCRIPTS)/misc/get_status.sh
 
-clean: config_is_ok clean_game clean_elk clean_kbe ## Delete the artefacts connected with the project (containers, volumes, docker networks, etc)
-	@source $(SCRIPTS)/log.sh; log info "Done"
-
-clean_all: ## Delete the artefacts of all games (not only the current project)
-	@docker-compose stop
+clean: clean_elk clean_game clean_kbe ## Delete the artefacts connected with the project (containers, volumes, docker networks, etc)
 	@docker-compose down
+	@docker-compose -f $(ROOT_DIR)/docker-compose.elk.yml down
+
+clean_all: config_is_ok game_is_not_running elk_is_not_runnig ## Delete the artefacts of all games (not only the current project)
+	@docker-compose down
+	@docker-compose -f $(ROOT_DIR)/docker-compose.elk.yml down
 	@res=$$(docker network ls --filter "name=kbe-net-*" -q); \
 	if [ ! -z "$$res" ]; then \
 		echo $$res | xargs docker network rm; \
@@ -87,7 +95,6 @@ clean_all: ## Delete the artefacts of all games (not only the current project)
 	if [ ! -z "$$res" ]; then \
 		echo $$res | xargs docker rmi; \
 	fi
-	@rm -f $(ROOT_DIR)/.env
 
 restart: stop start ## Stop and start
 
@@ -107,14 +114,16 @@ logs_console: config_is_ok ## Show actual log records of the game in the console
 -----: ## -----
 
 build_kbe: config_is_ok ## Build a docker image of KBEngine
-	@$(SCRIPTS)/build/build_kbe_compiled.sh \
+	@$(SCRIPTS)/build_kbe_compiled.sh \
 		--kbe-git-commit=$(KBE_GIT_COMMIT) \
 		--kbe-compiled-image-name-sha=$(KBE_COMPILED_IMAGE_NAME_SHA) \
 		--kbe-compiled-image-name-1=$(KBE_COMPILED_IMAGE_NAME_1)
 
 clean_kbe: config_is_ok kbe_is_built game_is_not_running # Clean the compiled kbe image
 	@docker rmi $(KBE_COMPILED_IMAGE_NAME_SHA)
-	@docker rmi $(KBE_COMPILED_IMAGE_NAME_1) 2>/dev/null
+	@if [ "$(KBE_COMPILED_IMAGE_NAME_SHA)" != "$(KBE_COMPILED_IMAGE_NAME_1)" ]; then \
+		docker rmi $(KBE_COMPILED_IMAGE_NAME_1); \
+	fi
 
 -----: ## -----
 
@@ -131,43 +140,48 @@ build_game: config_is_ok game_is_not_built kbe_is_built ## Build a kbengine dock
 		--build-arg KBE_KBENGINE_XML_ARGS="$(KBE_KBENGINE_XML_ARGS)" \
 		--tag "$(KBE_ASSETS_IMAGE_NAME)" \
 		.
-	@docker network create $(KBE_NET_NAME)
-	@docker volume create $(KBE_NET_NAME)
 
 start_game: config_is_ok game_is_not_running game_is_built ## Start the docker containers contained the game and the DB
 	@docker-compose up -d
 
 stop_game: config_is_ok game_is_running ## Stop the docker containers contained the game and the DB
 	@docker-compose stop
+	@docker-compose rm -f
 
 clean_game: config_is_ok game_is_built game_is_not_running ## Delete the game artefacts (db and kbe components)
-	@if [ ! -z "$$(docker volume ls --filter name=$(KBE_DB_VOLUME_NAME) -q)" ]; then \
-		docker volume rm $(KBE_DB_VOLUME_NAME); \
-	fi
+	@docker-compose stop
+	@docker-compose rm -f
 	@if [ ! -z "$$(docker images ls --filter reference=$(KBE_ASSETS_IMAGE_NAME) -q)" ]; then \
-		echo "Delete $(KBE_ASSETS_IMAGE_NAME)"; \
 		docker rmi $(KBE_ASSETS_IMAGE_NAME); \
 	fi
 	@if [ ! -z "$$(docker images ls --filter reference=$(KBE_DB_IMAGE_TAGGED_NAME) -q)" ]; then \
 		docker rmi $(KBE_DB_IMAGE_TAGGED_NAME); \
 	fi
-	@if [ ! -z "$$(docker network ls --filter "name=$(KBE_NET_NAME)" -q" ]; then \
-		@docker network rm $(KBE_NET_NAME); \
-	fi
 
 -----: ## -----
 
 build_elk: config_is_ok elk_is_not_built elk_is_not_runnig ## Build ELK images (Elasticsearch + Logstash + Kibana)
-	@$(ELK_SCRIPTS)/build_elk.sh
+	@docker pull $(ELK_ES_IMAGE_NAME)
+	@docker tag $(ELK_ES_IMAGE_NAME) $(ELK_ES_IMAGE_TAG)
+	@docker pull $(ELK_KIBANA_IMAGA_NAME)
+	@docker tag $(ELK_KIBANA_IMAGA_NAME) $(ELK_KIBANA_IMAGE_TAG)
+	@docker pull $(ELK_LOGSTASH_IMAGA_NAME)
+	@docker tag $(ELK_LOGSTASH_IMAGA_NAME) $(ELK_LOGSTASH_IMAGE_TAG)
+	@docker pull $(ELK_DEJAVU_IMAGA_NAME)
+	@docker tag $(ELK_DEJAVU_IMAGA_NAME) $(ELK_DEJAVU_IMAGE_TAG)
 
 start_elk: config_is_ok elk_is_not_runnig elk_is_built ## Start the game ELK (<https://www.elastic.co/what-is/elk-stack>)
 	@docker-compose -f $(ROOT_DIR)/docker-compose.elk.yml up -d --no-build
 
 stop_elk: config_is_ok elk_is_runnig ## Stop the game ELK
 	@docker-compose -f $(ROOT_DIR)/docker-compose.elk.yml stop
+	@docker-compose -f $(ROOT_DIR)/docker-compose.elk.yml rm
 
 clean_elk: config_is_ok elk_is_not_runnig elk_is_built ## Delete the game ELK artefacts
-	@$(ELK_SCRIPTS)/clean_elk.sh
+	@docker rmi $(ELK_ES_IMAGE_TAG)
+	@docker rmi $(ELK_KIBANA_IMAGE_TAG)
+	@docker rmi $(ELK_LOGSTASH_IMAGE_TAG)
+	@docker rmi $(ELK_DEJAVU_IMAGE_TAG)
 
 restart_elk: stop_elk start_elk
 
@@ -177,7 +191,7 @@ go_into: config_is_ok game_is_running ## [Dev] Go into the running game containe
 	@docker exec --interactive --tty "$KBE_ASSETS_CONTAINER_NAME" /bin/bash
 
 build_force: ## [Dev] Build a docker image of compiled KBEngine without using of cache
-	@$(ROOT_DIR)/scripts/build/build_kbe_compiled.sh \
+	@$(SCRIPTS)/build_kbe_compiled.sh \
 		--kbe-git-commit=$(KBE_GIT_COMMIT) \
 		--kbe-user-tag=$(KBE_USER_TAG) \
 		--force
@@ -245,14 +259,14 @@ game_is_not_built: # Check the game image doesn't exist. Raise error otherwise
 
 game_is_running: # Check the game is running. Raise error otherwise
 	@source $(SCRIPTS)/log.sh; \
-	if [ -z "$$(docker-compose ps --status=running -q)" ]; then \
+	if [ -z "$$(docker ps --filter "name=$(KBE_ASSETS_CONTAINER_NAME)" -q)" ]; then \
 		log error "The game is NOT running. Run \"make start_game\""; \
 		exit 1; \
 	fi
 
 game_is_not_running: # Check the game is not running. Raise error otherwise
 	@source $(SCRIPTS)/log.sh; \
-	if [ ! -z "$$(docker-compose ps --status=running -q)" ]; then \
+	if [ ! -z "$$(docker ps --filter "name=$(KBE_ASSETS_CONTAINER_NAME)" -q)" ]; then \
 		log error "The game is running"; \
 		exit 1; \
 	fi
@@ -300,28 +314,25 @@ elk_is_not_built: # Check the ELK is NOT built. Raise error otherwise
 	images="$(ELK_ES_IMAGE_TAG) $(ELK_KIBANA_IMAGE_TAG) $(ELK_LOGSTASH_IMAGE_TAG) $(ELK_DEJAVU_IMAGE_TAG) "; \
 	is_built=true; \
     for image in $$images ; do \
-		if [ ! -z "$$( docker images --filter reference="$$image" -q )" ]; then \
-			log debug "There is image \"$$image\""; \
+		if [ -z "$$( docker images --filter reference="$$image" -q )" ]; then \
 			is_built=false; \
 		fi \
     done; \
 	if $$is_built; then \
-		exit 1; \
-	else \
 		log error "The ELK images are already built. Run \"make clean_elk\" if you need to rebuild ELK"; \
-		exit 0; \
+		exit 1; \
 	fi
 
 elk_is_runnig: # Check the ELK is running. Raise error otherwise
 	@source $(SCRIPTS)/log.sh; \
-	if [ -z "$$(docker-compose -f $(ROOT_DIR)/docker-compose.elk.yml ps --status=running -q)" ]; then \
+	if [ -z "$$(docker-compose -f $(ROOT_DIR)/docker-compose.elk.yml ps -q)" ]; then \
 		log error  "The ELK services are NOT running now. Run \"make start_elk\" at first"; \
 		exit 1; \
 	fi
 
 elk_is_not_runnig: # Check the ELK is NOT running. Raise error otherwise
 	@source $(SCRIPTS)/log.sh; \
-	if [ ! -z "$$(docker-compose -f $(ROOT_DIR)/docker-compose.elk.yml ps --status=running -q)" ]; then \
+	if [ ! -z "$$(docker-compose -f $(ROOT_DIR)/docker-compose.elk.yml ps --filter="status=running" -q)" ]; then \
 		log error  "The ELK services are running now. Run \"make stop_elk\" at first"; \
 		exit 1; \
 	fi
@@ -333,3 +344,7 @@ hello:
 
 test:
 	@$(ROOT_DIR)/tests/run_tests.sh
+
+
+echo:
+	@docker-compose up -d
