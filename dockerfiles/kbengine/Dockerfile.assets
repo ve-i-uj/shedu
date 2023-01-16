@@ -29,7 +29,7 @@ RUN python3 /opt/kbengine/assets/modify_kbe_config.py \
 ENTRYPOINT bash /opt/kbengine/assets/docker-entrypoint.sh
 
 # # "net-tools" for debugging to view network state of a running container
-RUN yum install net-tools nano -y
+# RUN yum install net-tools nano -y
 # RUN yum install net-tools nano -y \
 #     && yum clean all \
 #     && rm -rf /var/cache/yum

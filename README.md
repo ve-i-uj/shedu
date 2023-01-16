@@ -47,8 +47,10 @@ This project uses Docker. You need to install [Docker](https://docs.docker.com/d
 
 ```bash
 bash scripts/prepare/install_docker.sh
-bash scripts/prepare/install_latest_compose.sh
+bash scripts/prepare/install_compose_v2.sh
 ```
+
+The user will added to the "docker" group. It need to logout and to login again for changing is applyed.
 
 Install Dependencies
 

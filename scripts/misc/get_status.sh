@@ -29,7 +29,7 @@ log info "* The running services:"
 log info "----- "
 res=$( docker ps --filter name="kbe-*" --filter status=running --format "{{.Names}}" )
 for name in $res; do
-    log info $name
+    log info "    $name"
 done
 log info "-----"
 log info ""
