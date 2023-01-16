@@ -104,6 +104,7 @@ clean_all: config_is_ok game_is_not_running elk_is_not_runnig clean ## Delete th
 	if [ ! -z "$$res" ]; then \
 		echo $$res | xargs docker rmi; \
 	fi
+	@rm -rf$(PROJECT_CACHE_DIR)
 
 restart: stop start ## Stop and start
 

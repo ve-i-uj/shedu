@@ -12,6 +12,7 @@ export PROJECT_DIR="$_curr_dir"
 export SCRIPTS="$PROJECT_DIR/scripts"
 
 export PROJECT_NAME=shedu
+export PROJECT_CACHE_DIR=/tmp/shedu
 export COMPOSE_PROJECT_NAME=$GAME_UNIQUE_NAME
 
 # Для игр используется один и тот же образ KBE, привязанный к коммиту KBE
