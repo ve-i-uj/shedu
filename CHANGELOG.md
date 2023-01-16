@@ -1,7 +1,22 @@
 
 # Changelog
 
-## [0.9.0] - 2022-09-25
+## [0.9.1] - 2023-01-16
+
+### Added
+- Tests for building work flow were added
+- Using cache of github responses
+
+### Changed
+- Checking ELK bash commands was moved in the Makefile (instead of the bash scripts)
+- Using docker-compose with two config files to stop and clean artifacts
+
+### Fixed
+- The project is compatible with docker-compose version 1.25.0
+- The "./configure" script was add the executable flag
+- Minor fixes for the docker installation scripts
+
+## [0.9.0] - 2023-01-14
 
 ### Added
 
