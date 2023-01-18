@@ -4,7 +4,7 @@
 # уникальные имена для образов и контейнеров инфраструктуры. Других переменных
 # конфиг не ждёт. Переменные в данном конфиге или константы или вычисляются
 # на основе других переменных в этом конфиге + GAME_UNIQUE_NAME
-export GAME_UNIQUE_NAME=${GAME_UNIQUE_NAME}
+export GAME_UNIQUE_NAME=$GAME_UNIQUE_NAME
 
 _curr_dir=$( realpath "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/.. )
 export _curr_dir=$_curr_dir  # С этой строкой PROJECT_DIR корректно прописывается envsubst (?)

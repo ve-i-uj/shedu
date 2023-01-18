@@ -2,25 +2,24 @@ SHELL := /bin/bash
 
 ROOT_DIR := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 SCRIPTS := $(ROOT_DIR)/scripts
-ELK_SCRIPTS := $(SCRIPTS)/elk
 
 # Check the .env file exists
+# Импорт переменых окружения из инициализационного файла, чтобы иметь
+# возможность запускать здесь docker-compose
 ifneq ("$(wildcard .env)","")
 	include .env
 	export $(shell sed 's/=.*//' .env)
+	tmp_dir := /tmp/shedu
+$(shell mkdir $(tmp_dir) 2>/dev/null; \
+		source $(ROOT_DIR)/.env; \
+		source $(SCRIPTS)/init.sh; \
+		envsubst < $(SCRIPTS)/init.sh \
+		| grep '^export' \
+		| cut -c8- > $(tmp_dir)/environment.mk \
+	)
+	include $(tmp_dir)/environment.mk
+	export $(shell sed 's/=.*//' $(tmp_dir)/environment.mk)
 endif
-
-# Импорт переменых окружения из инициализационного файла, чтобы иметь
-# возможность запускать здесь docker-compose
-$(shell mkdir /tmp/shedu 2>/dev/null; \
-	export GAME_UNIQUE_NAME=$(GAME_UNIQUE_NAME); \
-	source $(SCRIPTS)/init.sh; \
-	envsubst < $(SCRIPTS)/init.sh \
-	| grep '^export' \
-	| cut -c8- > /tmp/shedu/environment.mk \
-)
-include /tmp/shedu/environment.mk
-export $(shell sed 's/=.*//' /tmp/shedu/environment.mk)
 
 # * Перезагрузим часть переменных + какие-то создадим для docker-compose
 
@@ -182,7 +181,7 @@ restart_elk: stop_elk start_elk
 -----: ## -----
 
 go_into: config_is_ok game_is_running ## [Dev] Go into the running game container
-	@docker exec --interactive --tty "$KBE_ASSETS_CONTAINER_NAME" /bin/bash
+	@docker exec --interactive --tty "$(KBE_ASSETS_CONTAINER_NAME)" /bin/bash
 
 build_force: ## [Dev] Build a docker image of compiled KBEngine without using of cache
 	@$(SCRIPTS)/build_kbe_compiled.sh \
