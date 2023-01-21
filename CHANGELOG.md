@@ -1,6 +1,24 @@
 
 # Changelog
 
+## [0.9.3] - 2023-01-21
+
+### Added
+- A new config for the kbe server compatible with the Cocos2D-JS demo client
+- A new Dockerfile for building of the cocos demo client
+- Make rule for starting the kbe Cocos2D-JS demo
+
+## [0.9.2] - 2023-01-21
+
+### Added
+- The configuration file for the source code with LGPL license (v1.1.8)
+
+### Changed
+- Machine ports and Interfaces telnet port were opened
+
+### Fixed
+- The variables from the .env file are not exported to the Makefile
+
 ## [0.9.1] - 2023-01-16
 
 ### Added
