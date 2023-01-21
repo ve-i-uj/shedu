@@ -201,6 +201,22 @@ version: ## [Dev] The current version of the shedu
 
 -----: ## -----
 
+demo_cocos_build:
+	@cp $(ROOT_DIR)/.env /tmp/shedu/.env
+	@cp $(ROOT_DIR)/configs/kbe-v1.3.5-for-cocos-js-demo-v1.3.13.env $(ROOT_DIR)/.env
+	@docker build \
+		--file "$(DOCKERFILE_COCOS_DEMO_CLIENT)" \
+		--tag "$(KBE_DEMO_COCOS_CLIENT_IMAGE_NAME)" \
+		.
+	@cp /tmp/shedu/.env $(ROOT_DIR)/.env
+
+demo_cocos_start_client:
+	@docker run --rm -p 8080:80 \
+		--name $(KBE_DEMO_COCOS_CLIENT_CONTAINER_NAME) \
+		$(KBE_DEMO_COCOS_CLIENT_IMAGE_NAME)
+
+-----: ## -----
+
 define HELP_TEXT
 *** [shedu] Help ***
 
