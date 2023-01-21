@@ -89,11 +89,11 @@ clean: config_is_ok game_is_not_running elk_is_not_runnig ## Delete the artefact
 clean_all: config_is_ok game_is_not_running elk_is_not_runnig clean ## Delete the artefacts of all games (not only the current project)
 	@res=$$(docker network ls --filter "name=*kbe-net*" -q); \
 	if [ ! -z "$$res" ]; then \
-		echo $$res | xargs docker network rm; \
+		docker network rm $$res; \
 	fi
 	@res=$$(docker volume ls --filter name="*kbe*-data" -q); \
 	if [ ! -z "$$res" ]; then \
-		echo $$res | xargs docker volume rm; \
+		docker volume rm $$res; \
 	fi
 	@res=$$(docker images ls --filter reference="$(PROJECT_NAME)/*" --format "{{.Repository}}:{{.Tag}}"); \
 	if [ ! -z "$$res" ]; then \
@@ -103,7 +103,7 @@ clean_all: config_is_ok game_is_not_running elk_is_not_runnig clean ## Delete th
 	if [ ! -z "$$res" ]; then \
 		echo $$res | xargs docker rmi; \
 	fi
-	@rm -rf$(PROJECT_CACHE_DIR)
+	@rm -rf $(PROJECT_CACHE_DIR)
 
 restart: stop start ## Stop and start
 
@@ -129,10 +129,10 @@ build_kbe: config_is_ok ## Build a docker image of KBEngine
 		--kbe-compiled-image-name-1=$(KBE_COMPILED_IMAGE_NAME_1)
 
 clean_kbe: config_is_ok kbe_is_built game_is_not_running # Clean the compiled kbe image
-	@docker rmi $(KBE_COMPILED_IMAGE_NAME_SHA)
 	@if [ "$(KBE_COMPILED_IMAGE_NAME_SHA)" != "$(KBE_COMPILED_IMAGE_NAME_1)" ]; then \
 		docker rmi $(KBE_COMPILED_IMAGE_NAME_1); \
 	fi
+	@docker rmi $(KBE_COMPILED_IMAGE_NAME_SHA)
 
 -----: ## -----
 
@@ -211,6 +211,7 @@ demo_cocos_build:
 	@cp /tmp/shedu/.env $(ROOT_DIR)/.env
 
 demo_cocos_start_client:
+	@python3 -c "import webbrowser; webbrowser.open('http://0.0.0.0:8080/')"
 	@docker run --rm -p 8080:80 \
 		--name $(KBE_DEMO_COCOS_CLIENT_CONTAINER_NAME) \
 		$(KBE_DEMO_COCOS_CLIENT_IMAGE_NAME)
