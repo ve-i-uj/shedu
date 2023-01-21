@@ -35,6 +35,11 @@ services:
       - 50000-50009:50000-50009
       # Bots telnet
       - 51000:51000
+      # Debug ports:
+      # Machine
+      - 20099:20099
+      # Interfaces telnet
+      - 33000:33000
     volumes:
       - kbe-log-data:/opt/kbengine/assets/logs
     networks:
