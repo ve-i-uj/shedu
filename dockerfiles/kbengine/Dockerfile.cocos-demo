@@ -3,7 +3,9 @@ LABEL maintainer="Aleksei Burov <burov_alexey@mail.ru>"
 
 WORKDIR /opt
 RUN apt-get update && apt-get install git -y
-RUN git clone https://github.com/kbengine/kbengine_cocos2d_js_demo.git
+RUN git clone https://github.com/kbengine/kbengine_cocos2d_js_demo.git \
+    && cd /opt/kbengine_cocos2d_js_demo \
+    && git submodule update --init --remote
 
 FROM nginx:1.23.3
 COPY --from=demo_client /opt/kbengine_cocos2d_js_demo/cocos2d-js-client /usr/share/nginx/html
