@@ -207,7 +207,7 @@ make stop_elk
 Cleaning up ELK services
 
 ```bash
-make clean_elk
+make clean
 ```
 
 <a name="build"><h2>Build activity</h2></a>

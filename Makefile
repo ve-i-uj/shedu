@@ -312,7 +312,7 @@ elk_is_not_built: # Check the ELK is NOT built. Raise error otherwise
 		fi \
     done; \
 	if $$is_built; then \
-		log error "The ELK images are already built. Run \"make clean_elk\" if you need to rebuild ELK"; \
+		log error "The ELK images are already built. Run \"make clean\" if you need to rebuild ELK"; \
 		exit 1; \
 	fi
 
