@@ -36,11 +36,14 @@ export KBE_NET_NAME="kbe-net-$GAME_UNIQUE_NAME"
 export DOCKERFILE_KBE_ASSETS="$PROJECT_DIR/dockerfiles/kbengine/Dockerfile.assets"
 export DOCKERFILE_KBE_COMPILED=dockerfiles/kbengine/Dockerfile.kbe-compiled
 export DOCKERFILE_PRE_ASSETS=dockerfiles/kbengine/Dockerfile.pre-assets
+export DOCKERFILE_COCOS_DEMO_CLIENT=dockerfiles/kbengine/Dockerfile.cocos-demo
 
 export KBE_ASSETS_DEMO_GIT_URL=https://github.com/kbengine/kbengine_demos_assets.git
 export KBE_GITHUB_URL=https://github.com/kbengine/kbengine
 
 export KBE_GITHUB_API_URL=https://api.github.com/repos/kbengine/kbengine
+
+export KBE_COCOS_JS_DEMO_GIT_URL=https://github.com/kbengine/kbengine_cocos2d_js_demo.git
 
 export DOC_CONFIG_URL=https://github.com/ve-i-uj/shedu
 
@@ -68,3 +71,6 @@ export ELK_KIBANA_CONTATINER_NAME=$ELK_C_NAME_PREFIX-kibana-$GAME_UNIQUE_NAME
 export ELK_DEJAVU_IMAGA_NAME=appbaseio/dejavu
 export ELK_DEJAVU_IMAGE_TAG=$ELK_I_NAME_PREFIX-dejavu:$GAME_UNIQUE_NAME
 export ELK_DEJAVU_CONTATINER_NAME=$ELK_C_NAME_PREFIX-dejavu-$GAME_UNIQUE_NAME
+
+export KBE_DEMO_COCOS_CLIENT_IMAGE_NAME=$PROJECT_NAME/kbe-cocos-demo-client
+export KBE_DEMO_COCOS_CLIENT_CONTAINER_NAME=kbe-cocos-demo-client

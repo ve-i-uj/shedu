@@ -7,6 +7,6 @@ make stop
 make clean_all
 
 make build_elk
-make clean_elk
+make clean
 
 log info "Ok ($0)"
