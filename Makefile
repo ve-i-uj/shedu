@@ -145,7 +145,7 @@ build_game: config_is_ok game_is_not_built kbe_is_built ## Build a kbengine dock
 		--file "$(DOCKERFILE_KBE_ASSETS)" \
 		--build-arg KBE_COMPILED_IMAGE_NAME="$(KBE_COMPILED_IMAGE_NAME_SHA)" \
 		--build-arg PRE_ASSETS_IMAGE_NAME="$(PRE_ASSETS_IMAGE_NAME)" \
-		--build-arg KBE_ASSETS_PATH="$(KBE_ASSETS_PATH)" \
+		--build-arg KBE_ASSETS_SHA="$(KBE_ASSETS_SHA)" \
 		--build-arg KBE_KBENGINE_XML_ARGS="$(KBE_KBENGINE_XML_ARGS)" \
 		--tag "$(KBE_ASSETS_IMAGE_NAME)" \
 		.

@@ -14,9 +14,8 @@ RUN yum install python3 -y \
 COPY . /opt/kbengine/assets
 WORKDIR /opt/kbengine/assets
 
-ARG KBE_ASSETS_PATH=/opt/kbengine/assets
 ARG KBE_ASSETS_SHA
-RUN if [ -d ${KBE_ASSETS_PATH}/.git ]; then \
+RUN if [ -d /opt/kbengine/assets/.git ] && [ ! -z "${KBE_ASSETS_SHA}" ]; then \
         git checkout ${KBE_ASSETS_SHA} -b kbe-deploy-branch-${KBE_ASSETS_SHA}; \
     fi
 COPY --from=pre_assets /opt/kbengine/pre-assets/ /opt/kbengine/assets
