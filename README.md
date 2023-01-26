@@ -41,6 +41,7 @@ Download the project
 ```bash
 git clone https://github.com/ve-i-uj/shedu
 cd shedu
+git submodule update
 ```
 
 This project uses Docker. You need to install [Docker](https://docs.docker.com/desktop/install/linux-install/) and [Docker-compose](https://docs.docker.com/compose/install/) if they are not installed. You can install them according to their official documentation or [at your own risk] install them using the scripts that come with this project. If both Docker and Docker-compose exists on the host, you can skip this step.

@@ -1,0 +1,3 @@
+[submodule "enki"]
+	path = enki
+	url = https://github.com/ve-i-uj/enki.git
