@@ -25,36 +25,23 @@ services:
       retries: 0
     command: --log_warnings=9
 
-  kbe-assets:
+  kbe-machine:
     image: ${KBE_ASSETS_IMAGE_NAME}
-    container_name: ${KBE_ASSETS_CONTAINER_NAME}
-    restart: "no"
     depends_on:
-      kbe-mariadb: { condition: service_healthy }
+      - proxy_dep
+    container_name: ${KBE_COMPONENT_CONTAINER_NAME}-machine
+    restart: always
+    environment:
+      KBE_COMPONENT_NAME: machine
+      KBE_COMPONENT_ID: 2129652375332859700
     ports:
-      # LoginApp
-      - 20013:20013
-      # BaseApp
-      - 20015-20019:20015-20019
-      - 20005-20009:20005-20009/udp
-      # Baseapp telnet
-      - 40000-40009:40000-40009
-      # Cellapp telnet
-      - 50000-50009:50000-50009
-      # Bots telnet
-      - 51000:51000
-      # Debug ports:
-      # Machine
       - 20099:20099
-      # Interfaces telnet
-      - 33000:33000
     volumes:
       - kbe-log-data:/opt/kbengine/assets/logs
       - ./data/log4j/log4cxx_properties:/opt/kbengine/assets/res/server/log4cxx_properties:ro
     networks:
       - kbe-net
-    working_dir: /opt/kbengine/assets
-    entrypoint: bash /opt/kbengine/assets/.shedu/scripts/deploy/docker-entrypoint.sh
+    entrypoint: bash /opt/kbengine/assets/.shedu/scripts/deploy/start_component.sh
 
 volumes:
   kbe-mariadb-data:

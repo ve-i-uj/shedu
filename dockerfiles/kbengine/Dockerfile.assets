@@ -18,20 +18,29 @@ ARG KBE_ASSETS_SHA
 RUN if [ -d /opt/kbengine/assets/.git ] && [ ! -z "${KBE_ASSETS_SHA}" ]; then \
         git checkout ${KBE_ASSETS_SHA} -b kbe-deploy-branch-${KBE_ASSETS_SHA}; \
     fi
-COPY --from=pre_assets /opt/kbengine/pre-assets/ /opt/kbengine/assets/.shedu
+
+# Забираем скрипты и настройки для образа игры из подготовленного образа
+COPY --from=pre_assets /opt/kbengine/pre-assets/ /opt/kbengine/assets/.shedu/
+
+WORKDIR /opt/kbengine/assets
+
+# Модифицируем пользовательский конфиг файл kbe, чтобы работать с сетью docker
 ARG KBE_KBENGINE_XML_ARGS
-RUN python3 /opt/kbengine/assets/.shedu/scripts/deploy/modify_kbe_config.py \
+RUN python3 .shedu/scripts/deploy/modify_kbe_config.py \
     --kbengine-xml-args=${KBE_KBENGINE_XML_ARGS} \
-    --env-file=/opt/kbengine/assets/.shedu/.env \
+    --env-file=.shedu/.env \
     --kbe-assets-path=/opt/kbengine/assets
 
+# Подменим настройки логирования KBE своими. GAME_UNIQUE_NAME будет присутствовать
+# в пути папки логов
 ARG GAME_UNIQUE_NAME
 ENV KBE_GAME_NAME=${GAME_UNIQUE_NAME}
+RUN rm -rf res/server/log4cxx_properties \
+    && cp -r .shedu/data/log4j/log4cxx_properties res/server/log4cxx_properties
 
-ENTRYPOINT bash /opt/kbengine/assets/docker-entrypoint.sh
-
-# # "net-tools" for debugging to view network state of a running container
-# RUN yum install net-tools nano -y
-# RUN yum install net-tools nano -y \
-#     && yum clean all \
-#     && rm -rf /var/cache/yum
+# Эти переменные нужны скриптам деплоя
+ENV KBE_ASSETS_PATH=/opt/kbengine/assets/
+# Эти переменные нужны движку для старта
+ENV KBE_ROOT=/opt/kbengine
+ENV KBE_BIN_PATH=/opt/kbengine/kbe/bin/server
+ENV KBE_RES_PATH=/opt/kbengine/kbe/res:/opt/kbengine/assets/res
