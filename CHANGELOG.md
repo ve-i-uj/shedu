@@ -6,7 +6,6 @@
 ### Fixed
 - The kbe js plugin in a git submodule was not updated in the Dockerfile
 
-
 ## [0.9.3] - 2023-01-21
 
 ### Added

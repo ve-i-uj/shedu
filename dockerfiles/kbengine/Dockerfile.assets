@@ -22,8 +22,11 @@ COPY --from=pre_assets /opt/kbengine/pre-assets/ /opt/kbengine/assets
 ARG KBE_KBENGINE_XML_ARGS
 RUN python3 /opt/kbengine/assets/modify_kbe_config.py \
     --kbengine-xml-args=${KBE_KBENGINE_XML_ARGS} \
-    --env-file=/opt/kbengine/assets/shedu/.env \
+    --env-file=/opt/kbengine/assets/.shedu/.env \
     --kbe-assets-path=/opt/kbengine/assets
+
+ARG GAME_UNIQUE_NAME
+ENV GAME_NAME=${GAME_UNIQUE_NAME}
 
 ENTRYPOINT bash /opt/kbengine/assets/docker-entrypoint.sh
 

@@ -147,6 +147,7 @@ build_game: config_is_ok game_is_not_built kbe_is_built ## Build a kbengine dock
 		--build-arg PRE_ASSETS_IMAGE_NAME="$(PRE_ASSETS_IMAGE_NAME)" \
 		--build-arg KBE_ASSETS_SHA="$(KBE_ASSETS_SHA)" \
 		--build-arg KBE_KBENGINE_XML_ARGS="$(KBE_KBENGINE_XML_ARGS)" \
+		--build-arg GAME_UNIQUE_NAME="$(GAME_UNIQUE_NAME)" \
 		--tag "$(KBE_ASSETS_IMAGE_NAME)" \
 		.
 
@@ -156,6 +157,12 @@ start_game: config_is_ok game_is_not_running game_is_built ## Start the docker c
 stop_game: config_is_ok game_is_running ## Stop the docker containers contained the game and the DB
 	@docker-compose stop
 	@docker-compose rm -f
+
+clean_game: config_is_ok game_is_not_running ## Delete the artefacts connected with the project (containers, volumes, docker networks, etc)
+	@docker-compose \
+		--log-level ERROR \
+		-f $(ROOT_DIR)/docker-compose.yml \
+		down -v --rmi all
 
 -----: ## -----
 
