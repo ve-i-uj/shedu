@@ -22,3 +22,6 @@ debug_print_compose:
 
 debug_print_vars:
 	@$(SCRIPTS)/misc/print_configs_vars.sh
+
+debug_logs:
+	@docker-compose -f docker-compose.yml -f docker-compose.elk.yml logs --timestamps --follow
