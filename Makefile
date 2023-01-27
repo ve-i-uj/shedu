@@ -187,7 +187,7 @@ start_elk: config_is_ok elk_is_not_runnig elk_is_built ## Start the game ELK (<h
 		-p $(ELK_COMPOSE_PROJECT_NAME) \
 		up -d --no-build
 
-stop_elk: config_is_ok elk_is_runnig ## Stop the game ELK
+stop_elk: elk_is_runnig ## Stop the game ELK
 	@docker-compose \
 		-f $(ROOT_DIR)/docker-compose.elk.yml \
 		-p $(ELK_COMPOSE_PROJECT_NAME) \
