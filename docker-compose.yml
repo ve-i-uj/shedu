@@ -2,45 +2,50 @@ version: '3'
 
 services:
 
-  kbe-mariadb:
-    image: ${KBE_DB_IMAGE_TAGGED_NAME}
-    container_name: ${KBE_DB_CONTAINER_NAME}
+  machine:
+    image: ${KBE_ASSETS_IMAGE_NAME}
+    container_name: ${KBE_COMPONENT_CONTAINER_NAME}-machine
     restart: "no"
+    working_dir: /opt/kbengine/assets
     environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      MYSQL_DATABASE: ${MYSQL_DATABASE}
-      MYSQL_USER: ${MYSQL_USER}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-    volumes:
-      - kbe-mariadb-data:/var/lib/mysql
+      KBE_COMPONENT_NAME: machine
+      KBE_COMPONENT_ID: 2129652375332859600
+      KBE_MACHINE_HOST: localhost
+      KBE_MACHINE_PORT: 20099
     ports:
-      - 3306:3306
+      - 20099:20099
+    volumes:
+      - kbe-log-data:/opt/kbengine/assets/logs
     networks:
       - kbe-net
     healthcheck:
-      test: mysql ${MYSQL_DATABASE} --host=kbe-mariadb -P 3306 --user=${MYSQL_USER} --password=${MYSQL_PASSWORD} --silent --execute "SELECT 1;"
-      start_period: 5s
-      interval: 5s
-      timeout: 10s
-      retries: 0
-    command: --log_warnings=9
+      test: $$ENKI_PYTHON .shedu/enki/cmd/healthcheck/machine/send_onQueryAllInterfaceInfos.py
+      interval: 2s
+      timeout: 5s
+      retries: 1
+    entrypoint: bash .shedu/scripts/deploy/start_component.sh
 
-  kbe-machine:
+  logger:
     image: ${KBE_ASSETS_IMAGE_NAME}
     depends_on:
-      - proxy_dep
-    container_name: ${KBE_COMPONENT_CONTAINER_NAME}-machine
-    restart: always
+      machine: { condition: service_healthy }
+    container_name: ${KBE_COMPONENT_CONTAINER_NAME}-logger
+    restart: "no"
     environment:
-      KBE_COMPONENT_NAME: machine
-      KBE_COMPONENT_ID: 2129652375332859700
-    ports:
-      - 20099:20099
+      KBE_COMPONENT_NAME: logger
+      KBE_COMPONENT_ID: 1129653375331859700
+      KBE_MACHINE_HOST: machine
+      KBE_MACHINE_PORT: 20099
     volumes:
       - kbe-log-data:/opt/kbengine/assets/logs
       - ./data/log4j/log4cxx_properties:/opt/kbengine/assets/res/server/log4cxx_properties:ro
     networks:
       - kbe-net
+    healthcheck:
+      test: $$ENKI_PYTHON .shedu/enki/cmd/healthcheck/machine/send_onQueryAllInterfaceInfos.py
+      interval: 2s
+      timeout: 5s
+      retries: 1
     entrypoint: bash /opt/kbengine/assets/.shedu/scripts/deploy/start_component.sh
 
 volumes:

@@ -122,7 +122,16 @@ clean_kbe: config_is_ok kbe_is_built game_is_not_running # Clean the compiled kb
 build_game: config_is_ok game_is_not_built kbe_is_built ## Build a kbengine docker image contained assets. It binds "assets" with the compiled kbe image
 	@docker pull $(KBE_DB_IMAGE_NAME)
 	@docker tag $(KBE_DB_IMAGE_NAME) $(KBE_DB_IMAGE_TAGGED_NAME)
-	@docker build --file "$(DOCKERFILE_PRE_ASSETS)" --tag "$(PRE_ASSETS_IMAGE_NAME)" .
+	@docker build \
+		--file "$(DOCKERFILE_ENKI_PYTHON)" \
+		--tag "$(KBE_ENKI_PYTHON_IMAGE_NAME)" \
+		.
+	@docker build \
+		--file "$(DOCKERFILE_PRE_ASSETS)" \
+		--build-arg KBE_COMPILED_IMAGE_NAME="$(KBE_COMPILED_IMAGE_NAME_SHA)" \
+		--build-arg KBE_ENKI_PYTHON_IMAGE_NAME="$(KBE_ENKI_PYTHON_IMAGE_NAME)" \
+		--tag "$(PRE_ASSETS_IMAGE_NAME)" \
+		.
 	@cd $(KBE_ASSETS_PATH); \
 	docker build \
 		--file "$(DOCKERFILE_KBE_ASSETS)" \
@@ -199,8 +208,9 @@ restart_elk: stop_elk start_elk
 
 -----: ## -----
 
-go_into: config_is_ok game_is_running ## [Dev] Go into the running game container
-	@docker exec --interactive --tty "$(KBE_ASSETS_CONTAINER_NAME)" /bin/bash
+# go_into: config_is_ok game_is_running ## [Dev] Go into the running game container
+go_into: config_is_ok ## [Dev] Go into the running game container
+	@docker exec --interactive --tty "$(KBE_COMPONENT_CONTAINER_NAME)-machine" /bin/bash
 
 build_force: ## [Dev] Build a docker image of compiled KBEngine without using of cache
 	@$(SCRIPTS)/build_kbe_compiled.sh \
