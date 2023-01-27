@@ -23,5 +23,15 @@ debug_print_compose:
 debug_print_vars:
 	@$(SCRIPTS)/misc/print_configs_vars.sh
 
-debug_logs:
-	@docker-compose -f docker-compose.yml -f docker-compose.elk.yml logs --timestamps --follow
+debug_elk_logs:
+	@docker-compose \
+		-f $(ROOT_DIR)/docker-compose.elk.yml \
+		-p $(ELK_COMPOSE_PROJECT_NAME) \
+		logs --timestamps --follow
+
+debug_game_logs:
+	@docker-compose \
+		--log-level ERROR \
+		-f $(ROOT_DIR)/docker-compose.yml \
+		-p $(GAME_COMPOSE_PROJECT_NAME) \
+		logs --timestamps --follow

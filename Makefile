@@ -143,14 +143,14 @@ build_game: config_is_ok game_is_not_built kbe_is_built ## Build a kbengine dock
 		--tag "$(KBE_ASSETS_IMAGE_NAME)" \
 		.
 
-start_game: config_is_ok game_is_built ## Start the docker containers contained the game and the DB
+start_game: config_is_ok game_is_not_running game_is_built ## Start the docker containers contained the game and the DB
 	@docker-compose \
 		--log-level ERROR \
 		-f $(ROOT_DIR)/docker-compose.yml \
 		-p $(GAME_COMPOSE_PROJECT_NAME) \
 		up -d
 
-stop_game: config_is_ok ## Stop the docker containers contained the game and the DB
+stop_game: config_is_ok game_is_running ## Stop the docker containers contained the game and the DB
 	@docker-compose \
 		--log-level ERROR \
 		-f $(ROOT_DIR)/docker-compose.yml \
@@ -181,13 +181,13 @@ build_elk: elk_is_not_built elk_is_not_runnig ## Build ELK images (Elasticsearch
 	@docker pull $(ELK_DEJAVU_IMAGA_NAME)
 	@docker tag $(ELK_DEJAVU_IMAGA_NAME) $(ELK_DEJAVU_IMAGE_TAG)
 
-start_elk: elk_is_not_runnig elk_is_built ## Start the game ELK (<https://www.elastic.co/what-is/elk-stack>)
+start_elk: config_is_ok elk_is_not_runnig elk_is_built ## Start the game ELK (<https://www.elastic.co/what-is/elk-stack>)
 	@docker-compose \
 		-f $(ROOT_DIR)/docker-compose.elk.yml \
 		-p $(ELK_COMPOSE_PROJECT_NAME) \
 		up -d --no-build
 
-stop_elk: elk_is_runnig ## Stop the game ELK
+stop_elk: config_is_ok elk_is_runnig ## Stop the game ELK
 	@docker-compose \
 		-f $(ROOT_DIR)/docker-compose.elk.yml \
 		-p $(ELK_COMPOSE_PROJECT_NAME) \
@@ -197,7 +197,7 @@ stop_elk: elk_is_runnig ## Stop the game ELK
 		-p $(ELK_COMPOSE_PROJECT_NAME) \
 		rm -f
 
-clean_elk: elk_is_not_runnig game_is_not_running elk_is_built
+clean_elk: config_is_ok elk_is_not_runnig elk_is_built
 	@docker-compose \
 		--log-level ERROR \
 		-f $(ROOT_DIR)/docker-compose.elk.yml \
