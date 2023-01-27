@@ -8,7 +8,7 @@ The project builds, packages and starts [KBEngine](https://github.com/kbengine/k
 
 The main goal of the project is to simplify kbengine deploy. It doesn't need to know how to build a C++ project or what library you need to install for. Moreover all kbe infrastructure (database, smtp server etc) can be built and started just in one command too. You can choose a kbe commit for your kbe build and easy link assets to the chosen kbe version. Change variables in "configs/example.env" and save the file like a new one with your configuration.
 
-![Docker environment](https://user-images.githubusercontent.com/6612371/212449371-83721460-401d-4ce4-bc9c-827758115ca8.jpg "KBE docker environment")
+![Docker environment](https://user-images.githubusercontent.com/6612371/215063709-d279db1c-0efa-43f8-b204-58fa732d315f.jpg "KBE docker environment")
 
 ## Table of contents
 
