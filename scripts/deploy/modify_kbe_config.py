@@ -129,6 +129,17 @@ def set_shedu_net_settings(root: ET.Element, settings: dict):
 
         logger.info(f'Updated {name} "externalAddress"')
 
+    # Т.к. Interfaces находится в соседнем контейнере, нужно задать хост
+    interfaces_el = root.find('interfaces')
+    if interfaces_el is None:
+        interfaces_el = ET.SubElement(root, 'interfaces')
+    ihost_el = interfaces_el.find('host')
+    if ihost_el is None:
+        ihost_el = ET.SubElement(interfaces_el, 'host')
+    # Выставляем имя сервиса в docker-compose.yml
+    ihost_el.text = 'interfaces'
+    logger.info('Updated "root/interfaces/host"')
+
 
 def _add_element(root: ET.Element, path: str) -> ET.Element:
     for tag in path.split('/'):
