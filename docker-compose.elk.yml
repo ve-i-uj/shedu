@@ -62,6 +62,7 @@ services:
       XPACK_MONITORING_ELASTICSEARCH_SSL_VERIFICATION_MODE: none
     volumes:
       - kbe-log-data:/opt/kbengine/assets/logs
+      - ./data/logstash/shedu_says_hello.log:/opt/kbengine/assets/logs/${GAME_COMPOSE_PROJECT_NAME}/shedu_says_hello.log:ro
       - ./data/logstash/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
       - ./data/logstash/kbe_patterns:/usr/share/logstash/config/patterns/kbe
     networks:
@@ -70,7 +71,6 @@ services:
       - kbe-log-elk-elastic
 
 volumes:
-  kbe-mariadb-data:
   kbe-log-data:
   kbe-log-elastic-data:
 

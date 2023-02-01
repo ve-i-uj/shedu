@@ -131,7 +131,7 @@ def set_shedu_net_settings(root: ET.Element, settings: dict):
 
 
 def _add_element(root: ET.Element, path: str) -> ET.Element:
-    for tag in path.split('/')[1:]:
+    for tag in path.split('/'):
         elem = root.find(tag)
         if elem is None:
             elem = ET.SubElement(root, tag)

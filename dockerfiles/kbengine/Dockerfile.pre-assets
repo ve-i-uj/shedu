@@ -1,4 +1,6 @@
 FROM centos:centos7
-COPY deploy-scripts/* /opt/kbengine/pre-assets/
-COPY .env /opt/kbengine/pre-assets/shedu/.env
-RUN chmod +x /opt/kbengine/pre-assets/wait-for-it.sh
+COPY scripts/deploy /opt/kbengine/pre-assets/scripts/deploy
+COPY .env /opt/kbengine/pre-assets/.env
+
+RUN chmod +x /opt/kbengine/pre-assets/scripts/deploy/docker-entrypoint.sh
+RUN chmod +x /opt/kbengine/pre-assets/scripts/deploy/tail_logs.sh
