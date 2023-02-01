@@ -88,11 +88,10 @@ check_config: ## Check the configuration file
 # и сразу его открываем с нужными полями в таблице
 logs_kibana: elk_is_runnig ## Show the log viewer in the web interface (Kibana)
 	@curl -X POST \
-		"localhost:5601/api/saved_objects/_import" \
-		-H "kbn-xsrf: true" \
-		--form file=@$(ROOT_DIR)/data/kibana/export.ndjson \
+		http://localhost:5601/api/saved_objects/_import?overwrite=true \
+		-H "kbn-xsrf: true" --form file=@$(ROOT_DIR)/data/kibana/export.ndjson \
 		-s -o /dev/null
-	@url="http://localhost:5601/app/discover#/view/1e5585d0-9e35-11ed-b956-1b0b66d81afc?_g=(filters:!(),refreshInterval:(pause:!f,value:1000),time:(from:'2019-01-01T11:10:46.518Z',to:now))&_a=(columns:!('@timestamp',game_name,component_name,kbe_log_level,log_message),filters:!(),grid:(columns:(component_name:(width:150),game_name:(width:158),kbe_log_level:(width:115))),hideChart:!f,index:'34bcf5b8-996d-40f0-95bd-070365b6daff',interval:auto,query:(language:kuery,query:''),sort:!(!('@timestamp',desc)))"; \
+	@url="http://localhost:5601/app/discover#/view/9bdada80-a22e-11ed-ac3b-47395a81c705"; \
 		python3 -c "import webbrowser; webbrowser.open(\"$$url\")"
 
 logs_dejavu: elk_is_runnig ## Show the log viewer in the web interface (Dejavu)
@@ -189,7 +188,7 @@ stop_elk: elk_is_runnig ## Stop the game ELK
 		-p $(ELK_COMPOSE_PROJECT_NAME) \
 		rm -f
 
-clean_elk: elk_is_not_runnig elk_is_built
+clean_elk: elk_is_not_runnig game_is_not_running elk_is_built
 	@docker-compose \
 		--log-level ERROR \
 		-f $(ROOT_DIR)/docker-compose.elk.yml \
