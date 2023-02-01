@@ -99,7 +99,10 @@ logs_dejavu: elk_is_runnig ## Show the log viewer in the web interface (Dejavu)
 	@python3 -c "import webbrowser; webbrowser.open('http://localhost:1358/')"
 
 logs_console: config_is_ok ## Show actual log records of the game in the console
-	@docker-compose logs --timestamps --follow
+	@docker-compose \
+		-f $(ROOT_DIR)/docker-compose.yml \
+		-p $(GAME_COMPOSE_PROJECT_NAME) \
+		logs --timestamps --follow
 
 -----: ## -----
 
@@ -128,6 +131,7 @@ build_game: config_is_ok game_is_not_built kbe_is_built ## Build a kbengine dock
 		--build-arg KBE_ASSETS_SHA="$(KBE_ASSETS_SHA)" \
 		--build-arg KBE_KBENGINE_XML_ARGS="$(KBE_KBENGINE_XML_ARGS)" \
 		--build-arg GAME_UNIQUE_NAME="$(GAME_UNIQUE_NAME)" \
+		--build-arg KBE_COMPILED_IMAGE_NAME="$(KBE_COMPILED_IMAGE_NAME_SHA)" \
 		--tag "$(KBE_ASSETS_IMAGE_NAME)" \
 		.
 
