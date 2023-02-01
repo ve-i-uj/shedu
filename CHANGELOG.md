@@ -1,5 +1,22 @@
-
 # Changelog
+
+## [0.9.5] - 2023-02-01
+
+### Added
+- MariaDB health check and game start based on it
+- An initial log file in the "logs" directory to view logs without running game
+- The updated assets log4j settings to write logs to a separate dir for each game
+- Log records in the ES index have the "game_name" field
+- Exporting Kibana search settings before the log page is open
+
+### Changed
+- ELK and game compose projects were split
+- The deployment diagram was updated
+- The example configs were renamed
+- The deploy scripts were moved to the common scripts directory
+
+### Fixed
+- Fixed: the assets repository didn't checkout to the defined commit
 
 ## [0.9.4] - 2023-01-21
 
