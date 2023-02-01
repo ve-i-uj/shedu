@@ -1,0 +1,16 @@
+INFO shedu [2022-01-01 00:00:01,000] - [THIS IS NOT A KBENGINE LOG] Hello World!
+INFO shedu [2022-01-01 00:00:01,000] - [THIS IS NOT A KBENGINE LOG] It's an initialization message from the "Shedu" project
+INFO shedu [2022-01-01 00:00:01,001] - [THIS IS NOT A KBENGINE LOG] If no other log messages after some minutes ELK starting - it's ok
+INFO shedu [2022-01-01 00:00:01,002] - [THIS IS NOT A KBENGINE LOG] If ELK and the game have been started for a long time and there is no other messages then probably something happended
+INFO shedu [2022-01-01 00:00:01,003] - [THIS IS NOT A KBENGINE LOG] Anyway check the kbe log records with diffrent log level ...
+DEBUG shedu [2022-01-01 00:00:02,000] - [THIS IS NOT A KBENGINE LOG] Check the "DEBUG" log level
+INFO shedu [2022-01-01 00:00:02,001] - [THIS IS NOT A KBENGINE LOG] Check the "INFO" log level
+WARNING shedu [2022-01-01 00:00:02,002] - [THIS IS NOT A KBENGINE LOG] Check the "WARNING" log level
+ERROR shedu [2022-01-01 00:00:02,003] - [THIS IS NOT A KBENGINE LOG] Check the "ERROR" log level
+CRITICAL shedu [2022-01-01 00:00:02,004] - [THIS IS NOT A KBENGINE LOG] Check the "CRITICAL" log level
+S_DBG shedu [2022-01-01 00:00:02,005] - [THIS IS NOT A KBENGINE LOG] Check the "S_DBG" log level
+S_INFO shedu [2022-01-01 00:00:02,006] - [THIS IS NOT A KBENGINE LOG] Check the "INFO" log level
+S_WARN shedu [2022-01-01 00:00:02,007] - [THIS IS NOT A KBENGINE LOG] Check the "S_WARN" log level
+S_ERR shedu [2022-01-01 00:00:02,008] - [THIS IS NOT A KBENGINE LOG] Check the "S_ERR" log level
+S_NORM shedu [2022-01-01 00:00:02,009] - [THIS IS NOT A KBENGINE LOG] Check the "S_NORM" log level
+UNKNOWN shedu [2022-01-01 00:00:02,010] - [THIS IS NOT A KBENGINE LOG] Check the "UNKNOWN" log level
