@@ -17,12 +17,20 @@ services:
       - 3306:3306
     networks:
       - kbe-net
+    healthcheck:
+      test: mysql ${MYSQL_DATABASE} --user=${MYSQL_USER} --password='${MYSQL_PASSWORD}' --silent --execute "SELECT 1;"
+      start_period: 5s
+      interval: 5s
+      timeout: 10s
+      retries: 2
     command: --log_warnings=9
 
   kbe-assets:
     image: ${KBE_ASSETS_IMAGE_NAME}
     container_name: ${KBE_ASSETS_CONTAINER_NAME}
     restart: always
+    depends_on:
+      - machine: { condition: service_healthy }
     ports:
       # LoginApp
       - 20013:20013
@@ -44,7 +52,8 @@ services:
       - kbe-log-data:/opt/kbengine/assets/logs
     networks:
       - kbe-net
-    entrypoint: ["./wait-for-it.sh", "kbe-mariadb:3306", "--", "/bin/bash", "docker-entrypoint.sh"]
+    workdir: /opt/kbengine/assets
+    entrypoint: [".shedu/scripts/deploy/docker-entrypoint.sh"]
 
 volumes:
   kbe-mariadb-data:
