@@ -247,6 +247,27 @@ demo_cocos_start_client:
 
 -----: ## -----
 
+start_db_only:
+	@docker-compose \
+		--log-level ERROR \
+		-f $(ROOT_DIR)/docker-compose.yml \
+		-p $(GAME_COMPOSE_PROJECT_NAME) \
+		up -d mariadb
+
+stop_db_only:
+	@docker-compose \
+		--log-level ERROR \
+		-f $(ROOT_DIR)/docker-compose.yml \
+		-p $(GAME_COMPOSE_PROJECT_NAME) \
+		stop mariadb
+	@docker-compose \
+		--log-level ERROR \
+		-f $(ROOT_DIR)/docker-compose.yml \
+		-p $(GAME_COMPOSE_PROJECT_NAME) \
+		rm -f mariadb
+
+-----: ## -----
+
 define HELP_TEXT
 *** [shedu] Help ***
 
