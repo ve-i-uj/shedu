@@ -29,10 +29,3 @@ RUN rm -rf res/server/log4cxx_properties \
 
 # Чтобы у $ENKI_PYTHON в healthcheck был путь до библиотеки enki
 ENV PYTHONPATH=/opt/kbengine/assets/.shedu/enki
-
-# Эти переменные нужны скриптам деплоя
-ENV KBE_ASSETS_PATH=/opt/kbengine/assets/
-# Эти переменные нужны движку для старта
-ENV KBE_ROOT=/opt/kbengine
-ENV KBE_BIN_PATH=/opt/kbengine/kbe/bin/server
-ENV KBE_RES_PATH=/opt/kbengine/kbe/res:/opt/kbengine/assets/res

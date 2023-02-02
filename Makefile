@@ -181,7 +181,7 @@ build_elk: elk_is_not_built elk_is_not_runnig ## Build ELK images (Elasticsearch
 	@docker pull $(ELK_DEJAVU_IMAGA_NAME)
 	@docker tag $(ELK_DEJAVU_IMAGA_NAME) $(ELK_DEJAVU_IMAGE_TAG)
 
-start_elk: config_is_ok elk_is_not_runnig elk_is_built ## Start the game ELK (<https://www.elastic.co/what-is/elk-stack>)
+start_elk: elk_is_not_runnig elk_is_built ## Start the game ELK (<https://www.elastic.co/what-is/elk-stack>)
 	@docker-compose \
 		-f $(ROOT_DIR)/docker-compose.elk.yml \
 		-p $(ELK_COMPOSE_PROJECT_NAME) \
@@ -197,7 +197,7 @@ stop_elk: elk_is_runnig ## Stop the game ELK
 		-p $(ELK_COMPOSE_PROJECT_NAME) \
 		rm -f
 
-clean_elk: config_is_ok elk_is_not_runnig elk_is_built
+clean_elk: elk_is_not_runnig elk_is_built
 	@docker-compose \
 		--log-level ERROR \
 		-f $(ROOT_DIR)/docker-compose.elk.yml \
