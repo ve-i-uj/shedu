@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.9.6] - 2023-05-13
+
+### Changed
+- Elastic geoip processor was disabled because Kibana cannot connect to Elastic
+
 ## [0.9.5] - 2023-02-01
 
 ### Added

@@ -21,7 +21,8 @@ services:
       xpack.license.self_generated.type: basic
       # ES_JAVA_OPTS: "-Xms512m -Xmx512m"
     volumes:
-      - kbe-log-elastic-data:/var/lib/mysql
+      - ./data/elasticsearch/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
+      - kbe-log-elastic-data:/usr/share/elasticsearch/data
     ports:
       - 9200:9200
     networks:
