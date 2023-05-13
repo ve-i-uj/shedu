@@ -1,0 +1,62 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "[Docker] Machine",
+            "type": "cppdbg",
+            "request": "launch",
+            "cwd": "/opt/kbengine",
+            "program": "kbe/bin/server/machine",
+            "args": [],
+            "stopAtEntry": true,
+            "environment": [],
+            "externalConsole": true,
+            "sourceFileMap": {
+                "/opt": "/home/leto/2PeopleCompany/REPOS/KBEngine/Engine/kbengine"
+            },
+            "pipeTransport": {
+                "debuggerPath": "/usr/bin/gdb",
+                "pipeProgram": "docker",
+                "pipeArgs": [
+                    "exec",
+                    "-i",
+                    "kbe-game-machine",
+                    "sh",
+                    "-c"
+                ],
+                "pipeCwd": "${workspaceFolder}"
+            },
+            "MIMode": "gdb"
+        },
+        {
+            "name": "[Docker] Logger",
+            "type": "cppdbg",
+            "request": "launch",
+            "cwd": "/opt/kbengine",
+            "program": "kbe/bin/server/logger",
+            "args": [],
+            "stopAtEntry": true,
+            "environment": [],
+            "externalConsole": true,
+            "sourceFileMap": {
+                "/opt": "/home/leto/2PeopleCompany/REPOS/KBEngine/Engine/kbengine"
+            },
+            "pipeTransport": {
+                "debuggerPath": "/usr/bin/gdb",
+                "pipeProgram": "docker",
+                "pipeArgs": [
+                    "exec",
+                    "-i",
+                    "kbe-game-logger",
+                    "sh",
+                    "-c"
+                ],
+                "pipeCwd": "${workspaceFolder}"
+            },
+            "MIMode": "gdb"
+        },
+   ]
+}

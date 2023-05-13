@@ -26,6 +26,7 @@ optional_vars=(
     "KBE_USER_TAG"
     "KBE_ASSETS_SHA"
     "KBE_KBENGINE_XML_ARGS"
+    "GAME_IDLE_START"
 )
 
 # The example config file contains all necessary variable. Read all variable
