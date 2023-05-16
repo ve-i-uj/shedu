@@ -35,7 +35,9 @@ ifneq ($(KBE_USER_TAG),)
 endif
 
 SHEDU_VERSION := $(shell $(SCRIPTS)/version/get_version.sh)
+ENKI_VERSION := $(shell $(ROOT_DIR)/enki/scripts/version/get_version.sh)
 override PRE_ASSETS_IMAGE_NAME := $(PRE_ASSETS_IMAGE_NAME):$(SHEDU_VERSION)
+override KBE_ENKI_PYTHON_IMAGE_NAME := $(KBE_ENKI_PYTHON_IMAGE_NAME):$(ENKI_VERSION)
 override KBE_ASSETS_IMAGE_NAME := $(KBE_ASSETS_IMAGE_NAME):$(KBE_ASSETS_VERSION)
 
 ifeq ($(KBE_ASSETS_PATH), demo)
@@ -142,6 +144,11 @@ build_game: config_is_ok game_is_not_built kbe_is_built ## Build a kbengine dock
 		--build-arg KBE_COMPILED_IMAGE_NAME="$(KBE_COMPILED_IMAGE_NAME_SHA)" \
 		--tag "$(KBE_ASSETS_IMAGE_NAME)" \
 		.
+	@docker volume create $(KBE_DB_VOLUME_NAME)
+	@if [ -z "$$(docker volume ls --filter "name=$(KBE_LOG_VOLUME_NAME)" -q)" ]; then \
+		docker volume create $(KBE_LOG_VOLUME_NAME); \
+	fi
+
 
 start_game: config_is_ok game_is_not_running game_is_built ## Start the docker containers contained the game and the DB
 	@docker-compose \
@@ -167,7 +174,15 @@ clean_game: config_is_ok game_is_not_running ## Delete the artefacts connected w
 		--log-level ERROR \
 		-f $(ROOT_DIR)/docker-compose.yml \
 		-p $(GAME_COMPOSE_PROJECT_NAME) \
-		down -v --rmi all
+		down --rmi all
+	@docker volume rm $(KBE_DB_VOLUME_NAME)
+	@if [ -z "$$(docker volume ls --filter "name=$(ELK_ES_VOLUME_NAME)" -q)" ]; then \
+		if [ ! -z "$$(docker volume ls --filter "name=$(KBE_LOG_VOLUME_NAME)" -q)" ]; then \
+			docker volume rm $(KBE_LOG_VOLUME_NAME); \
+		fi; \
+	fi
+
+
 
 -----: ## -----
 
@@ -180,6 +195,10 @@ build_elk: elk_is_not_built elk_is_not_runnig ## Build ELK images (Elasticsearch
 	@docker tag $(ELK_LOGSTASH_IMAGA_NAME) $(ELK_LOGSTASH_IMAGE_TAG)
 	@docker pull $(ELK_DEJAVU_IMAGA_NAME)
 	@docker tag $(ELK_DEJAVU_IMAGA_NAME) $(ELK_DEJAVU_IMAGE_TAG)
+	@docker volume create $(ELK_ES_VOLUME_NAME)
+	@if [ -z "$$(docker volume ls --filter "name=$(KBE_LOG_VOLUME_NAME)" -q)" ]; then \
+		docker volume create $(KBE_LOG_VOLUME_NAME); \
+	fi
 
 start_elk: elk_is_not_runnig elk_is_built ## Start the game ELK (<https://www.elastic.co/what-is/elk-stack>)
 	@docker-compose \
@@ -202,7 +221,13 @@ clean_elk: elk_is_not_runnig elk_is_built
 		--log-level ERROR \
 		-f $(ROOT_DIR)/docker-compose.elk.yml \
 		-p $(ELK_COMPOSE_PROJECT_NAME) \
-		down -v --rmi all
+		down --rmi all
+	@docker volume rm $(ELK_ES_VOLUME_NAME)
+	@if [ -z "$$(docker volume ls --filter "name=$(KBE_DB_VOLUME_NAME)" -q)" ]; then \
+		if [ ! -z "$$(docker volume ls --filter "name=$(KBE_LOG_VOLUME_NAME)" -q)" ]; then \
+			docker volume rm $(KBE_LOG_VOLUME_NAME); \
+		fi; \
+	fi
 
 restart_elk: stop_elk start_elk
 
@@ -230,7 +255,7 @@ version: ## [Dev] The current version of the shedu
 
 -----: ## -----
 
-demo_cocos_build:
+cocos_build: ## [Dev] Build the Cocos2D client demo
 	@cp $(ROOT_DIR)/.env /tmp/shedu/.env
 	@cp $(ROOT_DIR)/configs/kbe-v1.3.5-for-cocos-js-demo-v1.3.13.env $(ROOT_DIR)/.env
 	@docker build \
@@ -239,7 +264,7 @@ demo_cocos_build:
 		.
 	@cp /tmp/shedu/.env $(ROOT_DIR)/.env
 
-demo_cocos_start_client:
+cocos_start: ## [Dev] Start the Cocos2D client demo
 	@python3 -c "import webbrowser; webbrowser.open('http://0.0.0.0:8080/')"
 	@docker run --rm -p 8080:80 \
 		--name $(KBE_DEMO_COCOS_CLIENT_CONTAINER_NAME) \
@@ -247,14 +272,14 @@ demo_cocos_start_client:
 
 -----: ## -----
 
-start_db_only:
+start_db_only: ## [Dev] Start DB only for debug purpose
 	@docker-compose \
 		--log-level ERROR \
 		-f $(ROOT_DIR)/docker-compose.yml \
 		-p $(GAME_COMPOSE_PROJECT_NAME) \
 		up -d mariadb
 
-stop_db_only:
+stop_db_only: ## [Dev] Stop DB only for debug purpose
 	@docker-compose \
 		--log-level ERROR \
 		-f $(ROOT_DIR)/docker-compose.yml \
@@ -319,14 +344,14 @@ game_is_not_built: # Check the game image doesn't exist. Raise error otherwise
 
 game_is_running: # Check the game is running. Raise error otherwise
 	@source $(SCRIPTS)/log.sh; \
-	if [ -z "$$(docker ps --filter "name=$(KBE_ASSETS_CONTAINER_NAME)" -q)" ]; then \
+	if [ -z "$$(docker ps --filter "name=$(KBE_COMPONENT_CONTAINER_NAME)" -q)" ]; then \
 		log error "The game is NOT running. Run \"make start_game\""; \
 		exit 1; \
 	fi
 
 game_is_not_running: # Check the game is not running. Raise error otherwise
 	@source $(SCRIPTS)/log.sh; \
-	if [ ! -z "$$(docker ps --filter "name=$(KBE_ASSETS_CONTAINER_NAME)" -q)" ]; then \
+	if [ ! -z "$$(docker ps --filter "name=$(KBE_COMPONENT_CONTAINER_NAME)" -q)" ]; then \
 		log error "The game is running"; \
 		exit 1; \
 	fi
@@ -401,6 +426,12 @@ include contrib/debug.mk
 
 hello:
 	@echo "Hello! (ROOT_DIR=$(ROOT_DIR))"
+	@echo
+	@echo "KBE_ASSETS_CONTAINER_NAME=$(KBE_ASSETS_CONTAINER_NAME)"
+	@echo "KBE_COMPONENT_CONTAINER_NAME=$(KBE_COMPONENT_CONTAINER_NAME)"
+	@echo "GAME_IDLE_START=$(GAME_IDLE_START)"
+	@echo
+	@echo "KBE_DB_VOLUME_NAME=$(KBE_DB_VOLUME_NAME)"
 
 test:
 	@docker version

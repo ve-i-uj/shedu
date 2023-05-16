@@ -7,7 +7,6 @@ services:
     container_name: ${ELK_ES_CONTATINER_NAME}
     restart: always
     environment:
-      discovery.type: single-node
       # Нужно для Dejavu
       http.port: 9200
       http.max_content_length: 10MB
@@ -73,7 +72,11 @@ services:
 
 volumes:
   kbe-log-data:
+    name: ${KBE_LOG_VOLUME_NAME}
+    external: true
   kbe-log-elastic-data:
+    name: ${ELK_ES_VOLUME_NAME}
+    external: true
 
 networks:
   kbe-net:

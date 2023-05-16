@@ -33,9 +33,17 @@ export KBE_DB_IMAGE_NAME=mariadb:10.8
 export KBE_DB_IMAGE_TAGGED_NAME=$PROJECT_NAME/$KBE_DB_IMAGE_NAME-$GAME_UNIQUE_NAME
 export KBE_DB_CONTAINER_NAME=kbe-mariadb
 
-export KBE_DB_VOLUME_NAME=kbe-mariadb-data-$GAME_UNIQUE_NAME
-export KBE_LOG_VOLUME_NAME=kbe-log-data-$GAME_UNIQUE_NAME
-export KBE_LOG_ELASTIC_VOLUME_NAME=kbe-log-elastic-data-$GAME_UNIQUE_NAME
+# Имена для volume будут задаваться в ручную, чтобы именование было без
+# префикса по умолчанию, но было уникальным в зависимости от игры.
+# Тома будут создавать и удалять в ручную в правиле сборки. Это нужно, т.к.
+# ELK и игра находятся в разных сетях и описываются разными docker-compose.yml
+# файлами. Но у них общий том для записи и чтения логов.
+# Если в правиле очистки _игры_ не будет найден том для ELK - это будет
+# означать, что нужно удалить и том с логами. Аналогично и с случае с очисткой
+# ELK - игра вычищена, значит и том с логами больше не нужен.
+export KBE_DB_VOLUME_NAME=kbe-mariadb-$GAME_UNIQUE_NAME-data
+export KBE_LOG_VOLUME_NAME=kbe-log-$GAME_UNIQUE_NAME-data
+export ELK_ES_VOLUME_NAME=kbe-elastic-$GAME_UNIQUE_NAME-data
 
 export KBE_NET_NAME="kbe-net"
 
@@ -43,7 +51,7 @@ export DOCKERFILE_KBE_ASSETS="$PROJECT_DIR/dockerfiles/kbengine/Dockerfile.asset
 export DOCKERFILE_KBE_COMPILED=dockerfiles/kbengine/Dockerfile.kbe-compiled
 export DOCKERFILE_PRE_ASSETS=dockerfiles/kbengine/Dockerfile.pre-assets
 export DOCKERFILE_COCOS_DEMO_CLIENT=dockerfiles/kbengine/Dockerfile.cocos-demo
-export DOCKERFILE_ENKI_PYTHON=dockerfiles/kbengine/Dockerfile.py39
+export DOCKERFILE_ENKI_PYTHON=dockerfiles/kbengine/Dockerfile.enki
 
 export KBE_ASSETS_DEMO_GIT_URL=https://github.com/kbengine/kbengine_demos_assets.git
 export KBE_GITHUB_URL=https://github.com/kbengine/kbengine
@@ -65,7 +73,6 @@ export ELK_C_NAME_PREFIX=$ELK_PROJECT_NAME
 export ELK_ES_IMAGE_NAME=elasticsearch:$ELK_VERSION
 export ELK_ES_IMAGE_TAG=$ELK_I_NAME_PREFIX-elastic-$ELK_VERSION:$GAME_UNIQUE_NAME
 export ELK_ES_CONTATINER_NAME=$ELK_C_NAME_PREFIX-elastic
-export ELK_ES_VOLUME_NAME=$ELK_PROJECT_NAME-elastic-volume
 
 export ELK_LOGSTASH_IMAGA_NAME=logstash:$ELK_VERSION
 export ELK_LOGSTASH_IMAGE_TAG=$ELK_I_NAME_PREFIX-logstash-$ELK_VERSION:$GAME_UNIQUE_NAME
