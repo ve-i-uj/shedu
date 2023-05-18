@@ -33,7 +33,7 @@ def read_args():
     parser.add_argument('--log-level', dest='log_level', type=str,
                         default='DEBUG',
                         choices=logging._nameToLevel.keys(),
-                        help='Settings file')
+                        help='Logging level')
     parser.add_argument('--kbengine-xml-args', dest='custom_settings', type=str,
                         help='This field will be modified in kbengine.xml')
 

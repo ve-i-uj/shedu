@@ -5,7 +5,7 @@ LABEL maintainer="Aleksei Burov <burov_alexey@mail.ru>"
 
 FROM ${KBE_COMPILED_IMAGE_NAME} as kbe_compiled
 
-RUN yum install git wget net-tools nano socat nc -y
+RUN yum install git wget net-tools nano socat nc tcpdump -y
 
 WORKDIR /opt/kbengine/assets/.shedu/
 # Запомним, на основе чего всё создано. Это делается здесь, т.к. образ
@@ -18,16 +18,10 @@ COPY scripts/deploy scripts/deploy
 # Настройки для Log4J
 COPY data/log4j/log4cxx_properties data/log4j/log4cxx_properties
 
-# Enki нужен для проверки здоровья компонентов
-COPY enki enki
-
-# Подтянем зависимости для виртуального оркужения библиотеки Enki
+# Enki нужен для проверки здоровья компонентов.
 COPY --from=enki_python /opt/python /opt/python
+COPY --from=enki_python /opt/enki /opt/enki
 ENV ENKI_PYTHON=/opt/python/bin/python3.9
-RUN $ENKI_PYTHON -m pip install --upgrade pip --trusted-host pypi.python.org
-RUN $ENKI_PYTHON -m pip install \
-    --no-warn-script-location \
-    -r /opt/kbengine/assets/.shedu/enki/requirements.txt
 
 # Эти переменные нужны скриптам деплоя
 ENV KBE_ASSETS_PATH=/opt/kbengine/assets/

@@ -2,31 +2,31 @@ version: '3'
 
 services:
 
-  # machine:
-  #   image: ${KBE_ASSETS_IMAGE_NAME}
-  #   container_name: ${KBE_COMPONENT_CONTAINER_NAME}-machine
-  #   restart: "no"
-  #   working_dir: /opt/kbengine/assets
-  #   environment:
-  #     LOG_LEVEL: INFO
-  #     KBE_COMPONENT_NAME: machine
-  #     KBE_COMPONENT_ID: 1001
-  #     KBE_MACHINE_HOST: localhost
-  #     KBE_MACHINE_PORT: 20099
-  #     GAME_IDLE_START: ${GAME_IDLE_START}
-  #   ports:
-  #     - 20099:20099
-  #   volumes:
-  #     - kbe-log-data:/opt/kbengine/assets/logs
-  #     - /tmp/kbedump:/tmp/kbedump
-  #   networks:
-  #     - kbe-net
-  #   # healthcheck:
-  #   #   test: $$ENKI_PYTHON .shedu/enki/cmd/machine/send_onQueryAllInterfaceInfos.py
-  #   #   interval: 2s
-  #   #   timeout: 5s
-  #   #   retries: 1
-  #   entrypoint: bash .shedu/scripts/deploy/start_component.sh
+  machine:
+    image: ${KBE_ASSETS_IMAGE_NAME}
+    container_name: ${KBE_COMPONENT_CONTAINER_NAME}-machine
+    restart: "no"
+    working_dir: /opt/kbengine/assets
+    environment:
+      LOG_LEVEL: INFO
+      KBE_COMPONENT_NAME: machine
+      KBE_COMPONENT_ID: 1001
+      KBE_MACHINE_HOST: localhost
+      KBE_MACHINE_PORT: 20099
+      GAME_IDLE_START: ${GAME_IDLE_START}
+    # ports:
+    #   - 20099:20099
+    volumes:
+      - kbe-log-data:/opt/kbengine/assets/logs
+      - /tmp/kbedump:/tmp/kbedump
+    networks:
+      - kbe-net
+    # healthcheck:
+    #   test: $$ENKI_PYTHON .shedu/enki/cmd/machine/send_onQueryAllInterfaceInfos.py
+    #   interval: 2s
+    #   timeout: 5s
+    #   retries: 1
+    entrypoint: bash .shedu/scripts/deploy/start_component.sh
 
   supervisor:
     image: ${KBE_ENKI_PYTHON_IMAGE_NAME}
@@ -35,12 +35,15 @@ services:
     working_dir: /opt/enki
     environment:
       LOG_LEVEL: DEBUG
-      KBE_MACHINE_HOST: 0.0.0.0
-      KBE_MACHINE_PORT: 20099
+      KBE_MACHINE_HOST: ${KBE_COMPONENT_CONTAINER_NAME}-supervisor
+      KBE_MACHINE_PORT: 20086
       GAME_UNIQUE_NAME: ${GAME_UNIQUE_NAME}
-      GAME_IDLE_START: ${GAME_IDLE_START}
+      DEBUG_SUPERVISOR: ${DEBUG_SUPERVISOR}
     ports:
-      - 20099:20099/udp
+      - 20086:20086/udp
+      - 20099:20099/tcp
+        # Порт для запуска приложения под дебагером в контейнере
+      - 18198:18198
     volumes:
       - kbe-log-data:/opt/kbengine/assets/logs
       - /tmp/kbedump:/tmp/kbedump
@@ -55,8 +58,9 @@ services:
 
   logger:
     image: ${KBE_ASSETS_IMAGE_NAME}
-    depends_on:
-      - supervisor
+    # depends_on:
+      # - supervisor
+      # - machine
     container_name: ${KBE_COMPONENT_CONTAINER_NAME}-logger
     restart: "no"
     environment:
