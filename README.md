@@ -166,7 +166,7 @@ ELK services are docker images. The state is stored in a named volume created fo
 
 At the engine level, the log4cxx library (log4j for C++) is used for logging. The default configuration files for log4j are located in the directory [kbe/res/server/log4cxx_properties_defaults](https://github.com/kbengine/kbengine/tree/master/kbe/res/server/log4cxx_properties_defaults). This directory contains a separate file for each component. The logging settings can be reloaded by defining custom log4j settings in the `res/server/log4cxx_properties` folder.
 
-By default, logs are written to the `assets/logs` directory. If all KBEngine server components are located on the same host, all logs will be in this folder. By default, each component sends all logs to the Logger component (using the KBEngine message protocol). And already Logger writes the received logs to the `assets/logs` folder. The file name for log records has the following pattern: `logger_<compnent_name>`. Some of the critical logs (errors and warnings) are written by the components to the assets folder under their own name (for example, "machine.log").
+By default, logs are written to the `assets/logs` directory. If all KBEngine server components are located on the same host, all logs will be in this folder. By default, each component sends all logs to the Logger component (using the KBEngine message protocol). And already Logger writes the received logs to the `assets/logs` folder. The file name for log records has the following pattern: `logger_<compnent_name>`. Some of the critical logs (errors and warnings) are written by the components to the `assets/logs` folder under their own name (for example, "machine.log").
 
 ## General principle of operation of KBEngine + ELK for collecting logs
 
