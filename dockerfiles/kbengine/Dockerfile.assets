@@ -26,6 +26,3 @@ ARG GAME_UNIQUE_NAME
 ENV KBE_GAME_NAME=${GAME_UNIQUE_NAME}
 RUN rm -rf res/server/log4cxx_properties \
     && cp -r .shedu/data/log4j/log4cxx_properties res/server/log4cxx_properties
-
-# Чтобы у $ENKI_PYTHON в healthcheck был путь до библиотеки enki
-ENV PYTHONPATH=/opt/kbengine/assets/.shedu/enki

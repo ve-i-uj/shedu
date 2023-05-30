@@ -1,32 +1,43 @@
 version: '3'
 
+x-env:
+  &env
+  LOG_LEVEL: INFO
+  KBE_MACHINE_HOST: ${KBE_COMPONENT_CONTAINER_NAME}-supervisor
+  KBE_MACHINE_TCP_PORT: 20099
+  GAME_UNIQUE_NAME: ${GAME_UNIQUE_NAME}
+  # Эту переменную нужно выставить всем компонентам в одинаковое значение.
+  # Контейнеры запускаются от рута, в этом случае KBEngine сам произвольно
+  # выставляет uid компонентам и будет отбрасывать все остальные
+  # компоненты с другим uid в инфе от Машины.
+  UUID: 1000
+  GAME_IDLE_START: ${GAME_IDLE_START}
+
 services:
 
-  machine:
-    image: ${KBE_ASSETS_IMAGE_NAME}
-    container_name: ${KBE_COMPONENT_CONTAINER_NAME}-machine
+  mariadb:
+    image: ${KBE_DB_IMAGE_TAGGED_NAME}
+    container_name: ${KBE_DB_CONTAINER_NAME}
     restart: "no"
-    working_dir: /opt/kbengine/assets
     environment:
-      LOG_LEVEL: INFO
-      KBE_COMPONENT_NAME: machine
-      KBE_COMPONENT_ID: 1001
-      KBE_MACHINE_HOST: localhost
-      KBE_MACHINE_PORT: 20099
-      GAME_IDLE_START: ${GAME_IDLE_START}
-    # ports:
-    #   - 20099:20099
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     volumes:
-      - kbe-log-data:/opt/kbengine/assets/logs
-      - /tmp/kbedump:/tmp/kbedump
+      - kbe-mariadb-data:/var/lib/mysql
+    ports:
+      - 3306:3306
     networks:
       - kbe-net
-    # healthcheck:
-    #   test: $$ENKI_PYTHON .shedu/enki/cmd/machine/send_onQueryAllInterfaceInfos.py
-    #   interval: 2s
-    #   timeout: 5s
-    #   retries: 1
-    entrypoint: bash .shedu/scripts/deploy/start_component.sh
+    healthcheck:
+      test: >
+        mysql ${MYSQL_DATABASE} --host=kbe-mariadb -P 3306 --user=${MYSQL_USER}
+        --password=${MYSQL_PASSWORD} --silent --execute "SELECT 1;"
+      interval: 5s
+      timeout: 2s
+      retries: 0
+    command: --log_warnings=9
 
   supervisor:
     image: ${KBE_ENKI_PYTHON_IMAGE_NAME}
@@ -34,151 +45,247 @@ services:
     restart: "no"
     working_dir: /opt/enki
     environment:
-      LOG_LEVEL: DEBUG
-      KBE_MACHINE_HOST: ${KBE_COMPONENT_CONTAINER_NAME}-supervisor
-      KBE_MACHINE_PORT: 20086
-      GAME_UNIQUE_NAME: ${GAME_UNIQUE_NAME}
       DEBUG_SUPERVISOR: ${DEBUG_SUPERVISOR}
+      <<: *env
     ports:
       - 20086:20086/udp
-      - 20099:20099/tcp
-        # Порт для запуска приложения под дебагером в контейнере
+      - 20099:20099/tcp # Порт для запуска приложения под дебагером в контейнере
       - 18198:18198
     volumes:
       - kbe-log-data:/opt/kbengine/assets/logs
-      - /tmp/kbedump:/tmp/kbedump
     networks:
       - kbe-net
-    # healthcheck:
-    #   test: $$ENKI_PYTHON .shedu/enki/cmd/machine/send_onQueryAllInterfaceInfos.py
-    #   interval: 2s
-    #   timeout: 5s
-    #   retries: 1
+    healthcheck:
+      test: >
+        test $$GAME_IDLE_START
+        || LOG_LEVEL=ERROR $$ENKI_PYTHON /opt/enki/tools/cmd/machine/lookApp.py
+      interval: 5s
+      timeout: 2s
+      retries: 1
     entrypoint: bash start_supervisor.sh
 
   logger:
     image: ${KBE_ASSETS_IMAGE_NAME}
-    # depends_on:
-      # - supervisor
-      # - machine
+    depends_on:
+      - supervisor
     container_name: ${KBE_COMPONENT_CONTAINER_NAME}-logger
     restart: "no"
     environment:
-      LOG_LEVEL: INFO
       KBE_COMPONENT_NAME: logger
       KBE_COMPONENT_ID: 2001
-      GAME_IDLE_START: ${GAME_IDLE_START}
+      <<: *env
     volumes:
       - kbe-log-data:/opt/kbengine/assets/logs
-      - /tmp/kbedump:/tmp/kbedump
     networks:
       - kbe-net
+    ports:
+      # telnet
+      - 34000:34000
+    healthcheck:
+      test: >
+        test $$GAME_IDLE_START
+        || CACHE_ADDR=1 LOG_LEVEL=ERROR $$ENKI_PYTHON /opt/enki/tools/cmd/logger/lookApp.py
+      interval: 5s
+      timeout: 2s
+      retries: 1
+      start_period: 10s
     entrypoint: bash /opt/kbengine/assets/.shedu/scripts/deploy/start_component.sh
 
-  # interfaces:
-  #   image: ${KBE_ASSETS_IMAGE_NAME}
-  #   depends_on:
-  #     - machine
-  #   container_name: ${KBE_COMPONENT_CONTAINER_NAME}-interfaces
-  #   restart: "no"
-  #   environment:
-  #     LOG_LEVEL: INFO
-  #     KBE_COMPONENT_NAME: interfaces
-  #     KBE_COMPONENT_ID: 3001
-  #     KBE_INTERFACES_HOST: localhost
-  #     KBE_INTERFACES_PORT: 30099
-  #     GAME_IDLE_START: ${GAME_IDLE_START}
-  #   volumes:
-  #     - kbe-log-data:/opt/kbengine/assets/logs
-  #     - /tmp/kbedump:/tmp/kbedump
-  #   networks:
-  #     - kbe-net
-  #   ports:
-  #     - 30099:30099
-  #     # Interfaces telnet
-  #     - 33000:33000
-  #   # healthcheck:
-  #   #   test: $$ENKI_PYTHON .shedu/enki/cmd/interfaces/send_lookApp.py
-  #   #   interval: 2s
-  #   #   timeout: 1s
-  #   #   retries: 1
-  #   entrypoint: bash /opt/kbengine/assets/.shedu/scripts/deploy/start_component.sh
+  interfaces:
+    image: ${KBE_ASSETS_IMAGE_NAME}
+    depends_on:
+      - supervisor
+      - logger
+    container_name: ${KBE_COMPONENT_CONTAINER_NAME}-interfaces
+    restart: "no"
+    environment:
+      KBE_COMPONENT_NAME: interfaces
+      KBE_COMPONENT_ID: 3001
+      <<: *env
+    volumes:
+      - kbe-log-data:/opt/kbengine/assets/logs
+    networks:
+      - kbe-net
+    ports:
+      - 30099:30099
+      # telnet
+      - 33000:33000
+    healthcheck:
+      test: >
+        test $$GAME_IDLE_START
+        || CACHE_ADDR=1 LOG_LEVEL=ERROR $$ENKI_PYTHON /opt/enki/tools/cmd/interfaces/lookApp.py
+      interval: 5s
+      timeout: 2s
+      start_period: 10s
+      retries: 1
+    entrypoint: bash /opt/kbengine/assets/.shedu/scripts/deploy/start_component.sh
 
-  # dbmgr:
-  #   image: ${KBE_ASSETS_IMAGE_NAME}
-  #   depends_on:
-  #     - machine
-  #     - mariadb
-  #     - interfaces
-  #   container_name: ${KBE_COMPONENT_CONTAINER_NAME}-dbmgr
-  #   restart: "no"
-  #   environment:
-  #     LOG_LEVEL: INFO
-  #     KBE_COMPONENT_NAME: dbmgr
-  #     KBE_COMPONENT_ID: 4001
-  #     KBE_MACHINE_HOST: machine
-  #     KBE_MACHINE_PORT: 20099
-  #     KBE_DBMGR_HOST: localhost
-  #     KBE_DBMGR_CACHED_PORT: "true"
-  #     GAME_IDLE_START: ${GAME_IDLE_START}
-  #   volumes:
-  #     - kbe-log-data:/opt/kbengine/assets/logs
-  #     - /tmp/kbedump:/tmp/kbedump
-  #   networks:
-  #     - kbe-net
-  #   ports:
-  #     # telnet
-  #     - 32000:32000
-  #   # TODO: чтобы отправить DBMgr::lookApp нужно запросить Machine::onQueryAllInterfaceInfos
-  #   # Но onQueryAllInterfaceInfos отдаёт только адреса, расположенные на одном хосте с машиной.
-  #   # Нужно свой сервис запускать и слушать бродкаст. И у него уточнять адрес DBMgr для хэлсчека
-  #   # healthcheck:
-  #   #   test: $$ENKI_PYTHON .shedu/enki/cmd/dbmgr/send_lookApp.py
-  #   #   interval: 2s
-  #   #   timeout: 3s
-  #   #   retries: 1
-  #   #   start_period: 10s
-  #   entrypoint: bash /opt/kbengine/assets/.shedu/scripts/deploy/start_component.sh
+  dbmgr:
+    image: ${KBE_ASSETS_IMAGE_NAME}
+    depends_on:
+      mariadb: { condition: service_healthy }
+      supervisor: { condition: service_healthy }
+      logger: { condition: service_healthy }
+      interfaces: { condition: service_healthy }
+    container_name: ${KBE_COMPONENT_CONTAINER_NAME}-dbmgr
+    restart: "no"
+    environment:
+      KBE_COMPONENT_NAME: dbmgr
+      KBE_COMPONENT_ID: 4001
+      <<: *env
+    volumes:
+      - kbe-log-data:/opt/kbengine/assets/logs
+    networks:
+      - kbe-net
+    ports:
+      # telnet
+      - 32000:32000
+    healthcheck:
+      test: >
+        test $$GAME_IDLE_START
+        || CACHE_ADDR=1 LOG_LEVEL=ERROR $$ENKI_PYTHON /opt/enki/tools/cmd/dbmgr/lookApp.py
+      interval: 5s
+      timeout: 2s
+      retries: 1
+      start_period: 10s
+    entrypoint: bash /opt/kbengine/assets/.shedu/scripts/deploy/start_component.sh
 
-  # baseappmgr:
-  #   image: ${KBE_ASSETS_IMAGE_NAME}
-  #   depends_on:
-  #     - dbmgr
-  #   container_name: ${KBE_COMPONENT_CONTAINER_NAME}-baseappmgr
-  #   restart: "no"
-  #   environment:
-  #     LOG_LEVEL: INFO
-  #     KBE_COMPONENT_NAME: baseappmgr
-  #     KBE_COMPONENT_ID: 5001
-  #     GAME_IDLE_START: ${GAME_IDLE_START}
-  #   volumes:
-  #     - kbe-log-data:/opt/kbengine/assets/logs
-  #     - /tmp/kbedump:/tmp/kbedump
-  #   networks:
-  #     - kbe-net
-  #   entrypoint: bash /opt/kbengine/assets/.shedu/scripts/deploy/start_component.sh
+  baseappmgr:
+    image: ${KBE_ASSETS_IMAGE_NAME}
+    depends_on:
+      dbmgr: { condition: service_healthy }
+    container_name: ${KBE_COMPONENT_CONTAINER_NAME}-baseappmgr
+    restart: "no"
+    environment:
+      KBE_COMPONENT_NAME: baseappmgr
+      KBE_COMPONENT_ID: 5001
+      <<: *env
+    volumes:
+      - kbe-log-data:/opt/kbengine/assets/logs
+    networks:
+      - kbe-net
+    healthcheck:
+      test: >
+        test $$GAME_IDLE_START
+        || CACHE_ADDR=1 LOG_LEVEL=ERROR $$ENKI_PYTHON /opt/enki/tools/cmd/baseappmgr/lookApp.py
+      interval: 5s
+      timeout: 2s
+      retries: 1
+      start_period: 10s
+    entrypoint: bash /opt/kbengine/assets/.shedu/scripts/deploy/start_component.sh
 
-  # mariadb:
-  #   image: ${KBE_DB_IMAGE_TAGGED_NAME}
-  #   container_name: ${KBE_DB_CONTAINER_NAME}
-  #   restart: "no"
-  #   environment:
-  #     MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-  #     MYSQL_DATABASE: ${MYSQL_DATABASE}
-  #     MYSQL_USER: ${MYSQL_USER}
-  #     MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-  #   volumes:
-  #     - kbe-mariadb-data:/var/lib/mysql
-  #   ports:
-  #     - 3306:3306
-  #   networks:
-  #     - kbe-net
-  #   healthcheck:
-  #     test: mysql ${MYSQL_DATABASE} --host=kbe-mariadb -P 3306 --user=${MYSQL_USER} --password=${MYSQL_PASSWORD} --silent --execute "SELECT 1;"
-  #     interval: 5s
-  #     timeout: 10s
-  #     retries: 0
-  #   command: --log_warnings=9
+  cellappmgr:
+    image: ${KBE_ASSETS_IMAGE_NAME}
+    depends_on:
+      dbmgr: { condition: service_healthy }
+    container_name: ${KBE_COMPONENT_CONTAINER_NAME}-cellappmgr
+    restart: "no"
+    environment:
+      KBE_COMPONENT_NAME: cellappmgr
+      KBE_COMPONENT_ID: 6001
+      <<: *env
+    volumes:
+      - kbe-log-data:/opt/kbengine/assets/logs
+    networks:
+      - kbe-net
+    healthcheck:
+      test: >
+        test $$GAME_IDLE_START
+        || CACHE_ADDR=1 LOG_LEVEL=ERROR $$ENKI_PYTHON /opt/enki/tools/cmd/cellappmgr/lookApp.py
+      interval: 5s
+      timeout: 2s
+      retries: 1
+      start_period: 10s
+    entrypoint: bash /opt/kbengine/assets/.shedu/scripts/deploy/start_component.sh
+
+  baseapp-7001:
+    image: ${KBE_ASSETS_IMAGE_NAME}
+    depends_on:
+      baseappmgr: { condition: service_healthy }
+    container_name: ${KBE_COMPONENT_CONTAINER_NAME}-baseapp-1
+    restart: "no"
+    environment:
+      KBE_COMPONENT_NAME: baseapp
+      KBE_COMPONENT_ID: 7001
+      <<: *env
+    volumes:
+      - kbe-log-data:/opt/kbengine/assets/logs
+    networks:
+      - kbe-net
+    ports:
+      # Port for connecting the game client
+      - 20015:20015
+      # telnet
+      - 40001:40000
+    healthcheck:
+      test: >
+        test $$GAME_IDLE_START
+        || CACHE_ADDR=1 LOG_LEVEL=ERROR $$ENKI_PYTHON /opt/enki/tools/cmd/baseapp/lookApp.py
+      interval: 5s
+      timeout: 2s
+      retries: 1
+      start_period: 20s
+    entrypoint: bash /opt/kbengine/assets/.shedu/scripts/deploy/start_component.sh
+
+  cellapp-8001:
+    image: ${KBE_ASSETS_IMAGE_NAME}
+    depends_on:
+      cellappmgr: { condition: service_healthy }
+    container_name: ${KBE_COMPONENT_CONTAINER_NAME}-cellapp-1
+    restart: "no"
+    environment:
+      KBE_COMPONENT_NAME: cellapp
+      KBE_COMPONENT_ID: 8001
+      <<: *env
+    volumes:
+      - kbe-log-data:/opt/kbengine/assets/logs
+    networks:
+      - kbe-net
+    ports:
+      # telnet
+      - 50001:50000
+    healthcheck:
+      test: >
+        test $$GAME_IDLE_START
+        || CACHE_ADDR=1 LOG_LEVEL=ERROR $$ENKI_PYTHON /opt/enki/tools/cmd/cellapp/lookApp.py
+      interval: 5s
+      timeout: 2s
+      retries: 1
+      start_period: 20s
+    entrypoint: bash /opt/kbengine/assets/.shedu/scripts/deploy/start_component.sh
+
+  loginapp:
+    image: ${KBE_ASSETS_IMAGE_NAME}
+    depends_on:
+      baseapp-7001: { condition: service_healthy }
+      cellapp-8001: { condition: service_healthy }
+    container_name: ${KBE_COMPONENT_CONTAINER_NAME}-loginapp
+    restart: "no"
+    environment:
+      KBE_COMPONENT_NAME: loginapp
+      KBE_COMPONENT_ID: 9001
+      <<: *env
+      LOGINAPP_PORT: 20013
+    volumes:
+      - kbe-log-data:/opt/kbengine/assets/logs
+    networks:
+      - kbe-net
+    ports:
+      # Port for connecting the game client
+      - 20013:20013
+      # telnet
+      - 31000:31000
+      # Http callback address for email registration
+      - 21103:21103
+    healthcheck:
+      test: >
+        test $$GAME_IDLE_START
+        || CACHE_ADDR=1 LOG_LEVEL=ERROR $$ENKI_PYTHON /opt/enki/tools/cmd/loginapp/lookApp.py
+      interval: 5s
+      timeout: 2s
+      retries: 1
+      start_period: 20s
+    entrypoint: bash /opt/kbengine/assets/.shedu/scripts/deploy/start_component.sh
 
 volumes:
   kbe-mariadb-data:

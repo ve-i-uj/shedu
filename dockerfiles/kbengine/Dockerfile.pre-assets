@@ -21,6 +21,8 @@ COPY data/log4j/log4cxx_properties data/log4j/log4cxx_properties
 # Enki нужен для проверки здоровья компонентов.
 COPY --from=enki_python /opt/python /opt/python
 COPY --from=enki_python /opt/enki /opt/enki
+# Чтобы у $ENKI_PYTHON в healthcheck был путь до библиотеки enki
+ENV PYTHONPATH=/opt/enki
 ENV ENKI_PYTHON=/opt/python/bin/python3.9
 
 # Эти переменные нужны скриптам деплоя
