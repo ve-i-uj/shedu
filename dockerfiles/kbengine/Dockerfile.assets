@@ -15,7 +15,7 @@ WORKDIR /opt/kbengine/assets
 
 # Модифицируем пользовательский конфиг файл kbe, чтобы работать с сетью docker
 ARG KBE_KBENGINE_XML_ARGS
-RUN $ENKI_PYTHON .shedu/scripts/deploy/modify_kbe_config.py \
+RUN $ENKI_PYTHON /opt/enki/tools/modify_kbe_config.py \
     --kbengine-xml-args=${KBE_KBENGINE_XML_ARGS} \
     --env-file=.shedu/.env \
     --kbe-assets-path=/opt/kbengine/assets
