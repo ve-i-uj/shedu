@@ -33,8 +33,6 @@ export KBE_DB_IMAGE_NAME=mariadb:10.8
 export KBE_DB_IMAGE_TAGGED_NAME=$PROJECT_NAME/$KBE_DB_IMAGE_NAME-$GAME_UNIQUE_NAME
 export KBE_DB_CONTAINER_NAME=kbe-mariadb
 
-# Имена для volume будут задаваться в ручную, чтобы именование было без
-# префикса по умолчанию, но было уникальным в зависимости от игры.
 # Тома будут создавать и удалять в ручную в правиле сборки. Это нужно, т.к.
 # ELK и игра находятся в разных сетях и описываются разными docker-compose.yml
 # файлами. Но у них общий том для записи и чтения логов.
@@ -42,8 +40,8 @@ export KBE_DB_CONTAINER_NAME=kbe-mariadb
 # означать, что нужно удалить и том с логами. Аналогично и с случае с очисткой
 # ELK - игра вычищена, значит и том с логами больше не нужен.
 export KBE_DB_VOLUME_NAME=kbe-mariadb-$GAME_UNIQUE_NAME-data
-export KBE_LOG_VOLUME_NAME=kbe-log-$GAME_UNIQUE_NAME-data
-export ELK_ES_VOLUME_NAME=kbe-elastic-$GAME_UNIQUE_NAME-data
+export KBE_LOG_VOLUME_NAME=kbe-log-data
+export ELK_ES_VOLUME_NAME=kbe-elastic-data
 
 export KBE_NET_NAME="kbe-net"
 
@@ -71,19 +69,19 @@ export ELK_I_NAME_PREFIX=$PROJECT_NAME/$ELK_PROJECT_NAME
 export ELK_C_NAME_PREFIX=$ELK_PROJECT_NAME
 
 export ELK_ES_IMAGE_NAME=elasticsearch:$ELK_VERSION
-export ELK_ES_IMAGE_TAG=$ELK_I_NAME_PREFIX-elastic-$ELK_VERSION:$GAME_UNIQUE_NAME
+export ELK_ES_IMAGE_TAG=$ELK_I_NAME_PREFIX-elastic-$ELK_VERSION:latest
 export ELK_ES_CONTATINER_NAME=$ELK_C_NAME_PREFIX-elastic
 
 export ELK_LOGSTASH_IMAGA_NAME=logstash:$ELK_VERSION
-export ELK_LOGSTASH_IMAGE_TAG=$ELK_I_NAME_PREFIX-logstash-$ELK_VERSION:$GAME_UNIQUE_NAME
+export ELK_LOGSTASH_IMAGE_TAG=$ELK_I_NAME_PREFIX-logstash-$ELK_VERSION:latest
 export ELK_LOGSTASH_CONTATINER_NAME=$ELK_C_NAME_PREFIX-logstash
 
 export ELK_KIBANA_IMAGA_NAME=kibana:$ELK_VERSION
-export ELK_KIBANA_IMAGE_TAG=$ELK_I_NAME_PREFIX-kibana-$ELK_VERSION:$GAME_UNIQUE_NAME
+export ELK_KIBANA_IMAGE_TAG=$ELK_I_NAME_PREFIX-kibana-$ELK_VERSION:latest
 export ELK_KIBANA_CONTATINER_NAME=$ELK_C_NAME_PREFIX-kibana
 
 export ELK_DEJAVU_IMAGA_NAME=appbaseio/dejavu
-export ELK_DEJAVU_IMAGE_TAG=$ELK_I_NAME_PREFIX-dejavu:$GAME_UNIQUE_NAME
+export ELK_DEJAVU_IMAGE_TAG=$ELK_I_NAME_PREFIX-dejavu:latest
 export ELK_DEJAVU_CONTATINER_NAME=$ELK_C_NAME_PREFIX-dejavu
 
 export KBE_DEMO_COCOS_CLIENT_IMAGE_NAME=$PROJECT_NAME/kbe-cocos-demo-client
