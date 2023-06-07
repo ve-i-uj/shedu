@@ -20,6 +20,8 @@ The main goal of the project is to simplify kbengine deploy. It doesn't need to 
 
 [KBEngine logging (Elasticsearch + Logstash + Kibana)](#elk)
 
+[Assets normalization](#normalize_entitiesxml)
+
 [Build activity](#build)
 
 <a name="glossary"><h2>Glossary</h2></a>
@@ -210,6 +212,19 @@ Cleaning up ELK services
 ```bash
 make clean
 ```
+
+<a name="normalize_entitiesxml"><h2>Assets normalization</h2></a>
+
+KBEngine has a confusing logic for checking assets, plus the behavior of components running on the same host and on different hosts is different. There were problems with kbengine-demo-assets. Almost all entities have  GameObject in their interfaces. GameObject does not have "cell" and "base" methods, but has "cell" and "base" properties. Because of this, the engine, when running components in different containers based on kbengine-demo-assets, displayed errors on starting, such as
+
+    ERROR baseapp01 1000 7001 [2023-06-07 05:15:27 522] - Space::createCellEntityInNewSpace: cannot find the cellapp script(Space)!
+    S_ERR baseapp01 1000 7001 [2023-06-07 05:15:27 522] - Traceback (most recent call last):
+    File "/opt/kbengine/assets/scripts/base/Space.py", line 24, in __init__
+    self.spaceUTypeB = self.cellData["spaceUType"]
+    S_ERR baseapp01 1000 7001 [2023-06-07 05:15:27 522] - AttributeError: 'Space' object has no attribute 'cellData'
+    INFO baseapp01 1000 7001 [2023-06-07 05:15:27 522] - EntityApp::createEntity: new Space 2007
+
+It turned out that the engine required that entities must specify `hasCell` in the entities.xml file. Since my goal was to work with the default kbengine-demo-assets from the developers, I added a script that normalizes the entities.xml file. The script, when building the game image, analyzes assets and modifies entities.xml, prescribing `hasCell`, `hasBase` to entities. But this led to the fact that almost all entities had `base` and `cell` components (hasBase=true and hasCell=true) due to GameObject in interfaces. The engine began to require, at startup, to implement modules for entities, for example, base/Monster or cell/Spaces. Then I added to the same normalizing script the addition of empty modules to such entities when building the image.
 
 <a name="build"><h2>Build activity</h2></a>
 

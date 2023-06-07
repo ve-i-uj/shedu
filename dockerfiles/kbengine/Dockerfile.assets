@@ -20,6 +20,16 @@ RUN $ENKI_PYTHON /opt/enki/tools/modify_kbe_config.py \
     --env-file=.shedu/.env \
     --kbe-assets-path=/opt/kbengine/assets
 
+# Добавим атрибуты hasBase, hasCell, hasClient сущности в entities.xml, на
+# основе содержания assets'ов. Это нужно делать обязательно, если компоненты
+# KBEngine запускать в разных контейнерах.
+RUN cp /opt/kbengine/assets/scripts/entities.xml /opt/kbengine/assets/scripts/entities.xml.bak
+RUN LOG_LEVEL=INFO \
+    ADD_EMPTY_ENTITY_MODULE=true \
+    GAME_ASSETS_DIR=/opt/kbengine/assets \
+    UPDATED_ENTITIES_XML_PATH=/opt/kbengine/assets/scripts/entities.xml \
+    $ENKI_PYTHON /opt/enki/tools/normalize_entitiesxml/main.py
+
 # Подменим настройки логирования KBE своими. GAME_UNIQUE_NAME будет присутствовать
 # в пути папки логов
 ARG GAME_UNIQUE_NAME
