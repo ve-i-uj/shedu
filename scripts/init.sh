@@ -31,7 +31,7 @@ export KBE_COMPONENT_CONTAINER_NAME=kbe-game
 
 export KBE_DB_IMAGE_NAME=mariadb:10.8
 export KBE_DB_IMAGE_TAGGED_NAME=$PROJECT_NAME/$KBE_DB_IMAGE_NAME
-export KBE_DB_CONTAINER_NAME=kbe-mariadb
+export KBE_DB_CONTAINER_NAME=kbe-game-mariadb
 
 # Тома будут создавать и удалять в ручную в правиле сборки. Это нужно, т.к.
 # ELK и игра находятся в разных сетях и описываются разными docker-compose.yml

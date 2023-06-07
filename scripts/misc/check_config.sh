@@ -28,6 +28,7 @@ optional_vars=(
     "KBE_KBENGINE_XML_ARGS"
     "GAME_IDLE_START"
     "DEBUG_SUPERVISOR"
+    "ENKI_PATH"
 )
 
 # The example config file contains all necessary variable. Read all variable

@@ -1,0 +1,71 @@
+{
+	"version": "2.0.0",
+    "options": {
+    },
+	"tasks": [
+        {
+            "label": "[Make] Stop -> Clean -> Build -> Start game",
+            "type": "shell",
+            "command": "make stop_game clean_game build_game start_game",
+            "args": [],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared",
+                "focus": true
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "[Make] Clean -> Build -> Start game",
+            "type": "shell",
+            "command": "make clean_game build_game start_game",
+            "args": [],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared",
+                "focus": true
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "[Make] Build -> Start game",
+            "type": "shell",
+            "command": "make build_game start_game",
+            "args": [],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared",
+                "focus": true
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "[Make] Stop -> Start game",
+            "type": "shell",
+            "command": "make stop_game start_game",
+            "args": [],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared",
+                "focus": true
+            },
+            "problemMatcher": []
+        },
+    ]
+}

@@ -124,6 +124,7 @@ clean_kbe: config_is_ok kbe_is_built game_is_not_running # Clean the compiled kb
 build_game: config_is_ok game_is_not_built kbe_is_built ## Build a kbengine docker image contained assets. It binds "assets" with the compiled kbe image
 	@docker pull $(KBE_DB_IMAGE_NAME)
 	@docker tag $(KBE_DB_IMAGE_NAME) $(KBE_DB_IMAGE_TAGGED_NAME)
+	@$(SCRIPTS)/dev/update_enki.sh
 	@docker build \
 		--file "$(DOCKERFILE_ENKI_PYTHON)" \
 		--tag "$(KBE_ENKI_PYTHON_IMAGE_NAME)" \
