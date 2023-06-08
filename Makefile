@@ -127,6 +127,8 @@ build_game: config_is_ok game_is_not_built kbe_is_built ## Build a kbengine dock
 	@$(SCRIPTS)/dev/update_enki.sh
 	@docker build \
 		--file "$(DOCKERFILE_ENKI_PYTHON)" \
+		--build-arg KBE_CONTAINER_USER="$(KBE_CONTAINER_USER)" \
+		--build-arg GAME_UNIQUE_NAME="$(GAME_UNIQUE_NAME)" \
 		--tag "$(KBE_ENKI_PYTHON_IMAGE_NAME)" \
 		.
 	@docker build \
@@ -142,7 +144,7 @@ build_game: config_is_ok game_is_not_built kbe_is_built ## Build a kbengine dock
 		--build-arg KBE_ASSETS_SHA="$(KBE_ASSETS_SHA)" \
 		--build-arg KBE_KBENGINE_XML_ARGS="$(KBE_KBENGINE_XML_ARGS)" \
 		--build-arg GAME_UNIQUE_NAME="$(GAME_UNIQUE_NAME)" \
-		--build-arg KBE_COMPILED_IMAGE_NAME="$(KBE_COMPILED_IMAGE_NAME_SHA)" \
+		--build-arg KBE_CONTAINER_USER="$(KBE_CONTAINER_USER)" \
 		--tag "$(KBE_ASSETS_IMAGE_NAME)" \
 		.
 	@docker volume create $(KBE_DB_VOLUME_NAME)
@@ -257,13 +259,10 @@ version: ## [Dev] The current version of the shedu
 -----: ## -----
 
 cocos_build: ## [Dev] Build the Cocos2D client demo
-	@cp $(ROOT_DIR)/.env /tmp/shedu/.env
-	@cp $(ROOT_DIR)/configs/kbe-v1.3.5-for-cocos-js-demo-v1.3.13.env $(ROOT_DIR)/.env
 	@docker build \
 		--file "$(DOCKERFILE_COCOS_DEMO_CLIENT)" \
 		--tag "$(KBE_DEMO_COCOS_CLIENT_IMAGE_NAME)" \
 		.
-	@cp /tmp/shedu/.env $(ROOT_DIR)/.env
 
 cocos_start: ## [Dev] Start the Cocos2D client demo
 	@python3 -c "import webbrowser; webbrowser.open('http://0.0.0.0:8080/')"

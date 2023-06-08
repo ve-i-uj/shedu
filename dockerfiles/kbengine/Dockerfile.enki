@@ -32,3 +32,8 @@ ENV PYTHONPATH=/opt/enki
 
 WORKDIR /opt/enki
 COPY scripts/deploy/start_supervisor.sh start_supervisor.sh
+
+ARG KBE_CONTAINER_USER
+ARG GAME_UNIQUE_NAME
+RUN useradd $KBE_CONTAINER_USER
+RUN chown -R $KBE_CONTAINER_USER:$KBE_CONTAINER_USER /opt/enki

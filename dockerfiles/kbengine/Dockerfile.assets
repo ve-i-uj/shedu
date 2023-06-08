@@ -36,3 +36,6 @@ ARG GAME_UNIQUE_NAME
 ENV KBE_GAME_NAME=${GAME_UNIQUE_NAME}
 RUN rm -rf res/server/log4cxx_properties \
     && cp -r .shedu/data/log4j/log4cxx_properties res/server/log4cxx_properties
+
+ARG KBE_CONTAINER_USER
+RUN useradd $KBE_CONTAINER_USER

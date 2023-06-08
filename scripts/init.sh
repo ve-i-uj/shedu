@@ -86,3 +86,12 @@ export ELK_DEJAVU_CONTATINER_NAME=$ELK_C_NAME_PREFIX-dejavu
 
 export KBE_DEMO_COCOS_CLIENT_IMAGE_NAME=$PROJECT_NAME/kbe-cocos-demo-client
 export KBE_DEMO_COCOS_CLIENT_CONTAINER_NAME=kbe-cocos-demo-client
+
+# KBEngine использует переменную окружения UID для идентификации компонентов,
+# запущенных одним и тем же пользователем. На основе UID в компонентах
+# генерируется свой идентификатор uid. Это имеет смысл, если на одном хосте
+# запущено несколько игр, но для Docker это не имеет смысла. В случае, если
+# запустить под рутом (UID=0), движок начнёт раздавать компонентам рандомные uid и
+# компоненты не будут находить друг друга (т.к. у них разный uid). Поэтому
+# создаётся пользователь, от имени которого будут запускаться компоненты.
+export KBE_CONTAINER_USER=kbengine

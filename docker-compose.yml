@@ -6,11 +6,7 @@ x-env:
   KBE_MACHINE_HOST: ${KBE_COMPONENT_CONTAINER_NAME}-supervisor
   KBE_MACHINE_TCP_PORT: 20099
   GAME_UNIQUE_NAME: ${GAME_UNIQUE_NAME}
-  # Эту переменную нужно выставить всем компонентам в одинаковое значение.
-  # Контейнеры запускаются от рута, в этом случае KBEngine сам произвольно
-  # выставляет uid компонентам и будет отбрасывать все остальные
-  # компоненты с другим uid в инфе от Машины.
-  UUID: 1000
+  KBE_CONTAINER_USER: ${KBE_CONTAINER_USER}
   GAME_IDLE_START: ${GAME_IDLE_START}
 
 services:
@@ -32,7 +28,7 @@ services:
       - kbe-net
     healthcheck:
       test: >
-        mysql ${MYSQL_DATABASE} --host=kbe-mariadb -P 3306 --user=${MYSQL_USER}
+        mysql ${MYSQL_DATABASE} --host=mariadb -P 3306 --user=${MYSQL_USER}
         --password=${MYSQL_PASSWORD} --silent --execute "SELECT 1;"
       interval: 5s
       timeout: 2s
@@ -75,7 +71,7 @@ services:
       KBE_COMPONENT_ID: 2001
       <<: *env
     volumes:
-      - kbe-log-data:/opt/kbengine/assets/logs
+      - kbe-log-data:/opt/kbengine/assets/logs/
     networks:
       - kbe-net
     ports:
