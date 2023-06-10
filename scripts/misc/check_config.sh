@@ -19,6 +19,7 @@ required_vars=(
     "KBE_ASSETS_PATH"
     "KBE_ASSETS_VERSION"
     "GAME_UNIQUE_NAME"
+    "KBE_PUBLIC_HOST"
 )
 
 optional_vars=(
