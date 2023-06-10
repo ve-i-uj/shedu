@@ -12,6 +12,7 @@ WORKDIR /opt/kbengine/assets/.shedu/
 # ассетов будет собираться в контексте папки ассетов (в этой папке уже .env
 # файла shedu нет).
 COPY .env .env
+COPY data/kbenginexml.data data/kbenginexml.data
 
 # Скрипты для модификации конфига, точка входа и т.п.
 COPY scripts/deploy scripts/deploy

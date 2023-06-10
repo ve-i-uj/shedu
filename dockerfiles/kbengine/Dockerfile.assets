@@ -15,10 +15,13 @@ WORKDIR /opt/kbengine/assets
 
 # Модифицируем пользовательский конфиг файл kbe, чтобы работать с сетью docker
 ARG KBE_KBENGINE_XML_ARGS
-RUN $ENKI_PYTHON /opt/enki/tools/modify_kbe_config.py \
-    --kbengine-xml-args=${KBE_KBENGINE_XML_ARGS} \
-    --env-file=.shedu/.env \
-    --kbe-assets-path=/opt/kbengine/assets
+RUN set -a \
+    && source .shedu/.env \
+    && envsubst < .shedu/data/kbenginexml.data > /tmp/kbenginexml.data \
+    && $ENKI_PYTHON /opt/enki/tools/modify_kbe_config.py \
+        --kbengine-xml-args=${KBE_KBENGINE_XML_ARGS} \
+        --data-file=/tmp/kbenginexml.data \
+        --kbe-assets-path=/opt/kbengine/assets
 
 # Добавим атрибуты hasBase, hasCell, hasClient сущности в entities.xml, на
 # основе содержания assets'ов. Это нужно делать обязательно, если компоненты
