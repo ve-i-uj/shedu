@@ -5,7 +5,7 @@ if [ ! -z ${GAME_IDLE_START} ]; then
     exit 0
 fi
 
-log_dir="/opt/kbengine/assets/logs/${GAME_UNIQUE_NAME}"
+log_dir="/opt/kbengine/assets/logs/${GAME_NAME}"
 if [ ! -d "$log_dir" ]; then
     mkdir -p "$log_dir"
     chown $KBE_CONTAINER_USER:$KBE_CONTAINER_USER "$log_dir"

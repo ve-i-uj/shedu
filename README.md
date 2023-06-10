@@ -154,7 +154,7 @@ Set the path to Assets in the KBE_ASSETS_PATH variable in the config (the ".env"
 
 #### Global Settings
 
-* GAME_UNIQUE_NAME - Under each instance of the game there is a separate kbe environment. The name of the game is a unique identifier for kbe environments. It cannot be empty.
+* GAME_NAME - Under each instance of the game there is a separate kbe environment. The name of the game is a unique identifier for kbe environments. It cannot be empty.
 
 <a name="elk"><h2>KBEngine logging (Elasticsearch + Logstash + Kibana)</h2></a>
 

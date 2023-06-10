@@ -18,7 +18,7 @@ required_vars=(
     "MYSQL_PASSWORD"
     "KBE_ASSETS_PATH"
     "KBE_ASSETS_VERSION"
-    "GAME_UNIQUE_NAME"
+    "GAME_NAME"
     "KBE_PUBLIC_HOST"
 )
 

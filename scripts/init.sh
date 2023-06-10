@@ -3,8 +3,8 @@
 # Эта переменная должна быть выставлена в окружении. По ней будут сформированы
 # уникальные имена для образов и контейнеров инфраструктуры. Других переменных
 # конфиг не ждёт. Переменные в данном конфиге или константы или вычисляются
-# на основе других переменных в этом конфиге + GAME_UNIQUE_NAME
-export GAME_UNIQUE_NAME=$GAME_UNIQUE_NAME
+# на основе других переменных в этом конфиге + GAME_NAME
+export GAME_NAME=$GAME_NAME
 
 _curr_dir=$( realpath "$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"/.. )
 export _curr_dir=$_curr_dir  # С этой строкой PROJECT_DIR корректно прописывается envsubst (?)
@@ -13,7 +13,7 @@ export SCRIPTS="$PROJECT_DIR/scripts"
 
 export PROJECT_NAME=shedu
 export PROJECT_CACHE_DIR=/tmp/shedu
-export GAME_COMPOSE_PROJECT_NAME=$GAME_UNIQUE_NAME
+export GAME_COMPOSE_PROJECT_NAME=$GAME_NAME
 export ELK_COMPOSE_PROJECT_NAME=kbe-elk
 
 # Для игр используется один и тот же образ KBE, привязанный к коммиту KBE
@@ -23,10 +23,10 @@ export PRE_ASSETS_IMAGE_NAME="$PROJECT_NAME/kbe-pre-assets"
 
 export KBE_ENKI_PYTHON_IMAGE_NAME=$PROJECT_NAME/enki-python
 
-export KBE_ASSETS_IMAGE_NAME=$PROJECT_NAME/kbe-assets-$GAME_UNIQUE_NAME
-export KBE_ASSETS_CONTAINER_NAME=kbe-assets-$GAME_UNIQUE_NAME
+export KBE_ASSETS_IMAGE_NAME=$PROJECT_NAME/kbe-assets-$GAME_NAME
+export KBE_ASSETS_CONTAINER_NAME=kbe-assets-$GAME_NAME
 
-export KBE_COMPONENT_IMAGE_NAME=$PROJECT_NAME/kbe-game-$GAME_UNIQUE_NAME
+export KBE_COMPONENT_IMAGE_NAME=$PROJECT_NAME/kbe-game-$GAME_NAME
 export KBE_COMPONENT_CONTAINER_NAME=kbe-game
 
 export KBE_DB_IMAGE_NAME=mariadb:10.8
@@ -39,7 +39,7 @@ export KBE_DB_CONTAINER_NAME=kbe-game-mariadb
 # Если в правиле очистки _игры_ не будет найден том для ELK - это будет
 # означать, что нужно удалить и том с логами. Аналогично и с случае с очисткой
 # ELK - игра вычищена, значит и том с логами больше не нужен.
-export KBE_DB_VOLUME_NAME=kbe-mariadb-$GAME_UNIQUE_NAME-data
+export KBE_DB_VOLUME_NAME=kbe-mariadb-$GAME_NAME-data
 export KBE_LOG_VOLUME_NAME=kbe-log-data
 export ELK_ES_VOLUME_NAME=kbe-elastic-data
 

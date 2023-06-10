@@ -33,10 +33,10 @@ RUN LOG_LEVEL=INFO \
     UPDATED_ENTITIES_XML_PATH=/opt/kbengine/assets/scripts/entities.xml \
     $ENKI_PYTHON /opt/enki/tools/normalize_entitiesxml/main.py
 
-# Подменим настройки логирования KBE своими. GAME_UNIQUE_NAME будет присутствовать
+# Подменим настройки логирования KBE своими. GAME_NAME будет присутствовать
 # в пути папки логов
-ARG GAME_UNIQUE_NAME
-ENV KBE_GAME_NAME=${GAME_UNIQUE_NAME}
+ARG GAME_NAME
+ENV GAME_NAME=${GAME_NAME}
 RUN rm -rf res/server/log4cxx_properties \
     && cp -r .shedu/data/log4j/log4cxx_properties res/server/log4cxx_properties
 
