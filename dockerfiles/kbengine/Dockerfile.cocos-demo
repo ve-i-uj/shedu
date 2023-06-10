@@ -7,5 +7,10 @@ RUN git clone https://github.com/kbengine/kbengine_cocos2d_js_demo.git \
     && cd /opt/kbengine_cocos2d_js_demo \
     && git submodule update --init --remote
 
+# Заменить на адрес хоста, где расположен Loginapp KBEngine
+ARG KBE_PUBLIC_HOST=0.0.0.0
+WORKDIR /opt/kbengine_cocos2d_js_demo
+RUN sed -i -- "s/args.ip = \"127.0.0.1\";/args.ip = \"$KBE_PUBLIC_HOST\";/g" cocos2d-js-client/main.js
+
 FROM nginx:1.23.3
 COPY --from=demo_client /opt/kbengine_cocos2d_js_demo/cocos2d-js-client /usr/share/nginx/html

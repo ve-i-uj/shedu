@@ -261,14 +261,19 @@ version: ## [Dev] The current version of the shedu
 cocos_build: ## [Dev] Build the Cocos2D client demo
 	@docker build \
 		--file "$(DOCKERFILE_COCOS_DEMO_CLIENT)" \
+		--build-arg KBE_PUBLIC_HOST="$(KBE_PUBLIC_HOST)" \
 		--tag "$(KBE_DEMO_COCOS_CLIENT_IMAGE_NAME)" \
 		.
 
 cocos_start: ## [Dev] Start the Cocos2D client demo
 	@python3 -c "import webbrowser; webbrowser.open('http://0.0.0.0:8080/')"
-	@docker run --rm -p 8080:80 \
+	@docker run --rm \
+		-p 8080:80 \
 		--name $(KBE_DEMO_COCOS_CLIENT_CONTAINER_NAME) \
 		$(KBE_DEMO_COCOS_CLIENT_IMAGE_NAME)
+
+cocos_clean: ## [Dev] Delete the image of the Cocos2D client demo
+	@docker rmi $(KBE_DEMO_COCOS_CLIENT_IMAGE_NAME)
 
 -----: ## -----
 
