@@ -18,7 +18,7 @@ ARG KBE_KBENGINE_XML_ARGS
 RUN set -a \
     && source .shedu/.env \
     && envsubst < .shedu/data/kbenginexml.data > /tmp/kbenginexml.data \
-    && $ENKI_PYTHON /opt/enki/tools/modify_kbe_config.py \
+    && $ENKI_PYTHON /opt/enki/tools/modify_kbeenginexml.py \
         --kbengine-xml-args=${KBE_KBENGINE_XML_ARGS} \
         --data-file=/tmp/kbenginexml.data \
         --kbe-assets-path=/opt/kbengine/assets
