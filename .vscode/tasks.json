@@ -1,8 +1,60 @@
 {
 	"version": "2.0.0",
     "options": {
+        "env": {
+          "PYTHONPATH": "${workspaceFolder}",
+          "LOG_LEVEL": "DEBUG",
+        }
     },
 	"tasks": [
+        {
+            "label": "[Supervisor] netstat -tulpan",
+            "type": "shell",
+            "command": "docker exec kbe-game-supervisor netstat -tulpan",
+            "args": [],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared",
+                "focus": true
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "[Supervisor] ps aux",
+            "type": "shell",
+            "command": "docker exec kbe-game-supervisor ps aux",
+            "args": [],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared",
+                "focus": true
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "[Logger] netstat -tulpan",
+            "type": "shell",
+            "command": "docker exec kbe-game-logger netstat -tulpan",
+            "args": [],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared",
+                "focus": true
+            },
+            "problemMatcher": []
+        },
         {
             "label": "[Make] Stop -> Clean -> Build -> Start game",
             "type": "shell",

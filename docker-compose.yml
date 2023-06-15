@@ -211,6 +211,7 @@ services:
     ports:
       # Port for connecting the game client
       - 20015:20015
+      - 20005:20005/udp
       # telnet
       - 40001:40000
     healthcheck:

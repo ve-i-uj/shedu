@@ -54,18 +54,20 @@ endif
 
 all: help
 
-build: config_is_ok build_elk build_kbe build_game ## Build all docker images (KBE, DB, ELK etc.)
-
-start: start_game  ## Start the kbe game and the kbe infrastructure (DB, the KBE components)
-
-stop: stop_game ## Stop the kbe game and the kbe infrastructure
-
 status: config_is_ok ## Return the game status ("running" or "stopped")
 	@$(SCRIPTS)/misc/get_status.sh
 
-clean: clean_game clean_elk  ## Delete the artefacts connected with the project (containers, volumes, docker networks, etc)
+force_stop_game: ## Force stop any game
+	@res=$$(docker ps --filter name=$(KBE_COMPONENT_CONTAINER_NAME) -q); \
+	if [ ! -z "$$res" ]; then \
+		docker stop "$$res"; \
+	fi
+	@res=$$(docker container ls --all --filter name=$(KBE_COMPONENT_CONTAINER_NAME) -q); \
+	if [ ! -z "$$res" ]; then \
+		echo $$res | xargs docker container rm --volume; \
+	fi
 
-clean_all: config_is_ok game_is_not_running elk_is_not_runnig clean ## Delete the artefacts of all games (not only the current project)
+clean_all: config_is_ok game_is_not_running elk_is_not_runnig ## Delete the artefacts of all games (not only the current project)
 	@res=$$(docker network ls --filter "name=*kbe-net*" -q); \
 	if [ ! -z "$$res" ]; then \
 		docker network rm $$res; \
@@ -79,8 +81,6 @@ clean_all: config_is_ok game_is_not_running elk_is_not_runnig clean ## Delete th
 		echo $$res | xargs docker rmi; \
 	fi
 	@rm -rf $(PROJECT_CACHE_DIR)
-
-restart: stop start ## Stop and start
 
 check_config: ## Check the configuration file
 	@$(SCRIPTS)/misc/print_configs_vars.sh --only-user-settings
@@ -310,13 +310,13 @@ visit the page <https://github.com/ve-i-uj/shedu>
 Example:
 
 cp configs/kbe-v2.5.12-demo.env .env
-make build
-make start
+make build_game
+make start_game
 make logs_console
 # Or you can view the game log records in the web intarface of Kibana or Dejavu
 # It needs to wait about a minute after the game ELK started because the ElasticSearch needs
 # time to up. Then run this command and the web page must open in your web browser.
-make logs_dejavu
+make logs_kibana
 _____
 
 Rules:
