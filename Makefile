@@ -100,10 +100,9 @@ logs_dejavu: elk_is_runnig ## Show the log viewer in the web interface (Dejavu)
 	@python3 -c "import webbrowser; webbrowser.open('http://localhost:1358/')"
 
 logs_console: config_is_ok ## Show actual log records of the game in the console
-	@docker-compose \
-		-f $(ROOT_DIR)/docker-compose.yml \
-		-p $(GAME_COMPOSE_PROJECT_NAME) \
-		logs --timestamps --follow
+	@docker exec \
+		-it $(KBE_COMPONENT_CONTAINER_NAME)-logger \
+		/bin/bash .shedu/scripts/deploy/tail_logs.sh
 
 -----: ## -----
 
