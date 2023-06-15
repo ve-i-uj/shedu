@@ -18,7 +18,8 @@ required_vars=(
     "MYSQL_PASSWORD"
     "KBE_ASSETS_PATH"
     "KBE_ASSETS_VERSION"
-    "GAME_UNIQUE_NAME"
+    "GAME_NAME"
+    "KBE_PUBLIC_HOST"
 )
 
 optional_vars=(
@@ -26,6 +27,9 @@ optional_vars=(
     "KBE_USER_TAG"
     "KBE_ASSETS_SHA"
     "KBE_KBENGINE_XML_ARGS"
+    "GAME_IDLE_START"
+    "DEBUG_SUPERVISOR"
+    "ENKI_PATH"
 )
 
 # The example config file contains all necessary variable. Read all variable

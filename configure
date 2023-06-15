@@ -1,13 +1,13 @@
-if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-    if [ -f /etc/redhat-release ]; then
-        sudo sh scripts/prepare/install_deps_centos7.sh
-    elif [ -f /etc/lsb-release ]; then
-        sudo sh scripts/prepare/install_deps_ubuntu.sh
-    else
-        echo "[ERROR] Unsupport Linux OS"
-        exit 1
-    fi
-else
+if [[ "$OSTYPE" != "linux-gnu"* ]]; then
     echo "[ERROR] Unsupport OS"
+    exit 1
+fi
+
+if [ -f /etc/redhat-release ]; then
+    sudo sh scripts/prepare/install_deps_centos7.sh
+elif [ -f /etc/lsb-release ]; then
+    sudo sh scripts/prepare/install_deps_ubuntu.sh
+else
+    echo "[ERROR] Unsupport Linux OS"
     exit 1
 fi

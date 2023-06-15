@@ -1,0 +1,502 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "[Docker] Machine",
+            "type": "cppdbg",
+            "request": "launch",
+            "cwd": "/opt/kbengine/assets",
+            "program": "/opt/kbengine/kbe/bin/server/machine",
+            "args": [
+                "--cid=1001"
+            ],
+            "stopAtEntry": false,
+            "environment": [],
+            "externalConsole": true,
+            "sourceFileMap": {
+                "/opt": "/home/leto/2PeopleCompany/REPOS/KBEngine/Engine/kbengine"
+            },
+            "pipeTransport": {
+                "debuggerPath": "/usr/bin/gdb",
+                "pipeProgram": "docker",
+                "pipeArgs": [
+                    "exec",
+                    "-i",
+                    "kbe-game-logger",
+                    "sh",
+                    "-c"
+                ],
+                "pipeCwd": "${workspaceFolder}"
+            },
+            "MIMode": "gdb"
+        },
+        {
+            "name": "[Docker] Logger",
+            "type": "cppdbg",
+            "request": "launch",
+            "cwd": "/opt/kbengine/assets",
+            "program": "/opt/kbengine/kbe/bin/server/logger",
+            "args": [
+                "--cid=2001"
+            ],
+            "stopAtEntry": false,
+            "environment": [
+            ],
+            "externalConsole": true,
+            "sourceFileMap": {
+                "/opt": "/home/leto/2PeopleCompany/REPOS/KBEngine/Engine/kbengine"
+            },
+            "pipeTransport": {
+                "debuggerPath": "/usr/bin/gdb",
+                "pipeProgram": "docker",
+                "pipeArgs": [
+                    "exec",
+                    "-i",
+                    "kbe-game-logger",
+                    "sh",
+                    "-c"
+                ],
+                "pipeCwd": "${workspaceFolder}"
+            },
+            "MIMode": "gdb"
+        },
+        {
+            "name": "[Docker] Interfaces",
+            "type": "cppdbg",
+            "request": "launch",
+            "cwd": "/opt/kbengine/assets",
+            "program": "/opt/kbengine/kbe/bin/server/interfaces",
+            "args": [
+                "--cid=3001"
+            ],
+            "stopAtEntry": false,
+            "environment": [],
+            "externalConsole": true,
+            "sourceFileMap": {
+                "/opt": "/home/leto/2PeopleCompany/REPOS/KBEngine/Engine/kbengine"
+            },
+            "pipeTransport": {
+                "debuggerPath": "/usr/bin/gdb",
+                "pipeProgram": "docker",
+                "pipeArgs": [
+                    "exec",
+                    "-i",
+                    "kbe-game-interfaces",
+                    "sh",
+                    "-c"
+                ],
+                "pipeCwd": "${workspaceFolder}"
+            },
+            "MIMode": "gdb"
+        },
+        {
+            "name": "[Docker] DBMgr",
+            "type": "cppdbg",
+            "request": "launch",
+            "cwd": "/opt/kbengine/assets",
+            "program": "/opt/kbengine/kbe/bin/server/dbmgr",
+            "args": [
+                "--cid=4001"
+            ],
+            "stopAtEntry": false,
+            "environment": [],
+            "externalConsole": true,
+            "sourceFileMap": {
+                "/opt": "/home/leto/2PeopleCompany/REPOS/KBEngine/Engine/kbengine"
+            },
+            "pipeTransport": {
+                "debuggerPath": "/usr/bin/gdb",
+                "pipeProgram": "docker",
+                "pipeArgs": [
+                    "exec",
+                    "-i",
+                    "kbe-game-dbmgr",
+                    "sh",
+                    "-c"
+                ],
+                "pipeCwd": "${workspaceFolder}"
+            },
+            "MIMode": "gdb"
+        },
+        {
+            "name": "[Docker] BaseappMgr",
+            "type": "cppdbg",
+            "request": "launch",
+            "cwd": "/opt/kbengine/assets",
+            "program": "/opt/kbengine/kbe/bin/server/baseappmgr",
+            "args": [
+                "--cid=5001"
+            ],
+            "stopAtEntry": false,
+            "environment": [],
+            "externalConsole": true,
+            "sourceFileMap": {
+                "/opt": "/home/leto/2PeopleCompany/REPOS/KBEngine/Engine/kbengine"
+            },
+            "pipeTransport": {
+                "debuggerPath": "/usr/bin/gdb",
+                "pipeProgram": "docker",
+                "pipeArgs": [
+                    "exec",
+                    "-i",
+                    "kbe-game-baseappmgr",
+                    "sh",
+                    "-c"
+                ],
+                "pipeCwd": "${workspaceFolder}"
+            },
+            "MIMode": "gdb"
+        },
+        {
+            "name": "[Docker] CellappMgr",
+            "type": "cppdbg",
+            "request": "launch",
+            "cwd": "/opt/kbengine/assets",
+            "program": "/opt/kbengine/kbe/bin/server/cellappmgr",
+            "args": [
+                "--cid=6001"
+            ],
+            "stopAtEntry": false,
+            "environment": [],
+            "externalConsole": true,
+            "sourceFileMap": {
+                "/opt": "/home/leto/2PeopleCompany/REPOS/KBEngine/Engine/kbengine"
+            },
+            "pipeTransport": {
+                "debuggerPath": "/usr/bin/gdb",
+                "pipeProgram": "docker",
+                "pipeArgs": [
+                    "exec",
+                    "-i",
+                    "kbe-game-cellappmgr",
+                    "sh",
+                    "-c"
+                ],
+                "pipeCwd": "${workspaceFolder}"
+            },
+            "MIMode": "gdb"
+        },
+        {
+            "name": "[Docker] Cellapp",
+            "type": "cppdbg",
+            "request": "launch",
+            "cwd": "/opt/kbengine/assets",
+            "program": "/opt/kbengine/kbe/bin/server/cellapp",
+            "args": [
+                "--cid=8001"
+            ],
+            "stopAtEntry": false,
+            "environment": [],
+            "externalConsole": true,
+            "sourceFileMap": {
+                "/opt": "/home/leto/2PeopleCompany/REPOS/KBEngine/Engine/kbengine"
+            },
+            "pipeTransport": {
+                "debuggerPath": "/usr/bin/gdb",
+                "pipeProgram": "docker",
+                "pipeArgs": [
+                    "exec",
+                    "-i",
+                    "kbe-game-cellapp-1",
+                    "sh",
+                    "-c"
+                ],
+                "pipeCwd": "${workspaceFolder}"
+            },
+            "MIMode": "gdb"
+        },
+        {
+            "name": "[Docker] Baseapp",
+            "type": "cppdbg",
+            "request": "launch",
+            "cwd": "/opt/kbengine/assets",
+            "program": "/opt/kbengine/kbe/bin/server/baseapp",
+            "args": [
+                "--cid=7001"
+            ],
+            "stopAtEntry": false,
+            "environment": [],
+            "externalConsole": true,
+            "sourceFileMap": {
+                "/opt": "/home/leto/2PeopleCompany/REPOS/KBEngine/Engine/kbengine"
+            },
+            "pipeTransport": {
+                "debuggerPath": "/usr/bin/gdb",
+                "pipeProgram": "docker",
+                "pipeArgs": [
+                    "exec",
+                    "-i",
+                    "kbe-game-baseapp-1",
+                    "sh",
+                    "-c"
+                ],
+                "pipeCwd": "${workspaceFolder}"
+            },
+            "MIMode": "gdb"
+        },
+        {
+            "name": "[Docker] Loginapp",
+            "type": "cppdbg",
+            "request": "launch",
+            "cwd": "/opt/kbengine/assets",
+            "program": "/opt/kbengine/kbe/bin/server/loginapp",
+            "args": [
+                "--cid=9001"
+            ],
+            "stopAtEntry": false,
+            "environment": [],
+            "externalConsole": true,
+            "sourceFileMap": {
+                "/opt": "/home/leto/2PeopleCompany/REPOS/KBEngine/Engine/kbengine"
+            },
+            "pipeTransport": {
+                "debuggerPath": "/usr/bin/gdb",
+                "pipeProgram": "docker",
+                "pipeArgs": [
+                    "exec",
+                    "-i",
+                    "kbe-game-loginapp",
+                    "sh",
+                    "-c"
+                ],
+                "pipeCwd": "${workspaceFolder}"
+            },
+            "MIMode": "gdb"
+        },
+        {
+            "name": "[Docker] Machine (common container)",
+            "type": "cppdbg",
+            "request": "launch",
+            "cwd": "/opt/kbengine/assets",
+            "program": "/opt/kbengine/kbe/bin/server/machine",
+            "args": [
+                "--cid", "4001"
+            ],
+            "stopAtEntry": false,
+            "environment": [],
+            "externalConsole": true,
+            "sourceFileMap": {
+                "/opt": "/home/leto/2PeopleCompany/REPOS/KBEngine/Engine/kbengine"
+            },
+            "pipeTransport": {
+                "debuggerPath": "/usr/bin/gdb",
+                "pipeProgram": "docker",
+                "pipeArgs": [
+                    "exec",
+                    "-i",
+                    "kbe-game-logger",
+                    "sh",
+                    "-c"
+                ],
+                "pipeCwd": "${workspaceFolder}"
+            },
+            "MIMode": "gdb"
+        },
+        {
+            "name": "[Docker] Logger (common container)",
+            "type": "cppdbg",
+            "request": "launch",
+            "cwd": "/opt/kbengine/assets",
+            "program": "/opt/kbengine/kbe/bin/server/logger",
+            "args": [
+                "--cid", "2001"
+            ],
+            "stopAtEntry": false,
+            "environment": [],
+            "externalConsole": true,
+            "sourceFileMap": {
+                "/opt": "/home/leto/2PeopleCompany/REPOS/KBEngine/Engine/kbengine"
+            },
+            "pipeTransport": {
+                "debuggerPath": "/usr/bin/gdb",
+                "pipeProgram": "docker",
+                "pipeArgs": [
+                    "exec",
+                    "-i",
+                    "kbe-game-logger",
+                    "sh",
+                    "-c"
+                ],
+                "pipeCwd": "${workspaceFolder}"
+            },
+            "MIMode": "gdb"
+        },
+        {
+            "name": "[Docker] Interfaces (common container)",
+            "type": "cppdbg",
+            "request": "launch",
+            "cwd": "/opt/kbengine/assets",
+            "program": "/opt/kbengine/kbe/bin/server/interfaces",
+            "args": [
+                "--cid", "3001"
+            ],
+            "stopAtEntry": false,
+            "environment": [],
+            "externalConsole": true,
+            "sourceFileMap": {
+                "/opt": "/home/leto/2PeopleCompany/REPOS/KBEngine/Engine/kbengine"
+            },
+            "pipeTransport": {
+                "debuggerPath": "/usr/bin/gdb",
+                "pipeProgram": "docker",
+                "pipeArgs": [
+                    "exec",
+                    "-i",
+                    "kbe-game-logger",
+                    "sh",
+                    "-c"
+                ],
+                "pipeCwd": "${workspaceFolder}"
+            },
+            "MIMode": "gdb"
+        },
+        {
+            "name": "[Docker] DBMgr (common container)",
+            "type": "cppdbg",
+            "request": "launch",
+            "cwd": "/opt/kbengine/assets",
+            "program": "/opt/kbengine/kbe/bin/server/dbmgr",
+            "args": [
+                "--cid", "4001"
+            ],
+            "stopAtEntry": false,
+            "environment": [],
+            "externalConsole": true,
+            "sourceFileMap": {
+                "/opt": "/home/leto/2PeopleCompany/REPOS/KBEngine/Engine/kbengine"
+            },
+            "pipeTransport": {
+                "debuggerPath": "/usr/bin/gdb",
+                "pipeProgram": "docker",
+                "pipeArgs": [
+                    "exec",
+                    "-i",
+                    "kbe-game-logger",
+                    "sh",
+                    "-c"
+                ],
+                "pipeCwd": "${workspaceFolder}"
+            },
+            "MIMode": "gdb"
+        },
+        {
+            "name": "[Docker] CellappMgr (common container)",
+            "type": "cppdbg",
+            "request": "launch",
+            "cwd": "/opt/kbengine/assets",
+            "program": "/opt/kbengine/kbe/bin/server/cellappmgr",
+            "args": [
+                "--cid", "5001"
+            ],
+            "stopAtEntry": false,
+            "environment": [],
+            "externalConsole": true,
+            "sourceFileMap": {
+                "/opt": "/home/leto/2PeopleCompany/REPOS/KBEngine/Engine/kbengine"
+            },
+            "pipeTransport": {
+                "debuggerPath": "/usr/bin/gdb",
+                "pipeProgram": "docker",
+                "pipeArgs": [
+                    "exec",
+                    "-i",
+                    "kbe-game-logger",
+                    "sh",
+                    "-c"
+                ],
+                "pipeCwd": "${workspaceFolder}"
+            },
+            "MIMode": "gdb"
+        },
+        {
+            "name": "[Docker] BaseappMgr (common container)",
+            "type": "cppdbg",
+            "request": "launch",
+            "cwd": "/opt/kbengine/assets",
+            "program": "/opt/kbengine/kbe/bin/server/baseappmgr",
+            "args": [
+                "--cid", "5001"
+            ],
+            "stopAtEntry": false,
+            "environment": [],
+            "externalConsole": true,
+            "sourceFileMap": {
+                "/opt": "/home/leto/2PeopleCompany/REPOS/KBEngine/Engine/kbengine"
+            },
+            "pipeTransport": {
+                "debuggerPath": "/usr/bin/gdb",
+                "pipeProgram": "docker",
+                "pipeArgs": [
+                    "exec",
+                    "-i",
+                    "kbe-game-logger",
+                    "sh",
+                    "-c"
+                ],
+                "pipeCwd": "${workspaceFolder}"
+            },
+            "MIMode": "gdb"
+        },
+        {
+            "name": "[Docker] CellappMgr (common container)",
+            "type": "cppdbg",
+            "request": "launch",
+            "cwd": "/opt/kbengine/assets",
+            "program": "/opt/kbengine/kbe/bin/server/cellappmgr",
+            "args": [
+                "--cid", "6001"
+            ],
+            "stopAtEntry": false,
+            "environment": [],
+            "externalConsole": true,
+            "sourceFileMap": {
+                "/opt": "/home/leto/2PeopleCompany/REPOS/KBEngine/Engine/kbengine"
+            },
+            "pipeTransport": {
+                "debuggerPath": "/usr/bin/gdb",
+                "pipeProgram": "docker",
+                "pipeArgs": [
+                    "exec",
+                    "-i",
+                    "kbe-game-logger",
+                    "sh",
+                    "-c"
+                ],
+                "pipeCwd": "${workspaceFolder}"
+            },
+            "MIMode": "gdb"
+        },
+        {
+            "name": "[Docker] Cellapp (common container)",
+            "type": "cppdbg",
+            "request": "launch",
+            "cwd": "/opt/kbengine/assets",
+            "program": "/opt/kbengine/kbe/bin/server/cellapp",
+            "args": [
+                "--cid", "7001"
+            ],
+            "stopAtEntry": false,
+            "environment": [],
+            "externalConsole": true,
+            "sourceFileMap": {
+                "/opt": "/home/leto/2PeopleCompany/REPOS/KBEngine/Engine/kbengine"
+            },
+            "pipeTransport": {
+                "debuggerPath": "/usr/bin/gdb",
+                "pipeProgram": "docker",
+                "pipeArgs": [
+                    "exec",
+                    "-i",
+                    "kbe-game-logger",
+                    "sh",
+                    "-c"
+                ],
+                "pipeCwd": "${workspaceFolder}"
+            },
+            "MIMode": "gdb"
+        },
+    ]
+}

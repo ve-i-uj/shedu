@@ -1,6 +1,34 @@
-FROM centos:centos7
-COPY scripts/deploy /opt/kbengine/pre-assets/scripts/deploy
-COPY .env /opt/kbengine/pre-assets/.env
+ARG KBE_COMPILED_IMAGE_NAME
+ARG KBE_ENKI_PYTHON_IMAGE_NAME
+FROM ${KBE_ENKI_PYTHON_IMAGE_NAME} as enki_python
+LABEL maintainer="Aleksei Burov <burov_alexey@mail.ru>"
 
-RUN chmod +x /opt/kbengine/pre-assets/scripts/deploy/docker-entrypoint.sh
-RUN chmod +x /opt/kbengine/pre-assets/scripts/deploy/tail_logs.sh
+FROM ${KBE_COMPILED_IMAGE_NAME} as kbe_compiled
+
+RUN yum install git wget net-tools nano socat nc tcpdump -y
+
+WORKDIR /opt/kbengine/assets/.shedu/
+# Запомним, на основе чего всё создано. Это делается здесь, т.к. образ
+# ассетов будет собираться в контексте папки ассетов (в этой папке уже .env
+# файла shedu нет).
+COPY .env .env
+COPY data/kbenginexml.data data/kbenginexml.data
+
+# Скрипты для модификации конфига, точка входа и т.п.
+COPY scripts/deploy scripts/deploy
+# Настройки для Log4J
+COPY data/log4j/log4cxx_properties data/log4j/log4cxx_properties
+
+# Enki нужен для проверки здоровья компонентов.
+COPY --from=enki_python /opt/python /opt/python
+COPY --from=enki_python /opt/enki /opt/enki
+# Чтобы у $ENKI_PYTHON в healthcheck был путь до библиотеки enki
+ENV PYTHONPATH=/opt/enki
+ENV ENKI_PYTHON=/opt/python/bin/python3.9
+
+# Эти переменные нужны скриптам деплоя
+ENV KBE_ASSETS_PATH=/opt/kbengine/assets/
+# Эти переменные нужны движку для старта
+ENV KBE_ROOT=/opt/kbengine
+ENV KBE_BIN_PATH=/opt/kbengine/kbe/bin/server
+ENV KBE_RES_PATH=/opt/kbengine/kbe/res:/opt/kbengine/assets/res

@@ -1,13 +1,54 @@
 # Changelog
 
+## [0.10.0] - 2023-06-15
+
+### Compatibility
+
+- Docker Compose V2
+- KBEngine [v2.x](https://github.com/kbengine/kbengine)
+- KBEngine [v1.x](https://github.com/kbengine/kbengine/tree/1.x)
+- Enki (Python library for KBEngine) [v0.6.x](https://github.com/ve-i-uj/enki)
+
+### Added
+
+- A new Dockerfile to build python3.9 for the enki lib
+- The "enki" lib added to health-check kbe components
+- Added a new component Supervisor based on the Enki library replacing the Machine component
+- The cluster components can be debugged by VSCode
+- An initial log file in the "logs" directory to view logs without running game
+- An alone DB instance can be started for debugging
+- Added a new environment variable "KBE_PUBLIC_HOST"
+- Added a script that updates the Enki library from host
+
+### Changed
+
+- Running each component in a separate container + health check
+- The ES and log volumes are common for all games
+- The script modify_kbeenginexml.py moved to the Enki project
+- The project volumes are external + makefile rules to manage them
+- Updated Cocos2d demo build to run clients on different hosts
+- The script modify_kbe_config.py reads kbengine.xml attributes from the configuration file
+- Starting cluster components as a non-root user
+- The ES and log volumes are common for all games
+- The script modify_kbe_config.py moved to the Enki project
+
+### Fixed
+
+- The game name is in the ES index name
+- ELK doesn't use the .env config so it's no need to check config for ELK
+- Removed game name from ELK and MariaDB tags
+- The rules "logs_console" is fixed up
+
 ## [0.9.6] - 2023-05-13
 
 ### Changed
+
 - Elastic geoip processor was disabled because Kibana cannot connect to Elastic
 
 ## [0.9.5] - 2023-02-01
 
 ### Added
+
 - MariaDB health check and game start based on it
 - An initial log file in the "logs" directory to view logs without running game
 - The updated assets log4j settings to write logs to a separate dir for each game
@@ -15,22 +56,26 @@
 - Exporting Kibana search settings before the log page is open
 
 ### Changed
+
 - ELK and game compose projects were split
 - The deployment diagram was updated
 - The example configs were renamed
 - The deploy scripts were moved to the common scripts directory
 
 ### Fixed
+
 - Fixed: the assets repository didn't checkout to the defined commit
 
 ## [0.9.4] - 2023-01-21
 
 ### Fixed
+
 - The kbe js plugin in a git submodule was not updated in the Dockerfile
 
 ## [0.9.3] - 2023-01-21
 
 ### Added
+
 - A new config for the kbe server compatible with the Cocos2D-JS demo client
 - A new Dockerfile for building of the cocos demo client
 - Make rule for starting the kbe Cocos2D-JS demo
@@ -38,25 +83,31 @@
 ## [0.9.2] - 2023-01-21
 
 ### Added
+
 - The configuration file for the source code with LGPL license (v1.1.8)
 
 ### Changed
+
 - Machine ports and Interfaces telnet port were opened
 
 ### Fixed
+
 - The variables from the .env file are not exported to the Makefile
 
 ## [0.9.1] - 2023-01-16
 
 ### Added
+
 - Tests for building work flow were added
 - Using cache of github responses
 
 ### Changed
+
 - Checking ELK bash commands was moved in the Makefile (instead of the bash scripts)
 - Using docker-compose with two config files to stop and clean artifacts
 
 ### Fixed
+
 - The project is compatible with docker-compose version 1.25.0
 - The "./configure" script was add the executable flag
 - Minor fixes for the docker installation scripts
@@ -70,7 +121,7 @@
 
 ### Changed
 
-- Kbe docker volumes and nets have the names based on $GAME_UNIQUE_NAME
+- Kbe docker volumes and nets have the names based on $GAME_NAME
 - The build logic was moved to the Makefile, the unusing scripts were removed
 - The scripts are used the log.sh lib
 - The check_config.sh script checks all values are valid

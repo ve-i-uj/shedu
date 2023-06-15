@@ -1,14 +1,6 @@
-ARG KBE_COMPILED_IMAGE_NAME
 ARG PRE_ASSETS_IMAGE_NAME
 FROM ${PRE_ASSETS_IMAGE_NAME} as pre_assets
 LABEL maintainer="Aleksei Burov <burov_alexey@mail.ru>"
-
-FROM ${KBE_COMPILED_IMAGE_NAME}
-# We need python to a run script modifing kbengine.xml .
-# The script sets some settings to work with docker.
-RUN yum install python3 -y \
-    && yum clean all \
-    && rm -rf /var/cache/yum
 
 # Предполагается, что контекст перемещён в папку $KBE_ASSETS_PATH
 COPY . /opt/kbengine/assets
@@ -18,20 +10,35 @@ ARG KBE_ASSETS_SHA
 RUN if [ -d /opt/kbengine/assets/.git ] && [ ! -z "${KBE_ASSETS_SHA}" ]; then \
         git checkout ${KBE_ASSETS_SHA} -b kbe-deploy-branch-${KBE_ASSETS_SHA}; \
     fi
-COPY --from=pre_assets /opt/kbengine/pre-assets/ /opt/kbengine/assets/.shedu
+
+WORKDIR /opt/kbengine/assets
+
+# Модифицируем пользовательский конфиг файл kbe, чтобы работать с сетью docker
 ARG KBE_KBENGINE_XML_ARGS
-RUN python3 /opt/kbengine/assets/.shedu/scripts/deploy/modify_kbe_config.py \
-    --kbengine-xml-args=${KBE_KBENGINE_XML_ARGS} \
-    --env-file=/opt/kbengine/assets/.shedu/.env \
-    --kbe-assets-path=/opt/kbengine/assets
+RUN set -a \
+    && source .shedu/.env \
+    && envsubst < .shedu/data/kbenginexml.data > /tmp/kbenginexml.data \
+    && $ENKI_PYTHON /opt/enki/tools/modify_kbeenginexml.py \
+        --kbengine-xml-args=${KBE_KBENGINE_XML_ARGS} \
+        --data-file=/tmp/kbenginexml.data \
+        --kbe-assets-path=/opt/kbengine/assets
 
-ARG GAME_UNIQUE_NAME
-ENV KBE_GAME_NAME=${GAME_UNIQUE_NAME}
+# Добавим атрибуты hasBase, hasCell, hasClient сущности в entities.xml, на
+# основе содержания assets'ов. Это нужно делать обязательно, если компоненты
+# KBEngine запускать в разных контейнерах.
+RUN cp /opt/kbengine/assets/scripts/entities.xml /opt/kbengine/assets/scripts/entities.xml.bak
+RUN LOG_LEVEL=INFO \
+    ADD_EMPTY_ENTITY_MODULE=true \
+    GAME_ASSETS_DIR=/opt/kbengine/assets \
+    UPDATED_ENTITIES_XML_PATH=/opt/kbengine/assets/scripts/entities.xml \
+    $ENKI_PYTHON /opt/enki/tools/normalize_entitiesxml/main.py
 
-ENTRYPOINT bash /opt/kbengine/assets/docker-entrypoint.sh
+# Подменим настройки логирования KBE своими. GAME_NAME будет присутствовать
+# в пути папки логов
+ARG GAME_NAME
+ENV GAME_NAME=${GAME_NAME}
+RUN rm -rf res/server/log4cxx_properties \
+    && cp -r .shedu/data/log4j/log4cxx_properties res/server/log4cxx_properties
 
-# # "net-tools" for debugging to view network state of a running container
-# RUN yum install net-tools nano -y
-# RUN yum install net-tools nano -y \
-#     && yum clean all \
-#     && rm -rf /var/cache/yum
+ARG KBE_CONTAINER_USER
+RUN useradd $KBE_CONTAINER_USER

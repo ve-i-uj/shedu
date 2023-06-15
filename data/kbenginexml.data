@@ -1,0 +1,13 @@
+root.dbmgr.databaseInterfaces.default.type=mysql
+root.dbmgr.databaseInterfaces.default.host=mariadb
+root.dbmgr.databaseInterfaces.default.port=0
+root.dbmgr.databaseInterfaces.default.auth.username=$MYSQL_USER
+root.dbmgr.databaseInterfaces.default.auth.password=$MYSQL_PASSWORD
+root.dbmgr.databaseInterfaces.default.databaseName=$MYSQL_DATABASE
+
+root.dbmgr.shareDB=true
+
+root.baseapp.externalAddress=$KBE_PUBLIC_HOST
+root.loginapp.externalAddress=$KBE_PUBLIC_HOST
+
+root.interfaces.host=interfaces
