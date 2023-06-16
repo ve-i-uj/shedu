@@ -297,6 +297,25 @@ stop_db_only: ## [Dev] Stop DB only for debug purpose
 
 -----: ## -----
 
+portainer_start:
+	@docker volume create portainer_data
+	@docker run \
+		--rm \
+		-d \
+		-p 9000:9000 \
+		--name portainer \
+		-v /var/run/docker.sock:/var/run/docker.sock \
+		-v portainer_data:/data portainer/portainer-ce:latest
+
+portainer_stop:
+	@docker container stop portainer
+	@docker volume rm portainer_data
+
+portainer_open:
+	@python3 -m webbrowser -t http://localhost:9000
+
+-----: ## -----
+
 define HELP_TEXT
 *** [shedu] Help ***
 
