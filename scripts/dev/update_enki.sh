@@ -1,4 +1,4 @@
-# Обновить библиотеку Enki с локального хоста.
+# Обновить библиотеку Enki из локальной папки.
 #
 # Скрипт используется в разработке, например, в tasks.json для VSCode перед сборкой.
 # Библиотека обновляется только, если выставлена переменная ENKI_PATH.
@@ -7,6 +7,13 @@
 curr_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 source $( realpath "$curr_dir/../init.sh" )
 source $( realpath $SCRIPTS/log.sh )
+
+$SCRIPTS/misc/check_config.sh "$PROJECT_DIR/.env" @>/dev/null
+if [ $? -ne 0 ]; then
+    log error "Invalid config file (shedu/.env). Run \"make check_config\" "
+    exit 1
+fi
+
 source $PROJECT_DIR/.env
 
 if [ ! -z "${ENKI_PATH-}" ]; then

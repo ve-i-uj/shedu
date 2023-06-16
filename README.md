@@ -16,7 +16,7 @@ The project can be used for convenient local development, quick MVP creation, an
 
 Tested on Ubuntu 20.04, CentOS 7, Ubuntu 22.04
 
-![Docker environment](https://github.com/ve-i-uj/shedu/assets/6612371/67c73dbb-581a-4cdb-b986-de564f3b3b6b "KBE docker environment")
+![Docker environment](https://github.com/ve-i-uj/shedu/assets/6612371/e052407e-85b9-484e-9c8f-4801832ad9f5 "KBE docker environment")
 
 ## Table of contents
 

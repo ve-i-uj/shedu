@@ -36,7 +36,7 @@ services:
     command: --log_warnings=9
 
   supervisor:
-    image: ${KBE_ENKI_PYTHON_IMAGE_NAME}
+    image: ${KBE_SUPERVISOR_IMAGE_NAME}
     container_name: ${KBE_COMPONENT_CONTAINER_NAME}-supervisor
     restart: "no"
     working_dir: /opt/enki
@@ -85,7 +85,7 @@ services:
       timeout: 2s
       retries: 1
       start_period: 10s
-    entrypoint: bash /opt/kbengine/assets/.shedu/scripts/deploy/start_component.sh
+    entrypoint: bash /opt/shedu/scripts/deploy/start_component.sh
 
   interfaces:
     image: ${KBE_ASSETS_IMAGE_NAME}
@@ -114,7 +114,7 @@ services:
       timeout: 2s
       start_period: 10s
       retries: 1
-    entrypoint: bash /opt/kbengine/assets/.shedu/scripts/deploy/start_component.sh
+    entrypoint: bash /opt/shedu/scripts/deploy/start_component.sh
 
   dbmgr:
     image: ${KBE_ASSETS_IMAGE_NAME}
@@ -144,7 +144,7 @@ services:
       timeout: 2s
       retries: 1
       start_period: 10s
-    entrypoint: bash /opt/kbengine/assets/.shedu/scripts/deploy/start_component.sh
+    entrypoint: bash /opt/shedu/scripts/deploy/start_component.sh
 
   baseappmgr:
     image: ${KBE_ASSETS_IMAGE_NAME}
@@ -168,7 +168,7 @@ services:
       timeout: 2s
       retries: 1
       start_period: 10s
-    entrypoint: bash /opt/kbengine/assets/.shedu/scripts/deploy/start_component.sh
+    entrypoint: bash /opt/shedu/scripts/deploy/start_component.sh
 
   cellappmgr:
     image: ${KBE_ASSETS_IMAGE_NAME}
@@ -192,7 +192,7 @@ services:
       timeout: 2s
       retries: 1
       start_period: 10s
-    entrypoint: bash /opt/kbengine/assets/.shedu/scripts/deploy/start_component.sh
+    entrypoint: bash /opt/shedu/scripts/deploy/start_component.sh
 
   baseapp-7001:
     image: ${KBE_ASSETS_IMAGE_NAME}
@@ -222,7 +222,7 @@ services:
       timeout: 2s
       retries: 1
       start_period: 20s
-    entrypoint: bash /opt/kbengine/assets/.shedu/scripts/deploy/start_component.sh
+    entrypoint: bash /opt/shedu/scripts/deploy/start_component.sh
 
   cellapp-8001:
     image: ${KBE_ASSETS_IMAGE_NAME}
@@ -249,7 +249,7 @@ services:
       timeout: 2s
       retries: 1
       start_period: 20s
-    entrypoint: bash /opt/kbengine/assets/.shedu/scripts/deploy/start_component.sh
+    entrypoint: bash /opt/shedu/scripts/deploy/start_component.sh
 
   loginapp:
     image: ${KBE_ASSETS_IMAGE_NAME}
@@ -282,7 +282,7 @@ services:
       timeout: 2s
       retries: 1
       start_period: 20s
-    entrypoint: bash /opt/kbengine/assets/.shedu/scripts/deploy/start_component.sh
+    entrypoint: bash /opt/shedu/scripts/deploy/start_component.sh
 
 volumes:
   kbe-mariadb-data:

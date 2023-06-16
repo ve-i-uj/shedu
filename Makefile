@@ -36,8 +36,9 @@ endif
 
 SHEDU_VERSION := $(shell $(SCRIPTS)/version/get_version.sh)
 ENKI_VERSION := $(shell $(ROOT_DIR)/enki/scripts/version/get_version.sh)
-override PRE_ASSETS_IMAGE_NAME := $(PRE_ASSETS_IMAGE_NAME):$(SHEDU_VERSION)
+override PRE_ASSETS_IMAGE_NAME := $(PRE_ASSETS_IMAGE_NAME):$(KBE_ASSETS_VERSION)
 override KBE_ENKI_PYTHON_IMAGE_NAME := $(KBE_ENKI_PYTHON_IMAGE_NAME):$(ENKI_VERSION)
+override KBE_SUPERVISOR_IMAGE_NAME := $(KBE_SUPERVISOR_IMAGE_NAME):$(ENKI_VERSION)
 override KBE_ASSETS_IMAGE_NAME := $(KBE_ASSETS_IMAGE_NAME):$(KBE_ASSETS_VERSION)
 
 ifeq ($(KBE_ASSETS_PATH), demo)
@@ -68,11 +69,11 @@ force_stop_game: ## Force stop any game
 	fi
 
 clean_all: config_is_ok game_is_not_running elk_is_not_runnig ## Delete the artefacts of all games (not only the current project)
-	@res=$$(docker network ls --filter "name=*kbe-net*" -q); \
+	@res=$$(docker network ls --filter "name=kbe-net" -q); \
 	if [ ! -z "$$res" ]; then \
 		docker network rm $$res; \
 	fi
-	@res=$$(docker volume ls --filter name="*kbe*-data" -q); \
+	@res=$$(docker volume ls --filter name="kbe-" -q); \
 	if [ ! -z "$$res" ]; then \
 		docker volume rm $$res; \
 	fi
@@ -102,7 +103,7 @@ logs_dejavu: elk_is_runnig ## Show the log viewer in the web interface (Dejavu)
 logs_console: config_is_ok ## Show actual log records of the game in the console
 	@docker exec \
 		-it $(KBE_COMPONENT_CONTAINER_NAME)-logger \
-		/bin/bash .shedu/scripts/deploy/tail_logs.sh
+		/bin/bash /opt/shedu/scripts/deploy/tail_logs.sh
 
 -----: ## -----
 
@@ -123,16 +124,23 @@ clean_kbe: config_is_ok kbe_is_built game_is_not_running # Clean the compiled kb
 build_game: config_is_ok game_is_not_built kbe_is_built ## Build a kbengine docker image contained assets. It binds "assets" with the compiled kbe image
 	@docker pull $(KBE_DB_IMAGE_NAME)
 	@docker tag $(KBE_DB_IMAGE_NAME) $(KBE_DB_IMAGE_TAGGED_NAME)
-	@$(SCRIPTS)/dev/update_enki.sh
+	@if [ ! -z $(ENKI_PATH) ] || [ $$( $(SCRIPTS)/misc/image_exists_on_hub.sh $(KBE_ENKI_PYTHON_IMAGE_NAME) ) = false ]; then \
+		$(SCRIPTS)/dev/update_enki.sh; \
+		docker build \
+			--file "$(DOCKERFILE_ENKI_PYTHON)" \
+			--build-arg KBE_CONTAINER_USER="$(KBE_CONTAINER_USER)" \
+			--tag "$(KBE_ENKI_PYTHON_IMAGE_NAME)" \
+			. ; \
+	else \
+		docker pull "$(KBE_ENKI_PYTHON_IMAGE_NAME)"; \
+	fi
 	@docker build \
-		--file "$(DOCKERFILE_ENKI_PYTHON)" \
-		--build-arg KBE_CONTAINER_USER="$(KBE_CONTAINER_USER)" \
-		--build-arg GAME_NAME="$(GAME_NAME)" \
-		--tag "$(KBE_ENKI_PYTHON_IMAGE_NAME)" \
+		--file "$(DOCKERFILE_SUPERVISOR)" \
+		--build-arg KBE_ENKI_PYTHON_IMAGE_NAME="$(KBE_ENKI_PYTHON_IMAGE_NAME)" \
+		--tag "$(KBE_SUPERVISOR_IMAGE_NAME)" \
 		.
 	@docker build \
 		--file "$(DOCKERFILE_PRE_ASSETS)" \
-		--build-arg KBE_COMPILED_IMAGE_NAME="$(KBE_COMPILED_IMAGE_NAME_SHA)" \
 		--build-arg KBE_ENKI_PYTHON_IMAGE_NAME="$(KBE_ENKI_PYTHON_IMAGE_NAME)" \
 		--tag "$(PRE_ASSETS_IMAGE_NAME)" \
 		.
@@ -144,6 +152,7 @@ build_game: config_is_ok game_is_not_built kbe_is_built ## Build a kbengine dock
 		--build-arg KBE_KBENGINE_XML_ARGS="$(KBE_KBENGINE_XML_ARGS)" \
 		--build-arg GAME_NAME="$(GAME_NAME)" \
 		--build-arg KBE_CONTAINER_USER="$(KBE_CONTAINER_USER)" \
+		--build-arg KBE_COMPILED_IMAGE_NAME_SHA="$(KBE_COMPILED_IMAGE_NAME_SHA)" \
 		--tag "$(KBE_ASSETS_IMAGE_NAME)" \
 		.
 	@docker volume create $(KBE_DB_VOLUME_NAME)
@@ -171,20 +180,15 @@ stop_game: config_is_ok game_is_running ## Stop the docker containers contained 
 		-p $(GAME_COMPOSE_PROJECT_NAME) \
 		rm -f
 
-clean_game: config_is_ok game_is_not_running ## Delete the artefacts connected with the project (containers, volumes, docker networks, etc)
-	@docker-compose \
-		--log-level ERROR \
-		-f $(ROOT_DIR)/docker-compose.yml \
-		-p $(GAME_COMPOSE_PROJECT_NAME) \
-		down --rmi all
+clean_game: config_is_ok game_is_not_running game_is_built ## Delete the artefacts connected with the project (containers, volumes, docker networks, etc)
+	@docker rmi "$(KBE_ASSETS_IMAGE_NAME)"
 	@docker volume rm $(KBE_DB_VOLUME_NAME)
 	@if [ -z "$$(docker volume ls --filter "name=$(ELK_ES_VOLUME_NAME)" -q)" ]; then \
 		if [ ! -z "$$(docker volume ls --filter "name=$(KBE_LOG_VOLUME_NAME)" -q)" ]; then \
 			docker volume rm $(KBE_LOG_VOLUME_NAME); \
 		fi; \
 	fi
-
-
+	@docker rmi "$(PRE_ASSETS_IMAGE_NAME)"
 
 -----: ## -----
 
@@ -234,10 +238,6 @@ clean_elk: elk_is_not_runnig elk_is_built
 restart_elk: stop_elk start_elk
 
 -----: ## -----
-
-# go_into: config_is_ok game_is_running ## [Dev] Go into the running game container
-go_into: config_is_ok ## [Dev] Go into the running game container
-	@docker exec --interactive --tty "$(KBE_COMPONENT_CONTAINER_NAME)-machine" /bin/bash
 
 build_force: ## [Dev] Build a docker image of compiled KBEngine without using of cache
 	@$(SCRIPTS)/build_kbe_compiled.sh \
@@ -362,14 +362,14 @@ game_is_not_running: # Check the game is not running. Raise error otherwise
 
 kbe_is_built: # Check the compiled kbe image exists. Raise error otherwise
 	@source $(SCRIPTS)/log.sh; \
-	if [ -z "$$(docker images --filter "reference=$(KBE_COMPILED_IMAGE_NAME)" -q)" ]; then \
+	if [ -z "$$(docker images --filter "reference=$(KBE_COMPILED_IMAGE_NAME_SHA)" -q)" ]; then \
 		log error "The \"$(KBE_COMPILED_IMAGE_NAME_1)\" image is NOT built. Run \"make build_kbe\" af first"; \
 		exit 1; \
 	fi
 
 kbe_is_not_built: # Check the compiled kbe image doesn't exist. Raise error otherwise
 	@source $(SCRIPTS)/log.sh; \
-	if [ ! -z "$$(docker images --filter "reference=$(KBE_COMPILED_IMAGE_NAME)" -q)" ]; then \
+	if [ ! -z "$$(docker images --filter "reference=$(KBE_COMPILED_IMAGE_NAME_SHA)" -q)" ]; then \
 		log error "The \"$(KBE_COMPILED_IMAGE_NAME_1)\" image is built. Run \"make clean_kbe\" at first"; \
 		exit 1; \
 	fi
@@ -436,6 +436,10 @@ hello:
 	@echo "GAME_IDLE_START=$(GAME_IDLE_START)"
 	@echo
 	@echo "KBE_DB_VOLUME_NAME=$(KBE_DB_VOLUME_NAME)"
+	@echo
+	@echo "ENKI_PATH=$(ENKI_PATH)"
+	@echo "KBE_ENKI_PYTHON_IMAGE_NAME=$(KBE_ENKI_PYTHON_IMAGE_NAME)"
+	@echo
 
 test:
 	@docker version

@@ -1,0 +1,11 @@
+ARG KBE_ENKI_PYTHON_IMAGE_NAME
+FROM ${KBE_ENKI_PYTHON_IMAGE_NAME}
+LABEL maintainer="Aleksei Burov <burov_alexey@mail.ru>"
+
+#
+# Образ компонента Supervisor, написанного на Python и повторяющего API
+# комонента KBEngine Machine.
+#
+
+WORKDIR /opt/enki
+COPY scripts/deploy/start_supervisor.sh start_supervisor.sh

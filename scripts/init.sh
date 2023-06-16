@@ -19,9 +19,10 @@ export ELK_COMPOSE_PROJECT_NAME=kbe-elk
 # Для игр используется один и тот же образ KBE, привязанный к коммиту KBE
 export KBE_COMPILED_IMAGE_NAME="$PROJECT_NAME/kbe-compiled"
 
-export PRE_ASSETS_IMAGE_NAME="$PROJECT_NAME/kbe-pre-assets"
+export PRE_ASSETS_IMAGE_NAME="$PROJECT_NAME/kbe-pre-assets-$GAME_NAME"
 
 export KBE_ENKI_PYTHON_IMAGE_NAME=$PROJECT_NAME/enki-python
+export KBE_SUPERVISOR_IMAGE_NAME=$PROJECT_NAME/supervisor
 
 export KBE_ASSETS_IMAGE_NAME=$PROJECT_NAME/kbe-assets-$GAME_NAME
 export KBE_ASSETS_CONTAINER_NAME=kbe-assets-$GAME_NAME
@@ -50,6 +51,7 @@ export DOCKERFILE_KBE_COMPILED=dockerfiles/kbengine/Dockerfile.kbe-compiled
 export DOCKERFILE_PRE_ASSETS=dockerfiles/kbengine/Dockerfile.pre-assets
 export DOCKERFILE_COCOS_DEMO_CLIENT=dockerfiles/kbengine/Dockerfile.cocos-demo
 export DOCKERFILE_ENKI_PYTHON=dockerfiles/kbengine/Dockerfile.enki
+export DOCKERFILE_SUPERVISOR=dockerfiles/kbengine/Dockerfile.supervisor
 
 export KBE_ASSETS_DEMO_GIT_URL=https://github.com/kbengine/kbengine_demos_assets.git
 export KBE_GITHUB_URL=https://github.com/kbengine/kbengine
