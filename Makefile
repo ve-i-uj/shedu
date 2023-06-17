@@ -3,7 +3,7 @@ SHELL := /bin/bash
 ROOT_DIR := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 SCRIPTS := $(ROOT_DIR)/scripts
 
-# Check the .env file exists
+# Check if the .env file exists
 # Импорт переменых окружения из инициализационного файла, чтобы иметь
 # возможность запускать здесь docker-compose
 ifneq ("$(wildcard .env)","")
@@ -21,7 +21,7 @@ $(shell mkdir $(tmp_dir) 2>/dev/null; \
 	export $(shell sed 's/=.*//' $(tmp_dir)/environment.mk)
 endif
 
-# * Перезагрузим часть переменных + какие-то создадим для docker-compose
+# Перезагрузим часть переменных + какие-то создадим для docker-compose
 
 ifeq ($(KBE_GIT_COMMIT),)
 	# Если хэш целевого комита не выставлен, то берётся последний комит из репозитория
@@ -54,58 +54,6 @@ endif
 	@echo Use \"make help\"
 
 all: help
-
-status: config_is_ok ## Return the game status ("running" or "stopped")
-	@$(SCRIPTS)/misc/get_status.sh
-
-force_stop_game: ## Force stop any game
-	@res=$$(docker ps --filter name=$(KBE_COMPONENT_CONTAINER_NAME) -q); \
-	if [ ! -z "$$res" ]; then \
-		docker stop "$$res"; \
-	fi
-	@res=$$(docker container ls --all --filter name=$(KBE_COMPONENT_CONTAINER_NAME) -q); \
-	if [ ! -z "$$res" ]; then \
-		echo $$res | xargs docker container rm --volume; \
-	fi
-
-clean_all: config_is_ok game_is_not_running elk_is_not_runnig ## Delete the artefacts of all games (not only the current project)
-	@res=$$(docker network ls --filter "name=kbe-net" -q); \
-	if [ ! -z "$$res" ]; then \
-		docker network rm $$res; \
-	fi
-	@res=$$(docker volume ls --filter name="kbe-" -q); \
-	if [ ! -z "$$res" ]; then \
-		docker volume rm $$res; \
-	fi
-	@res=$$(docker images ls --filter reference="$(PROJECT_NAME)/*" --format "{{.Repository}}:{{.Tag}}"); \
-	if [ ! -z "$$res" ]; then \
-		echo $$res | xargs docker rmi; \
-	fi
-	@rm -rf $(PROJECT_CACHE_DIR)
-
-check_config: ## Check the configuration file
-	@$(SCRIPTS)/misc/print_configs_vars.sh --only-user-settings
-	@$(SCRIPTS)/misc/check_config.sh $(ROOT_DIR)/.env
-
-# При остановке ELK не сохраняется view Kibana в ES. Поэтому импортируем view
-# и сразу его открываем с нужными полями в таблице
-logs_kibana: elk_is_runnig ## Show the log viewer in the web interface (Kibana)
-	@curl -X POST \
-		http://localhost:5601/api/saved_objects/_import?overwrite=true \
-		-H "kbn-xsrf: true" --form file=@$(ROOT_DIR)/data/kibana/export.ndjson \
-		-s -o /dev/null
-	@url="http://localhost:5601/app/discover#/view/9bdada80-a22e-11ed-ac3b-47395a81c705"; \
-		python3 -c "import webbrowser; webbrowser.open(\"$$url\")"
-
-logs_dejavu: elk_is_runnig ## Show the log viewer in the web interface (Dejavu)
-	@python3 -c "import webbrowser; webbrowser.open('http://localhost:1358/')"
-
-logs_console: config_is_ok ## Show actual log records of the game in the console
-	@docker exec \
-		-it $(KBE_COMPONENT_CONTAINER_NAME)-logger \
-		/bin/bash /opt/shedu/scripts/deploy/tail_logs.sh
-
------: ## -----
 
 build_kbe: config_is_ok ## Build a docker image of KBEngine
 	@$(SCRIPTS)/build_kbe_compiled.sh \
@@ -239,11 +187,65 @@ restart_elk: stop_elk start_elk
 
 -----: ## -----
 
-build_force: ## [Dev] Build a docker image of compiled KBEngine without using of cache
+check_config: ## Check the configuration file
+	@$(SCRIPTS)/misc/print_configs_vars.sh --only-user-settings
+	@$(SCRIPTS)/misc/check_config.sh $(ROOT_DIR)/.env
+
+# При остановке ELK не сохраняется view Kibana в ES. Поэтому импортируем view
+# и сразу его открываем с нужными полями в таблице
+logs_kibana: elk_is_runnig ## Show the log viewer in the web interface (Kibana)
+	@curl -X POST \
+		http://localhost:5601/api/saved_objects/_import?overwrite=true \
+		-H "kbn-xsrf: true" --form file=@$(ROOT_DIR)/data/kibana/export.ndjson \
+		-s -o /dev/null
+	@url="http://localhost:5601/app/discover#/view/9bdada80-a22e-11ed-ac3b-47395a81c705"; \
+		python3 -c "import webbrowser; webbrowser.open(\"$$url\")"
+
+logs_dejavu: elk_is_runnig ## Show the log viewer in the web interface (Dejavu)
+	@python3 -c "import webbrowser; webbrowser.open('http://localhost:1358/')"
+
+logs_console: config_is_ok ## Show actual log records of the game in the console
+	@docker exec \
+		-it $(KBE_COMPONENT_CONTAINER_NAME)-logger \
+		/bin/bash /opt/shedu/scripts/deploy/tail_logs.sh
+
+clean_all: force_stop_game force_stop_elk ## Stop and delete the artefacts of all games (not only the current project)
+	@res=$$(docker network ls --filter "name=kbe-net" -q); \
+	if [ ! -z "$$res" ]; then \
+		docker network rm $$res; \
+	fi
+	@res=$$(docker volume ls --filter name="kbe-" -q); \
+	if [ ! -z "$$res" ]; then \
+		docker volume rm $$res; \
+	fi
+	@res=$$(docker images ls --filter reference="$(PROJECT_NAME)/*" --format "{{.Repository}}:{{.Tag}}"); \
+	if [ ! -z "$$res" ]; then \
+		echo $$res | xargs docker rmi; \
+	fi
+	@rm -rf $(PROJECT_CACHE_DIR)
+
+status: config_is_ok ## Return the game status ("running" or "stopped")
+	@$(SCRIPTS)/misc/get_status.sh
+
+-----: ## -----
+
+force_build_kbe: ## [Dev] Build a docker image of compiled KBEngine without using of cache
 	@$(SCRIPTS)/build_kbe_compiled.sh \
 		--kbe-git-commit=$(KBE_GIT_COMMIT) \
 		--kbe-user-tag=$(KBE_USER_TAG) \
 		--force
+
+force_stop_game: ## [Dev] Force stop any game
+	@res=$$(docker container ls --all --filter name=$(KBE_COMPONENT_CONTAINER_NAME) -q); \
+	if [ ! -z "$$res" ]; then \
+		echo $$res | xargs docker container rm --force --volumes; \
+	fi
+
+force_stop_elk: ## [Dev] Force stop ELK
+	@res=$$(docker container ls --all --filter name=$(ELK_C_NAME_PREFIX) -q); \
+	if [ ! -z "$$res" ]; then \
+		echo $$res | xargs docker container rm --force --volumes; \
+	fi
 
 push_kbe: config_is_ok kbe_is_built ## [Dev] Push the image to the docker hub repository
 	@docker push $(KBE_COMPILED_IMAGE_NAME_SHA)
@@ -251,6 +253,9 @@ push_kbe: config_is_ok kbe_is_built ## [Dev] Push the image to the docker hub re
 
 tail_elk_logs: config_is_ok elk_is_runnig ## [Dev] Show the ELK log records in the console
 	@docker-compose -f $(ROOT_DIR)/docker-compose.elk.yml logs -f
+
+print_vars: ## [Dev] List the variables of the ".env" and "init.sh" files
+	@$(SCRIPTS)/misc/print_configs_vars.sh
 
 version: ## [Dev] The current version of the shedu
 	@$(ROOT_DIR)/scripts/version/get_version.sh
@@ -276,28 +281,7 @@ cocos_clean: ## [Dev] Delete the image of the Cocos2D client demo
 
 -----: ## -----
 
-start_db_only: ## [Dev] Start DB only for debug purpose
-	@docker-compose \
-		--log-level ERROR \
-		-f $(ROOT_DIR)/docker-compose.yml \
-		-p $(GAME_COMPOSE_PROJECT_NAME) \
-		up -d mariadb
-
-stop_db_only: ## [Dev] Stop DB only for debug purpose
-	@docker-compose \
-		--log-level ERROR \
-		-f $(ROOT_DIR)/docker-compose.yml \
-		-p $(GAME_COMPOSE_PROJECT_NAME) \
-		stop mariadb
-	@docker-compose \
-		--log-level ERROR \
-		-f $(ROOT_DIR)/docker-compose.yml \
-		-p $(GAME_COMPOSE_PROJECT_NAME) \
-		rm -f mariadb
-
------: ## -----
-
-portainer_start:
+portainer_start: ## [Dev] Start Portainer
 	@docker volume create portainer_data
 	@docker run \
 		--rm \
@@ -307,11 +291,11 @@ portainer_start:
 		-v /var/run/docker.sock:/var/run/docker.sock \
 		-v portainer_data:/data portainer/portainer-ce:latest
 
-portainer_stop:
+portainer_stop: ## [Dev] Stop Portainer
 	@docker container stop portainer
 	@docker volume rm portainer_data
 
-portainer_open:
+portainer_open: ## [Dev] Open the Portainer web page (only on local host)
 	@python3 -m webbrowser -t http://localhost:9000
 
 -----: ## -----
@@ -332,7 +316,7 @@ cp configs/kbe-v2.5.12-demo.env .env
 make build_game
 make start_game
 make logs_console
-# Or you can view the game log records in the web intarface of Kibana or Dejavu
+# Or you can view the game log records in the web intarface of Kibana or Dejavu.
 # It needs to wait about a minute after the game ELK started because the ElasticSearch needs
 # time to up. Then run this command and the web page must open in your web browser.
 make logs_kibana

@@ -20,18 +20,27 @@ debug_elk_run_logstash:
 debug_print_compose:
 	@docker-compose config
 
-debug_print_vars:
-	@$(SCRIPTS)/misc/print_configs_vars.sh
-
 debug_elk_logs:
 	@docker-compose \
 		-f $(ROOT_DIR)/docker-compose.elk.yml \
 		-p $(ELK_COMPOSE_PROJECT_NAME) \
 		logs --timestamps --follow
 
-debug_game_logs:
+debug_db_run: # Start DB only
 	@docker-compose \
 		--log-level ERROR \
 		-f $(ROOT_DIR)/docker-compose.yml \
 		-p $(GAME_COMPOSE_PROJECT_NAME) \
-		logs --timestamps --follow
+		up -d mariadb
+
+debug_db_down: # Stop DB only
+	@docker-compose \
+		--log-level ERROR \
+		-f $(ROOT_DIR)/docker-compose.yml \
+		-p $(GAME_COMPOSE_PROJECT_NAME) \
+		stop mariadb
+	@docker-compose \
+		--log-level ERROR \
+		-f $(ROOT_DIR)/docker-compose.yml \
+		-p $(GAME_COMPOSE_PROJECT_NAME) \
+		rm -f mariadb
