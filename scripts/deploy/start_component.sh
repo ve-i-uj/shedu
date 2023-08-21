@@ -10,8 +10,8 @@ fi
 log_dir="/opt/kbengine/assets/logs/${GAME_NAME}"
 if [ ! -d "$log_dir" ]; then
     mkdir -p "$log_dir"
-    chown $KBE_CONTAINER_USER:$KBE_CONTAINER_USER "$log_dir"
 fi
+chown $KBE_CONTAINER_USER:$KBE_CONTAINER_USER "$log_dir"
 
 runuser \
     --user kbengine \
