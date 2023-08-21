@@ -36,7 +36,7 @@ ENV PYTHONPATH=/opt/enki
 ENV ENKI_PYTHON=/opt/python/bin/python3.9
 
 # Эти переменные нужны скриптам деплоя
-ENV KBE_ASSETS_PATH=/opt/kbengine/assets/
+ENV KBE_ASSETS_PATH=/opt/kbengine/assets
 # Эти переменные нужны движку для старта
 ENV KBE_ROOT=/opt/kbengine
 ENV KBE_BIN_PATH=/opt/kbengine/kbe/bin/server

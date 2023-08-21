@@ -62,4 +62,11 @@ RUN rm -rf res/server/log4cxx_properties \
 ARG KBE_CONTAINER_USER
 RUN useradd $KBE_CONTAINER_USER
 
+# При получении сообщения Loginapp::importClientSDK Loginapp создаёт временную
+# папку в Assets'ах (/opt/kbengine/assets/_tmp). Папка ассетсов под рутом, а
+# процесс Loginapp запущен от пользователя. Чтобы это соощение работало, заранее
+# создадим эту папку с нужными правами.
+RUN mkdir /opt/kbengine/assets/_tmp \
+    && chown $KBE_CONTAINER_USER:$KBE_CONTAINER_USER /opt/kbengine/assets/_tmp
+
 COPY --from=kbe_compiled /opt/kbengine/kbe/ /opt/kbengine/kbe/
