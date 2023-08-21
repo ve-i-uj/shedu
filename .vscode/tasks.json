@@ -58,7 +58,7 @@
         {
             "label": "[Make] Stop -> Clean -> Build -> Start game",
             "type": "shell",
-            "command": "make stop_game clean_game build_game start_game",
+            "command": "make force_stop_game clean_game build_game start_game",
             "args": [],
             "group": {
                 "kind": "build",

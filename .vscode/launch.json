@@ -186,7 +186,7 @@
             "cwd": "/opt/kbengine/assets",
             "program": "/opt/kbengine/kbe/bin/server/cellapp",
             "args": [
-                "--cid=8001"
+                "--cid=7001"
             ],
             "stopAtEntry": false,
             "environment": [],
@@ -215,7 +215,7 @@
             "cwd": "/opt/kbengine/assets",
             "program": "/opt/kbengine/kbe/bin/server/baseapp",
             "args": [
-                "--cid=7001"
+                "--cid=8001"
             ],
             "stopAtEntry": false,
             "environment": [],
