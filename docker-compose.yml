@@ -54,9 +54,9 @@ services:
       - kbe-net
     healthcheck:
       test: >
-        test $$GAME_IDLE_START
+        test $$GAME_IDLE_START || test $$DISABLE_HEALTHCHECK
         || LOG_LEVEL=ERROR $$ENKI_PYTHON /opt/enki/tools/cmd/machine/lookApp.py
-      interval: 5s
+      interval: ${HEALTHCHECK_INTERVAL}
       timeout: 2s
       retries: 1
     entrypoint: bash start_supervisor.sh
@@ -80,9 +80,9 @@ services:
       - 34000:34000
     healthcheck:
       test: >
-        test $$GAME_IDLE_START
+        test $$GAME_IDLE_START || test $$DISABLE_HEALTHCHECK
         || CACHE_ADDR=1 LOG_LEVEL=ERROR $$ENKI_PYTHON /opt/enki/tools/cmd/logger/lookApp.py
-      interval: 5s
+      interval: ${HEALTHCHECK_INTERVAL}
       timeout: 2s
       retries: 1
       start_period: 10s
@@ -109,9 +109,9 @@ services:
       - 33000:33000
     healthcheck:
       test: >
-        test $$GAME_IDLE_START
+        test $$GAME_IDLE_START || test $$DISABLE_HEALTHCHECK
         || CACHE_ADDR=1 LOG_LEVEL=ERROR $$ENKI_PYTHON /opt/enki/tools/cmd/interfaces/lookApp.py
-      interval: 5s
+      interval: ${HEALTHCHECK_INTERVAL}
       timeout: 2s
       start_period: 10s
       retries: 1
@@ -139,9 +139,9 @@ services:
       - 32000:32000
     healthcheck:
       test: >
-        test $$GAME_IDLE_START
+        test $$GAME_IDLE_START || test $$DISABLE_HEALTHCHECK
         || CACHE_ADDR=1 LOG_LEVEL=ERROR $$ENKI_PYTHON /opt/enki/tools/cmd/dbmgr/lookApp.py
-      interval: 5s
+      interval: ${HEALTHCHECK_INTERVAL}
       timeout: 2s
       retries: 1
       start_period: 10s
@@ -163,9 +163,9 @@ services:
       - kbe-net
     healthcheck:
       test: >
-        test $$GAME_IDLE_START
+        test $$GAME_IDLE_START || test $$DISABLE_HEALTHCHECK
         || CACHE_ADDR=1 LOG_LEVEL=ERROR $$ENKI_PYTHON /opt/enki/tools/cmd/baseappmgr/lookApp.py
-      interval: 5s
+      interval: ${HEALTHCHECK_INTERVAL}
       timeout: 2s
       retries: 1
       start_period: 10s
@@ -187,9 +187,9 @@ services:
       - kbe-net
     healthcheck:
       test: >
-        test $$GAME_IDLE_START
+        test $$GAME_IDLE_START || test $$DISABLE_HEALTHCHECK
         || CACHE_ADDR=1 LOG_LEVEL=ERROR $$ENKI_PYTHON /opt/enki/tools/cmd/cellappmgr/lookApp.py
-      interval: 5s
+      interval: ${HEALTHCHECK_INTERVAL}
       timeout: 2s
       retries: 1
       start_period: 10s
@@ -214,9 +214,9 @@ services:
       - 50001:50000
     healthcheck:
       test: >
-        test $$GAME_IDLE_START
+        test $$GAME_IDLE_START || test $$DISABLE_HEALTHCHECK
         || CACHE_ADDR=1 LOG_LEVEL=ERROR $$ENKI_PYTHON /opt/enki/tools/cmd/cellapp/lookApp.py
-      interval: 5s
+      interval: ${HEALTHCHECK_INTERVAL}
       timeout: 2s
       retries: 1
       start_period: 20s
@@ -244,9 +244,9 @@ services:
       - 40001:40000
     healthcheck:
       test: >
-        test $$GAME_IDLE_START
+        test $$GAME_IDLE_START || test $$DISABLE_HEALTHCHECK
         || CACHE_ADDR=1 LOG_LEVEL=ERROR $$ENKI_PYTHON /opt/enki/tools/cmd/baseapp/lookApp.py
-      interval: 5s
+      interval: ${HEALTHCHECK_INTERVAL}
       timeout: 2s
       retries: 1
       start_period: 20s
@@ -277,9 +277,9 @@ services:
       - 21103:21103
     healthcheck:
       test: >
-        test $$GAME_IDLE_START
+        test $$GAME_IDLE_START || test $$DISABLE_HEALTHCHECK
         || CACHE_ADDR=1 LOG_LEVEL=ERROR $$ENKI_PYTHON /opt/enki/tools/cmd/loginapp/lookApp.py
-      interval: 5s
+      interval: ${HEALTHCHECK_INTERVAL}
       timeout: 2s
       retries: 1
       start_period: 20s

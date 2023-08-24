@@ -48,6 +48,10 @@ ifeq ($(KBE_ASSETS_PATH), demo)
 	fi)
 endif
 
+ifeq ($(HEALTHCHECK_INTERVAL),)
+	override HEALTHCHECK_INTERVAL := 5s
+endif
+
 .PHONY: *
 .EXPORT_ALL_VARIABLES:
 .DEFAULT:
@@ -90,6 +94,7 @@ build_game: config_is_ok game_is_not_built kbe_is_built ## Build a kbengine dock
 	@docker build \
 		--file "$(DOCKERFILE_PRE_ASSETS)" \
 		--build-arg KBE_ENKI_PYTHON_IMAGE_NAME="$(KBE_ENKI_PYTHON_IMAGE_NAME)" \
+		--build-arg KBE_COMPILED_IMAGE_NAME_SHA="$(KBE_COMPILED_IMAGE_NAME_SHA)" \
 		--tag "$(PRE_ASSETS_IMAGE_NAME)" \
 		.
 	@cd $(KBE_ASSETS_PATH); \
@@ -100,7 +105,6 @@ build_game: config_is_ok game_is_not_built kbe_is_built ## Build a kbengine dock
 		--build-arg KBE_KBENGINE_XML_ARGS="$(KBE_KBENGINE_XML_ARGS)" \
 		--build-arg GAME_NAME="$(GAME_NAME)" \
 		--build-arg KBE_CONTAINER_USER="$(KBE_CONTAINER_USER)" \
-		--build-arg KBE_COMPILED_IMAGE_NAME_SHA="$(KBE_COMPILED_IMAGE_NAME_SHA)" \
 		--tag "$(KBE_ASSETS_IMAGE_NAME)" \
 		.
 	@docker volume create $(KBE_DB_VOLUME_NAME)
@@ -136,7 +140,7 @@ clean_game: config_is_ok game_is_not_running game_is_built ## Delete the artefac
 			docker volume rm $(KBE_LOG_VOLUME_NAME); \
 		fi; \
 	fi
-	@docker rmi "$(PRE_ASSETS_IMAGE_NAME)"
+	@docker rmi "$(PRE_ASSETS_IMAGE_NAME)"; \
 
 -----: ## -----
 
@@ -223,6 +227,9 @@ clean_all: force_stop_game force_stop_elk ## Stop and delete the artefacts of al
 		echo $$res | xargs docker rmi; \
 	fi
 	@rm -rf $(PROJECT_CACHE_DIR)
+	@if [ ! -z "$$(docker images --filter "reference=$(PRE_ASSETS_IMAGE_NAME)" -q)" ]; then \
+		docker rmi "$(PRE_ASSETS_IMAGE_NAME)"; \
+	fi
 
 status: config_is_ok ## Return the game status ("running" or "stopped")
 	@$(SCRIPTS)/misc/get_status.sh
@@ -297,6 +304,43 @@ portainer_stop: ## [Dev] Stop Portainer
 
 portainer_open: ## [Dev] Open the Portainer web page (only on local host)
 	@python3 -m webbrowser -t http://localhost:9000
+
+-----: ## -----
+
+# The "pre-assets" image is dependencies + settings from Shedu + compiled KBEngine.
+# When debugging game scripts (assets), you need to restart the server
+# frequently. Because settings in this case do not change, pre-assets for the
+# debugged version of the game is the same. So "pre-assets image"
+# doesn't need to be deleted and to be rebuilt. It will greatly speed up the
+# server startup and save a lot of time with frequent restarts.
+
+restart_game: ## [Dev] Rebuild and restart the game server with only updated "assets"
+	@res=$$(docker container ls --all --filter name=$(KBE_COMPONENT_CONTAINER_NAME) -q); \
+	if [ ! -z "$(NOT_STOP_DB)" ]; then \
+		mariadb_id=$$(docker container ls --all --filter name=$(KBE_COMPONENT_CONTAINER_NAME)-mariadb -q); \
+		res=$${res[@]/$$mariadb_id}; \
+	fi; \
+	if [ ! -z "$$res" ]; then \
+		echo $$res | xargs docker container rm --force --volumes; \
+	fi
+	@if [ ! -z "$$(docker images --filter "reference=$(KBE_ASSETS_IMAGE_NAME)" -q)" ]; then \
+		docker rmi "$(KBE_ASSETS_IMAGE_NAME)"; \
+	fi
+	@cd $(KBE_ASSETS_PATH); \
+	docker build \
+		--file "$(DOCKERFILE_KBE_ASSETS)" \
+		--build-arg PRE_ASSETS_IMAGE_NAME="$(PRE_ASSETS_IMAGE_NAME)" \
+		--build-arg KBE_ASSETS_SHA="$(KBE_ASSETS_SHA)" \
+		--build-arg KBE_KBENGINE_XML_ARGS="$(KBE_KBENGINE_XML_ARGS)" \
+		--build-arg GAME_NAME="$(GAME_NAME)" \
+		--build-arg KBE_CONTAINER_USER="$(KBE_CONTAINER_USER)" \
+		--tag "$(KBE_ASSETS_IMAGE_NAME)" \
+		.
+	@docker-compose \
+		--log-level ERROR \
+		-f $(ROOT_DIR)/docker-compose.yml \
+		-p $(GAME_COMPOSE_PROJECT_NAME) \
+		up -d
 
 -----: ## -----
 
@@ -442,6 +486,8 @@ hello:
 	@echo
 	@echo "ENKI_PATH=$(ENKI_PATH)"
 	@echo "KBE_ENKI_PYTHON_IMAGE_NAME=$(KBE_ENKI_PYTHON_IMAGE_NAME)"
+	@echo
+	@echo "HEALTHCHECK_INTERVAL"=$(HEALTHCHECK_INTERVAL)
 	@echo
 
 test:

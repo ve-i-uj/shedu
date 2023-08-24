@@ -1,6 +1,4 @@
-ARG KBE_COMPILED_IMAGE_NAME_SHA
 ARG PRE_ASSETS_IMAGE_NAME
-FROM ${KBE_COMPILED_IMAGE_NAME_SHA} as kbe_compiled
 FROM ${PRE_ASSETS_IMAGE_NAME} as pre_assets
 LABEL maintainer="Aleksei Burov <burov_alexey@mail.ru>"
 
@@ -13,9 +11,6 @@ LABEL maintainer="Aleksei Burov <burov_alexey@mail.ru>"
 #
 # При сборке образа на основе этого файла предполагается, что контекст
 # перемещён в папку $KBE_ASSETS_PATH.
-#
-# В самом конце копируем бирарники KBEngine. Бинарники весят ~1.5Гб,
-# чтобы не забивать ими слои сборки, добавляем их именно в конце.
 #
 
 COPY . /opt/kbengine/assets
@@ -68,5 +63,3 @@ RUN useradd $KBE_CONTAINER_USER
 # создадим эту папку с нужными правами.
 RUN mkdir /opt/kbengine/assets/_tmp \
     && chown $KBE_CONTAINER_USER:$KBE_CONTAINER_USER /opt/kbengine/assets/_tmp
-
-COPY --from=kbe_compiled /opt/kbengine/kbe/ /opt/kbengine/kbe/

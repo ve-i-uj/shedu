@@ -1,4 +1,6 @@
+ARG KBE_COMPILED_IMAGE_NAME_SHA
 ARG KBE_ENKI_PYTHON_IMAGE_NAME
+FROM ${KBE_COMPILED_IMAGE_NAME_SHA} as kbe_compiled
 FROM ${KBE_ENKI_PYTHON_IMAGE_NAME} as enki_python
 LABEL maintainer="Aleksei Burov <burov_alexey@mail.ru>"
 
@@ -11,6 +13,11 @@ LABEL maintainer="Aleksei Burov <burov_alexey@mail.ru>"
 # Shedu. Это делается здесь, т.к. образ ассетов будет собираться в контексте
 # папки ассетов (и в папке ассетов, например, уже .env файла из shedu нет).
 #
+# В самом конце копируем бирарники KBEngine. Бинарники весят ~1.5Гб, виртуальный
+# размер у промежуточных слоёв игры будет большой, но т.к. он не реальный - это
+# не страшно.
+#
+
 
 FROM centos:centos7
 
@@ -44,3 +51,6 @@ ENV KBE_RES_PATH=/opt/kbengine/kbe/res:/opt/kbengine/assets/res
 
 # Переменные окружения
 COPY .env .env
+
+# Скомпилированный KBEngine
+COPY --from=kbe_compiled /opt/kbengine/kbe/ /opt/kbengine/kbe/

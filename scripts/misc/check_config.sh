@@ -30,6 +30,9 @@ optional_vars=(
     "GAME_IDLE_START"
     "DEBUG_SUPERVISOR"
     "ENKI_PATH"
+    "DISABLE_HEALTHCHECK"
+    "HEALTHCHECK_INTERVAL"
+    "NOT_STOP_DB"
 )
 
 # The example config file contains all necessary variable. Read all variable
