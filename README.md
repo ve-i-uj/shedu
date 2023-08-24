@@ -28,13 +28,15 @@ Tested on Ubuntu 20.04, CentOS 7, Ubuntu 22.04
 
 [KBEngine logging (Elasticsearch + Logstash + Kibana)](#elk)
 
-[Cocos2D build example](#cocos2d)
-
 [Build activity](#build)
 
 [Assets normalization](https://github.com/ve-i-uj/enki#normalize_entitiesxml)
 
 [The script "modify_kbe_config"](https://github.com/ve-i-uj/enki#modify_kbe_config)
+
+[Cocos2D build example](#cocos2d)
+
+[Debug KBEngine in Docker](#debug)
 
 <a name="glossary"><h2>Glossary</h2></a>
 
@@ -337,3 +339,78 @@ make cocos_start
 ```
 
 ![Cocos2D](https://github.com/ve-i-uj/shedu/assets/6612371/b983bab8-db57-4617-beaf-cd57a600ab62)
+
+<a name="debug"><h2>Debug KBEngine in Docker</h2></a>
+
+The project has settings for VSCode so that you can run KBEngine under debugging. The debugger will launch and connect to the components that are running in the Docker container. Debugger is the best answer to many questions.
+
+![image](https://github.com/ve-i-uj/shedu/assets/6612371/b3cfbe6d-0c06-4f92-a385-6cebbe615ccc)
+
+You do not need to build KBEngine, it is already built in the container, but you need the KBEngine source code, you can download it from the [github repository](https://github.com/kbengine/kbengine). The sources must be in the same commit as the version of KBEngine in the Docker container (the `KBE_GIT_COMMIT` value in the `.env` file).
+
+You need to add the KBEngine sources to the `Shedu` workspace in VSCode (File -> Add folder to workspace...) - this is necessary for navigating through the code. The mapping between KBEngine in the Docker container and VSCode is already configured.
+
+To launch components under a debugger, you must first launch the containers themselves, but without KBEngine components. To do this, in Shedu, you need to set the `GAME_IDLE_START=true` variable in the `.env` config. After changing the `.env` file, you need to rebuild the project (`make clean_game build_game`). Next, we launch Shedu as standard through the `make start_game` rule.
+
+You can see that the KBEngine process is not running in the container (e.g Logger), this can be done through the `[Logger] ps aux` task in VSCode. There will be something like this
+
+```console
+USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+root           1  1.4  0.0  11704  2512 ?        Ss   09:50   0:00 bash /opt/shedu/scripts/deploy/start_component.sh
+root           6  0.0  0.0   4416   680 ?        S    09:50   0:00 tail -f /dev/null
+root          31  0.0  0.0  51748  3336 ?        Rs   09:50   0:00 ps aux
+```
+
+We see that there is no KBEngine process, there is `tail -f /dev/null` so that the container runs idle and does not terminate.
+
+Next, set a breakpoint in the KBEngine sources and run Debugger from VSCode (F5). That's actually all. Then we catch any place that interests us.
+
+<details>
+
+<summary>Breakpoint in Logger</summary>
+
+![image](https://github.com/ve-i-uj/shedu/assets/6612371/68c2aaa9-353f-420e-bf90-84916513bbeb)
+
+</details>
+<br/>
+
+There is a separate configuration for each component. Components need to be run one by one sequentially by the hands.
+
+### Run the Supervisor component under the debugger
+
+This project does not have the Machine component, instead it runs a component written in Python called Supervisor. To run the Supervisor under the debugger, you need to set the `DEBUG_SUPERVISOR=true` variable in the `.env` file. After changing the `.env` file, you need to rebuild the project (`make clean_game build_game`). We select in VSCode that we need to run the `[Docker] Supervisor` configuration under the debugger and run it. We set a breakpoint in the right place and catch the execution.
+
+<details>
+
+<summary>Breakpoint in Supervisor</summary>
+
+![image](https://github.com/ve-i-uj/shedu/assets/6612371/1c29596f-b8e2-43d1-ba8c-46b1b6ed4c6e)
+
+</details>
+<br/>
+
+
+Attention! The supervisor does not respond to the `GAME_IDLE_START=true` variable, this variable is reloaded for it in docker-compose.yml. Therefore, by the time you start the debug for the Supervisor from VSCode, the Supervisor will already be running. But with `DEBUG_SUPERVISOR=true` it is run via `debugpy`. And `debugpy` is already waiting for a connection from the VSCode debugger. Thus, breakpoints in `main.py` will not work (because at the time the debugger is connected, the application is already running), but you can set breakpoints in any other places, they will work there.
+
+### Run all components under the debugger
+
+When launching all components under the debugger, you need to wait for the component to be ready, because healthcheck is disabled in this case. For example, DBMgr takes a long time to start up. The database when started with `GAME_IDLE_START=true` will start normally, this variable does not affect the start of the database. Components need to be launched sequentially as they are listed in `launch.json` (or in the debug configuration dropdown in VSCode). The exception is BaseappMgr and CellappMgr - they need to be run one after the other without waiting. Accordingly, if you need to use the debugger to get to the `Loginapp` component, then you will need to sequentially launch all the components one by one, starting from Supervisor. The easiest way to understand that the component is running normally is by looking at the logs (`make logs_kibana`).
+
+<details>
+
+<summary>Debug all components</summary>
+
+![image](https://github.com/ve-i-uj/shedu/assets/6612371/b3cfbe6d-0c06-4f92-a385-6cebbe615ccc)
+
+</details>
+<br/>
+
+### Possible problems
+
+Most likely, the components of KBEngine v1.x will not start correctly under the debugger. This is because each component has its own unique cluster ID (uid) based on the UID environment variable. By this identifier, the components understand which cluster they belong to if several game clusters are running on the same computer, but under different users. But if UID=0, as is the case when running as root, then each component randomly generates an uid and the components cannot find each other. In the KBEngine v2.x, it is possible to set the uid value through the `UUID` environment variable, but in KBEngine v1.x there is no such possibility - only by UID, i.e. by user ID.
+
+Docker runs processes as root (i.e. UID=0) in a container by default. Plus, there is also a Logstash container, which is also running as root. The Logstash container and KBEngine cluster containers have a common log volume. If you run containers with KBEngine as a user, then there was a problem with the logs and access rights to the log volume. Therefore, the container entry script starts as root, changes permissions of their folders, and only then launches the KBEngine component as a normal user. When running under a debugger, there is no such possibility, because you need to directly run the compiled KBEngine component file from the debugger.
+
+I added the UUID variable to docker-compose.yml, so when running under the debugger, this variable is in the container and the uid will be created from it. Same uid - components find each other. But KBEngine v1.x does not have a uid created by the `UUID` variable, so most likely DBMgr will not be able to find Interfaces, Logger and nothing will work further.
+
+I emphasize that this situation exists only to the launch under the debugger. Regular cluster start (without `GAME_IDLE_START=true`) also works for KBEngine v1.x.

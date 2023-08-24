@@ -21,7 +21,7 @@ LABEL maintainer="Aleksei Burov <burov_alexey@mail.ru>"
 
 FROM centos:centos7
 
-RUN yum install git wget net-tools nano socat nc tcpdump gettext mariadb-devel -y \
+RUN yum install git wget net-tools nano socat nc tcpdump gettext mariadb-devel gdb -y \
     && yum clean all \
     && rm -rf /var/cache/yum
 

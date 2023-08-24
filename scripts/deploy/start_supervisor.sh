@@ -14,7 +14,7 @@ touch "$log_dir/supervisor.log"
 chown $KBE_CONTAINER_USER:$KBE_CONTAINER_USER "$log_dir/supervisor.log"
 
 if [ ! -z ${DEBUG_SUPERVISOR} ]; then
-    # Контейнеры запускаются под запуск компонентов под дебагером. Запуск
+    # Контейнер с Супервизором запускается под запуск компонентов под дебагером. Запуск
     # и подключение к компоненту будет осуществляться позже через VSCode.
     # ${ENKI_PYTHON} -m debugpy --listen 0.0.0.0:18198 --wait-for-client /opt/enki/enki/app/supervisor/main.py > "$log_dir/supervisor.log"
     cmd="${ENKI_PYTHON} -m debugpy --listen 0.0.0.0:18198 /opt/enki/enki/app/supervisor/main.py"
