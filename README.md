@@ -16,7 +16,7 @@ The project can be used for convenient local development, quick MVP creation, an
 
 Tested on Ubuntu 20.04, CentOS 7, Ubuntu 22.04
 
-![Docker environment](https://github.com/ve-i-uj/shedu/assets/6612371/e052407e-85b9-484e-9c8f-4801832ad9f5 "KBE docker environment")
+![Docker environment](https://github.com/ve-i-uj/shedu/assets/6612371/04f450cc-3302-4630-adca-bb1672d4f970 "KBE docker environment")
 
 ## Table of contents
 
@@ -60,7 +60,7 @@ Tested on Ubuntu 20.04, CentOS 7, Ubuntu 22.04
     * Cellapp - processing game logic related to space or location. Managing spatial data (position, direction of the entity), adding geometric maps (navmesh), setting spatial triggers. Creating and Destroying a Level
     * Baseapp - keeps a connection with the client after loginapp is authenticated. Proxy calls to Cellapp. Used for game logic of non-spatial objects (chats, managers, clans)
     * Loginapp - connection point for clients. Responsible for authentication of the game client. After successful authentication passes Basseapp address for subsequent connection
-* KBEngine Environment - a set of services around game engine components: database, smtp server, web server (for Kosos2D, for example), etc.
+* KBEngine Environment - a set of services around game engine components: database, log services, smtp server, web server (for Kosos2D, for example), etc.
 * KBEngine Cluster - KBEngine Component + KBEngine Environment
 
 * Client - plugin supporting network protocol KBEngine + game engine (Cocos2D, Unity, Godot, UE etc.)
@@ -77,7 +77,7 @@ git submodule update --init --recursive
 
 ### Install Docker and Compose
 
-This project uses Docker, so you need to install [Docker](https://docs.docker.com/desktop/install/linux-install/) and [Docker Compose V2](https://docs.docker.com/ compose /install/) if they are not installed. You can install them according to the official docker documentation, or [at your own risk] install them using the scripts that come with this project. If both Docker and Docker-compose are installed on the host, you can skip this step.
+This project uses Docker, so you need to install [Docker](https://docs.docker.com/desktop/install/linux-install/) and [Docker Compose V2](https://docs.docker.com/compose/install) if they are not installed. You can install them according to the official docker documentation, or [at your own risk] install them using the scripts that come with this project. If both Docker and Docker-compose are installed on the host, you can skip this step.
 
 ```bash
 bash scripts/prepare/install_docker.sh
@@ -95,7 +95,7 @@ The user will added to the "docker" group. It need to logout and to login again 
 
 ### The configuration file
 
-The project reads the settings from the ".env" file located in the root directory. There are [examples](configs/example.env) of .env files in the "configs" directory. By default, without changing the settings, the game server will be launched with [kbengine_demos_assets](https://github.com/kbengine/kbengine_demos_assets). You can start the kbe server with your "assets" just point in the .env file the directory of your "assets". For more information see settings [described here](#configuration-file). Copy an example env file to the root directory and change it if you want set your custom settings.
+The project reads the settings from the ".env" file located in the root directory. There are [examples](configs) of .env files in the "configs" directory. If you use the `example.env` config file without changing the settings, the game server will be launched with [kbengine_demos_assets](https://github.com/kbengine/kbengine_demos_assets). You can start the kbe server with your "assets" just point in the .env file the directory of your "assets". For more information see settings [described here](#configuration-file). Copy an example env file to the root directory and change it if you want set your custom settings.
 
 ```bash
 cp configs/example.env .env
@@ -104,6 +104,8 @@ cp configs/example.env .env
 ### Build KBEngine
 
 There are several already built kbe images on [Docker Hub](https://hub.docker.com/repository/registry-1.docker.io/shedu/kbe-compiled/), so building a kbe might take just a few minutes (or a few seconds later if docker cache is used).
+
+Build the engine
 
 ```bash
 make build_kbe
@@ -153,43 +155,43 @@ cp configs/kbe-v2.5.12-demo.env .env
 
 Set the path to Assets in the KBE_ASSETS_PATH variable in the config (the ".env" file). The path to Assets must be an absolute path pointing to your "assets" folder on your host. This "assets" folder will be copied into the game image. If KBE_ASSETS_PATH value is "demo", the latest version of [kbengine_demos_assets](https://github.com/kbengine/kbengine_demos_assets) will be downloaded and will be used (these Assets are suitable for Kbengine client demos). For demo purpose you need just copy an example config file like in the above command.
 
-![Settings](https://github.com/ve-i-uj/shedu/assets/6612371/5372b7e8-e136-4e9b-b678-cb2e30718518)
+![Settings](https://github.com/ve-i-uj/shedu/assets/6612371/921bf70b-4579-4f3b-abcd-9b753b8290f5)
 
 #### Database build settings
 
-* MYSQL_ROOT_PASSWORD - database root password
-* MYSQL_DATABASE - database name
-* MYSQL_USER - database user
-* MYSQL_PASSWORD - database password
+* MYSQL_ROOT_PASSWORD -  [Mandatory] Database root password
+* MYSQL_DATABASE -  [Mandatory] Database name
+* MYSQL_USER -  [Mandatory] Database user
+* MYSQL_PASSWORD -  [Mandatory] Database user password
 
 #### KBE build settings
 
-* KBE_GIT_COMMIT - # KBEngine will be compiled from the source code based on a git commit. The latest commit of the kbe repository will be use if the value of the variable is unset. Example: 7d379b9f
-* KBE_USER_TAG - Tag the compiled kbengine image with this tag. For example: v2.5.12
+* KBE_GIT_COMMIT -  [Optional] KBEngine will be compiled from the source code based on a git commit. The latest commit of the kbe repository will be use if the value of the variable is unset. Example: 7d379b9f
+* KBE_USER_TAG -  [Optional] The compiled kbengine image will have this tag. For example: v2.5.12
 
 #### Game assets settings
 
-* KBE_ASSETS_PATH - Absolute path to the "assets" directory. If set to "demo", the kbe demo "assets" will be used (https://github.com/kbengine/kbengine_demos_assets.git)
-* KBE_ASSETS_SHA - You can set the "assests" git sha if the "assets" is a git project. Example: 81f7249b
-* KBE_ASSETS_VERSION - The version of the "assets". This variable labels the finaly game image, it cannot be empty. Set any non-empty string if your project has no version.
-* KBE_KBENGINE_XML_ARGS - With this field, you can change the values of the fields in kbengine.xml in the final image of the game. Example: (example: KBE_KBENGINE_XML_ARGS=root.dbmgr.account_system.account_registration.loginAutoCreate=true;root.whatever=123)
-* KBE_PUBLIC_HOST - The external address of the server where the cluster packaged in Docker will be deployed. For home development, when both client and server are on the same computer, you can use the default gateway address.
+* KBE_ASSETS_PATH -  [Mandatory] The absolute path to the "assets" directory. If the value is "demo" then [the kbe demo "assets"](https://github.com/kbengine/kbengine_demos_assets.git) will be used
+* KBE_ASSETS_SHA -  [Optional] You can set the "assets" git sha if the "assets" is a git project. Example: 81f7249b
+* KBE_ASSETS_VERSION -  [Mandatory] The version of the "assets". This variable labels the finaly game image, it cannot be empty. Set any non-empty string if your project has no version.
+* KBE_KBENGINE_XML_ARGS -  [Optional] With this field, you can change the values of the fields in kbengine.xml in the final image of the game. Example: KBE_KBENGINE_XML_ARGS=root.dbmgr.account_system.account_registration.loginAutoCreate=true;root.whatever=123
+* KBE_PUBLIC_HOST -  [Mandatory] The external address of the server where the KBEngine Docker cluster will be deployed. For home development, when both client and server are on the same computer, you can use the default gateway address.
 
 #### Global Settings
 
-* GAME_NAME - For each instance of the game there is a separate kbe environment. The name of the game is a unique identifier for the kbe environments. It cannot be empty.
+* GAME_NAME -  [Mandatory] For each instance of the game there is a separate kbe environment. The name of the game is a unique identifier for the kbe environments. It cannot be empty.
 
-#### Develop Settings
+#### Other Settings
 
-* GAME_IDLE_START - If this variable has any value, cluster containers are started without processes of kbe components. It needs to the VSCode debugger will launch the kbe component in the container later and attach to the kbe component's process. The health check of components will be disabled if this variable are set.
-* DEBUG_SUPERVISOR - The Supervisor container is started under debugging via debugpy. After starting, you can connect to it with the VSCode debugger on port 18198. To activate the variable, you need to set any value.
-* ENKI_PATH - The path to the Enki library. If the variable is empty, the version from the git submodule will be used. The variable can be used while developing something in Enki and testing the functionality.
+```console
+make print_vars_doc
+```
 
 <a name="elk"><h2>KBEngine logging (Elasticsearch + Logstash + Kibana)</h2></a>
 
 The Shedu project demonstrates the use of the ELK stack ([Elastic + Logstash + Kibana](https://www.elastic.co/what-is/)) to easily view KBEngine logs. You can conveniently save game server logs in Elasticsearch and conveniently view them through Kibana or Dejavu (frontends for Elasticsearch) .
 
-ELK services are docker images. The state is stored in a named volume created for each game. Services are launched using docker-compose and at the start the containers are associated with the desired volume.  The ELK version is v8.5.3.
+ELK services are docker images. The log documents are stored in a named volume. The ELK version is v8.5.3.
 
 Before starting, you need to build the service images if they are not already built and then start the services.
 
@@ -225,20 +227,21 @@ The life cycles of game services and ELK services are independent. ELK will work
 
 At the engine level, the log4cxx library (log4j for C++) is used for logging. The default configuration files for log4j are located in the directory [kbe/res/server/log4cxx_properties_defaults](https://github.com/kbengine/kbengine/tree/master/kbe/res/server/log4cxx_properties_defaults). This directory contains a separate file for each component. The logging settings can be reloaded by defining custom log4j settings in the `res/server/log4cxx_properties` folder.
 
-By default, logs are written to the `assets/logs` directory. If all KBEngine server components are located on the same host, all logs will be in this folder. By default, each component sends all logs to the Logger component (using the KBEngine message protocol). Then Logger writes the received logs to the `assets/logs` folder. The file name for log records has the following pattern: `logger_<compnent_name>`. Some of the critical logs (errors and warnings) are written by the components to the `assets/logs` folder under their own name (for example, "machine.log").
+By default, logs are written to the `assets/logs` directory. If all KBEngine server components are located on the same host, all logs will be in this folder. By default, each component sends all logs to the Logger component (using the KBEngine message protocol). Then Logger writes the received logs to the `assets/logs` folder. The file name for log records has the following pattern: `logger_<compnent_name>`. Some of the critical logs (errors and warnings) are written by the components to the `assets/logs` folder under their own name (for example, "machine.log"). The critical logs do not send to Logger.
 
-## General principle of operation of KBEngine + ELK for collecting logs
+## KBEngine logs + ELK for collecting logs
 
 Operating procedure:
 
 * KBEngine default settings remain unchanged (logs are still written to the `logs` directory)
-* The `logs` folder of the container is mounted in a separate volume created for the logs
-* This volume is mounted to the container with Logstash
+* There is a separate volume created for the logs
+* The `logs` folder of each container is mounted in the separate log volume
+* This volume is also mounted to the Logstash container
 * Logstash collects all new records from the `logs` folder, normalizes them and sends them to Elasticsearch
 * Elasticsearch stores documents in its own volume (the ES volume and the log volume are different volumes)
 * To view the logs stored in Elasticsearch, you can use the web interfaces of Kibana or Dejavu services locally running in Docker
 
-Logstash configuration settings are located in the `shedu/data/logstash` folder. To customize the logging fields, you can modify the [grok](https://www.elastic.co/guide/en/logstash/current/plugins-filters-grok.html) pattern ["LOG_MESSAGE"](data/logstash/kbe_patterns). It is convenient to combine customization of this pattern with game scripts logging using the python language ([logging module](https://docs.python.org/3/library/logging.html)). An example of setting up logging of game scripts using Python can be found [here](https://github.com/ve-i-uj/anu/blob/develop/scripts/server_common/sclog.py).
+Logstash configuration settings are located in the `shedu/data/logstash` folder. To customize the logging fields, you can modify the [grok](https://www.elastic.co/guide/en/logstash/current/plugins-filters-grok.html) pattern ["LOG_MESSAGE"](data/logstash/kbe_patterns). It is convenient to combine customization of this pattern with game scripts logging using the python logging module. An example of setting up logging of game scripts using Python can be found [here](https://github.com/ve-i-uj/modern_kbengine_demos_assets#python_logging).
 
 Stopping ELK services
 
@@ -280,7 +283,6 @@ To run the example, we need KBEngine version v1.3.5 (commit 26e95776) and assets
     KBE_ASSETS_VERSION=v1.3.5
 
     GAME_NAME=cocos-demo
-    GAME_IDLE_START=
 
     KBE_PUBLIC_HOST=0.0.0.0
 
@@ -331,7 +333,7 @@ Next, run the game client on Cocos2D. To run the client, you need a web server. 
 </details>
 <br/>
 
-To build the client, an Nginx image is taken, a demo client is cloned into it, and the address of the KBEngine server is specified in the client code.
+Building of the client image 1) pulls an Nginx image, 2) clones a demo client into the image, 3) changes the server address in the client code.
 
 ```bash
 make cocos_build
@@ -342,15 +344,15 @@ make cocos_start
 
 <a name="debug"><h2>Debug KBEngine in Docker</h2></a>
 
-The project has settings for VSCode so that you can run KBEngine under debugging. The debugger will launch and connect to the components that are running in the Docker container. Debugger is the best answer to many questions.
+The project has [settings for VSCode](.vscode) so that you can run KBEngine under debugging. The debugger will launch and connect to the components that are running in the Docker container. Debugger is the best answer to many questions.
 
 ![image](https://github.com/ve-i-uj/shedu/assets/6612371/b3cfbe6d-0c06-4f92-a385-6cebbe615ccc)
 
-You do not need to build KBEngine, it is already built in the container, but you need the KBEngine source code, you can download it from the [github repository](https://github.com/kbengine/kbengine). The sources must be in the same commit as the version of KBEngine in the Docker container (the `KBE_GIT_COMMIT` value in the `.env` file).
+You do not need to build KBEngine, it is already built in the container, but you need the KBEngine source code, you can download it from the [github repository](https://github.com/kbengine/kbengine). The source code must be in the same commit as the version of KBEngine in the Docker container (the `KBE_GIT_COMMIT` value in the `.env` file).
 
-You need to add the KBEngine sources to the `Shedu` workspace in VSCode (File -> Add folder to workspace...) - this is necessary for navigating through the code. The mapping between KBEngine in the Docker container and VSCode is already configured.
+You need to add the KBEngine source code to the `Shedu` workspace in VSCode (File -> Add folder to workspace...) - this is necessary for navigating through the code. The mapping between KBEngine in the Docker container and VSCode is already configured.
 
-To launch components under a debugger, you must first launch the containers themselves, but without KBEngine components. To do this, in Shedu, you need to set the `GAME_IDLE_START=true` variable in the `.env` config. After changing the `.env` file, you need to rebuild the project (`make clean_game build_game`). Next, we launch Shedu as standard through the `make start_game` rule.
+To launch components under a debugger, you must first launch the containers themselves, but without KBEngine components. To do this, in Shedu, you need to set the `GAME_IDLE_START=true` variable in the `.env` config. After changing the `.env` file, you need to rebuild the project (`make clean_game build_game`). Next, we launch Shedu by the `make start_game` rule.
 
 You can see that the KBEngine process is not running in the container (e.g Logger), this can be done through the `[Logger] ps aux` task in VSCode. There will be something like this
 
@@ -363,7 +365,7 @@ root          31  0.0  0.0  51748  3336 ?        Rs   09:50   0:00 ps aux
 
 We see that there is no KBEngine process, there is `tail -f /dev/null` so that the container runs idle and does not terminate.
 
-Next, set a breakpoint in the KBEngine sources and run Debugger from VSCode (F5). That's actually all. Then we catch any place that interests us.
+Next, set a breakpoint in the KBEngine source code and run Debugger from VSCode (F5). That's actually all. Then we catch any place that interests us.
 
 <details>
 
@@ -374,7 +376,7 @@ Next, set a breakpoint in the KBEngine sources and run Debugger from VSCode (F5)
 </details>
 <br/>
 
-There is a separate configuration for each component. Components need to be run one by one sequentially by the hands.
+There is a separate configuration for each component in the [launch.json](.vscode/launch.json) file. Components need to be run one by one sequentially by the hands.
 
 ### Run the Supervisor component under the debugger
 
@@ -389,8 +391,7 @@ This project does not have the Machine component, instead it runs a component wr
 </details>
 <br/>
 
-
-Attention! The supervisor does not respond to the `GAME_IDLE_START=true` variable, this variable is reloaded for it in docker-compose.yml. Therefore, by the time you start the debug for the Supervisor from VSCode, the Supervisor will already be running. But with `DEBUG_SUPERVISOR=true` it is run via `debugpy`. And `debugpy` is already waiting for a connection from the VSCode debugger. Thus, breakpoints in `main.py` will not work (because at the time the debugger is connected, the application is already running), but you can set breakpoints in any other places, they will work there.
+Attention! The supervisor ignores the `GAME_IDLE_START=true` variable because this variable is overwrited in docker-compose.yml. Therefore, by the time you start the debug for the Supervisor from VSCode, the Supervisor will already be running. But with `DEBUG_SUPERVISOR=true` it is run via `debugpy`. And `debugpy` is already waiting for a connection from the VSCode debugger. Thus, breakpoints in `main.py` will not work (because at the time the debugger is connected, the application is already running), but you can set breakpoints in any other places, they will work there.
 
 ### Run all components under the debugger
 
@@ -409,7 +410,7 @@ When launching all components under the debugger, you need to wait for the compo
 
 Most likely, the components of KBEngine v1.x will not start correctly under the debugger. This is because each component has its own unique cluster ID (uid) based on the UID environment variable. By this identifier, the components understand which cluster they belong to if several game clusters are running on the same computer, but under different users. But if UID=0, as is the case when running as root, then each component randomly generates an uid and the components cannot find each other. In the KBEngine v2.x, it is possible to set the uid value through the `UUID` environment variable, but in KBEngine v1.x there is no such possibility - only by UID, i.e. by user ID.
 
-Docker runs processes as root (i.e. UID=0) in a container by default. Plus, there is also a Logstash container, which is also running as root. The Logstash container and KBEngine cluster containers have a common log volume. If you run containers with KBEngine as a user, then there was a problem with the logs and access rights to the log volume. Therefore, the container entry script starts as root, changes permissions of their folders, and only then launches the KBEngine component as a normal user. When running under a debugger, there is no such possibility, because you need to directly run the compiled KBEngine component file from the debugger.
+Docker runs processes as root (i.e. UID=0) in a container by default. Plus, there is also a Logstash container, which is also running as root. The Logstash container and KBEngine cluster containers have a shared log volume. If you run containers with KBEngine as a user, then there was a problem with the logs and access rights to the log volume. Therefore, the container entry script starts as root, changes permissions of their folders, and only then launches the KBEngine component as a normal user. When running under a debugger, there is no such possibility, because you need to directly run the compiled KBEngine component file from the debugger.
 
 I added the UUID variable to docker-compose.yml, so when running under the debugger, this variable is in the container and the uid will be created from it. Same uid - components find each other. But KBEngine v1.x does not have a uid created by the `UUID` variable, so most likely DBMgr will not be able to find Interfaces, Logger and nothing will work further.
 

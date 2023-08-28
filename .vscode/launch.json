@@ -164,11 +164,11 @@
             "MIMode": "gdb"
         },
         {
-            "name": "[Docker] Baseapp",
+            "name": "[Docker] Cellapp",
             "type": "cppdbg",
             "request": "launch",
             "cwd": "/opt/kbengine/assets",
-            "program": "/opt/kbengine/kbe/bin/server/baseapp",
+            "program": "/opt/kbengine/kbe/bin/server/cellapp",
             "args": [
                 "--cid=7001"
             ],
@@ -184,7 +184,7 @@
                 "pipeArgs": [
                     "exec",
                     "-i",
-                    "kbe-game-baseapp-1",
+                    "kbe-game-cellapp-1",
                     "sh",
                     "-c"
                 ],
@@ -193,11 +193,11 @@
             "MIMode": "gdb"
         },
         {
-            "name": "[Docker] Cellapp",
+            "name": "[Docker] Baseapp",
             "type": "cppdbg",
             "request": "launch",
             "cwd": "/opt/kbengine/assets",
-            "program": "/opt/kbengine/kbe/bin/server/cellapp",
+            "program": "/opt/kbengine/kbe/bin/server/baseapp",
             "args": [
                 "--cid=8001"
             ],
@@ -213,7 +213,7 @@
                 "pipeArgs": [
                     "exec",
                     "-i",
-                    "kbe-game-cellapp-1",
+                    "kbe-game-baseapp-1",
                     "sh",
                     "-c"
                 ],

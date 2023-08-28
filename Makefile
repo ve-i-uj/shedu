@@ -189,11 +189,8 @@ clean_elk: elk_is_not_runnig elk_is_built
 
 restart_elk: stop_elk start_elk
 
------: ## -----
 
-check_config: ## Check the configuration file
-	@$(SCRIPTS)/misc/print_configs_vars.sh --only-user-settings
-	@$(SCRIPTS)/misc/check_config.sh $(ROOT_DIR)/.env
+-----: ## -----
 
 # При остановке ELK не сохраняется view Kibana в ES. Поэтому импортируем view
 # и сразу его открываем с нужными полями в таблице
@@ -213,6 +210,8 @@ logs_console: config_is_ok ## Show actual log records of the game in the console
 		-it $(KBE_COMPONENT_CONTAINER_NAME)-logger \
 		/bin/bash /opt/shedu/scripts/deploy/tail_logs.sh
 
+-----: ## -----
+
 clean_all: force_stop_game force_stop_elk ## Stop and delete the artefacts of all games (not only the current project)
 	@res=$$(docker network ls --filter "name=kbe-net" -q); \
 	if [ ! -z "$$res" ]; then \
@@ -231,28 +230,38 @@ clean_all: force_stop_game force_stop_elk ## Stop and delete the artefacts of al
 		docker rmi "$(PRE_ASSETS_IMAGE_NAME)"; \
 	fi
 
+-----: ## -----
+
+print_vars_doc: config_is_ok ## Print documentation of environment variables to stdout
+	@python3 $(SCRIPTS)/misc/print_env_var_doc.py
+
+check_config: ## Check the configuration file
+	@$(SCRIPTS)/misc/print_configs_vars.sh --only-user-settings
+	@$(SCRIPTS)/misc/check_config.sh $(ROOT_DIR)/.env
+
 status: config_is_ok ## Return the game status ("running" or "stopped")
 	@$(SCRIPTS)/misc/get_status.sh
 
 -----: ## -----
 
-force_build_kbe: ## [Dev] Build a docker image of compiled KBEngine without using of cache
-	@$(SCRIPTS)/build_kbe_compiled.sh \
-		--kbe-git-commit=$(KBE_GIT_COMMIT) \
-		--kbe-user-tag=$(KBE_USER_TAG) \
-		--force
+cocos_build: ## [Demo] Build the Cocos2D client demo
+	@docker build \
+		--file "$(DOCKERFILE_COCOS_DEMO_CLIENT)" \
+		--build-arg KBE_PUBLIC_HOST="$(KBE_PUBLIC_HOST)" \
+		--tag "$(KBE_DEMO_COCOS_CLIENT_IMAGE_NAME)" \
+		.
 
-force_stop_game: ## [Dev] Force stop any game
-	@res=$$(docker container ls --all --filter name=$(KBE_COMPONENT_CONTAINER_NAME) -q); \
-	if [ ! -z "$$res" ]; then \
-		echo $$res | xargs docker container rm --force --volumes; \
-	fi
+cocos_start: ## [Demo] Start the Cocos2D client demo
+	@python3 -c "import webbrowser; webbrowser.open('http://0.0.0.0:8080/')"
+	@docker run --rm \
+		-p 8080:80 \
+		--name $(KBE_DEMO_COCOS_CLIENT_CONTAINER_NAME) \
+		$(KBE_DEMO_COCOS_CLIENT_IMAGE_NAME)
 
-force_stop_elk: ## [Dev] Force stop ELK
-	@res=$$(docker container ls --all --filter name=$(ELK_C_NAME_PREFIX) -q); \
-	if [ ! -z "$$res" ]; then \
-		echo $$res | xargs docker container rm --force --volumes; \
-	fi
+cocos_clean: ## [Demo] Delete the image of the Cocos2D client demo
+	@docker rmi $(KBE_DEMO_COCOS_CLIENT_IMAGE_NAME)
+
+-----: ## -----
 
 push_kbe: config_is_ok kbe_is_built ## [Dev] Push the image to the docker hub repository
 	@docker push $(KBE_COMPILED_IMAGE_NAME_SHA)
@@ -269,22 +278,22 @@ version: ## [Dev] The current version of the shedu
 
 -----: ## -----
 
-cocos_build: ## [Dev] Build the Cocos2D client demo
-	@docker build \
-		--file "$(DOCKERFILE_COCOS_DEMO_CLIENT)" \
-		--build-arg KBE_PUBLIC_HOST="$(KBE_PUBLIC_HOST)" \
-		--tag "$(KBE_DEMO_COCOS_CLIENT_IMAGE_NAME)" \
-		.
+force_build_kbe: ## [Dev] Build a docker image of compiled KBEngine without using of cache
+	@$(SCRIPTS)/build_kbe_compiled.sh \
+		--kbe-git-commit=$(KBE_GIT_COMMIT) \
+		--force
 
-cocos_start: ## [Dev] Start the Cocos2D client demo
-	@python3 -c "import webbrowser; webbrowser.open('http://0.0.0.0:8080/')"
-	@docker run --rm \
-		-p 8080:80 \
-		--name $(KBE_DEMO_COCOS_CLIENT_CONTAINER_NAME) \
-		$(KBE_DEMO_COCOS_CLIENT_IMAGE_NAME)
+force_stop_game: ## [Dev] Force stop any game
+	@res=$$(docker container ls --all --filter name=$(KBE_COMPONENT_CONTAINER_NAME) -q); \
+	if [ ! -z "$$res" ]; then \
+		echo $$res | xargs docker container rm --force --volumes; \
+	fi
 
-cocos_clean: ## [Dev] Delete the image of the Cocos2D client demo
-	@docker rmi $(KBE_DEMO_COCOS_CLIENT_IMAGE_NAME)
+force_stop_elk: ## [Dev] Force stop ELK
+	@res=$$(docker container ls --all --filter name=$(ELK_C_NAME_PREFIX) -q); \
+	if [ ! -z "$$res" ]; then \
+		echo $$res | xargs docker container rm --force --volumes; \
+	fi
 
 -----: ## -----
 
@@ -357,12 +366,16 @@ visit the page <https://github.com/ve-i-uj/shedu>
 Example:
 
 cp configs/kbe-v2.5.12-demo.env .env
-make build_game
-make start_game
+make build_kbe build_game start_game
 make logs_console
-# Or you can view the game log records in the web intarface of Kibana or Dejavu.
-# It needs to wait about a minute after the game ELK started because the ElasticSearch needs
-# time to up. Then run this command and the web page must open in your web browser.
+
+# You can also view the game log records in the web intarface of Kibana or Dejavu.
+
+make build_elk start_elk
+
+# Wait a few minutes as ElasticSearch takes some time to start up.
+# Then run this command and the web page must open in your web browser.
+
 make logs_kibana
 _____
 
