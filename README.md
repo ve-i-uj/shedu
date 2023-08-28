@@ -38,6 +38,8 @@ Tested on Ubuntu 20.04, CentOS 7, Ubuntu 22.04
 
 [Debug KBEngine in Docker](#debug)
 
+[KBEngine server startup sequence diagrams](#sequence_diagrams)
+
 <a name="glossary"><h2>Glossary</h2></a>
 
 * Host - the server with installed Docker and Docker Compose
@@ -257,8 +259,23 @@ make clean_elk
 
 <a name="build"><h2>Build activity</h2></a>
 
+<details>
+
+<summary>Build KBEngine source</summary>
+
 ![Build kbe](https://user-images.githubusercontent.com/6612371/212449373-9935364b-7144-4880-9144-e2b19a6fbb22.jpg)
+
+</details>
+<br/>
+
+<details open>
+
+<summary>Build Assets</summary>
+
 ![Build Assets](https://user-images.githubusercontent.com/6612371/212449374-f39cc7ad-2b50-4f22-804d-929be1c680c7.jpg)
+
+</details>
+<br/>
 
 <a name="cocos2d"><h2>Cocos2D example</h2></a>
 
@@ -404,7 +421,6 @@ When launching all components under the debugger, you need to wait for the compo
 ![image](https://github.com/ve-i-uj/shedu/assets/6612371/b3cfbe6d-0c06-4f92-a385-6cebbe615ccc)
 
 </details>
-<br/>
 
 ### Possible problems
 
@@ -415,3 +431,64 @@ Docker runs processes as root (i.e. UID=0) in a container by default. Plus, ther
 I added the UUID variable to docker-compose.yml, so when running under the debugger, this variable is in the container and the uid will be created from it. Same uid - components find each other. But KBEngine v1.x does not have a uid created by the `UUID` variable, so most likely DBMgr will not be able to find Interfaces, Logger and nothing will work further.
 
 I emphasize that this situation exists only to the launch under the debugger. Regular cluster start (without `GAME_IDLE_START=true`) also works for KBEngine v1.x.
+
+<a name="sequence_diagrams"><h2>KBEngine server startup sequence diagrams</h2></a>
+
+Below are sequence diagrams of the server startup. The diagrams illustrate the messages, the sequence in which messages are sent, and the association of the components of a KBEngine cluster during initial startup. The server starts up without game entities, so the diagram will show the main initialization links only.
+
+For all components, there are 4 basic actions that all components can do
+
+1) Ask Machine / Supervisor for the address of the component
+2) Establish a permanent TCP connection between two components (with querying the state of the component)
+3) Register yourself in Machine / Supervisor
+4) Connect to the Logger component and send it a log records
+
+First, these 4 main sequences will be illustrated, then the startup diagram of the first 6 components + DB will be given (Supervisor, Logger, Interfaces, DBMgr, BaseappMgr, CellappMgr). Next, there will be diagrams for Cellapp, Baseapp, Loginapp.
+
+<details>
+
+<summary>Common actions for all components</summary>
+
+![GetComponentAddress](https://github.com/ve-i-uj/shedu/assets/6612371/efd373c9-ef56-4af8-a6fc-e7cbb6d2e5f1)
+![LoggerRegisterNewApp](https://github.com/ve-i-uj/shedu/assets/6612371/e0952507-42d3-49ca-81c4-7bb50a37c53d)
+![OpenPermanentTCPConnection](https://github.com/ve-i-uj/shedu/assets/6612371/6bf1124f-fb9f-4622-a957-680eb7c6cbf0)
+![RegisterComponent](https://github.com/ve-i-uj/shedu/assets/6612371/7807f8af-319a-454d-92b9-491d784a5a3f)
+
+</details>
+<br/>
+
+<details>
+
+<summary>Supervisor, Logger, Interfaces, DBMgr, BaseappMgr, CellappMgr</summary>
+
+![Cluster start (No Entities)](https://github.com/ve-i-uj/shedu/assets/6612371/37319cce-6187-415b-aa94-74986796c593)
+
+</details>
+<br/>
+
+<details open>
+
+<summary>Baseapp</summary>
+
+![Start Baseapp (No Entities)](https://github.com/ve-i-uj/shedu/assets/6612371/98b92821-e6ab-47a4-b8c4-6000863cd47d)
+
+</details>
+<br/>
+
+<details>
+
+<summary>Cellapp</summary>
+
+![Start Cellapp (No Entities)](https://github.com/ve-i-uj/shedu/assets/6612371/8811df69-b016-4485-9085-fdfa7fb202f4)
+
+</details>
+<br/>
+
+<details>
+
+<summary>Loginapp</summary>
+
+![Start Loginapp (No Entities)](https://github.com/ve-i-uj/shedu/assets/6612371/4c9a8857-71d9-4d85-ae8c-1c683f0deb3d)
+
+</details>
+<br/>
