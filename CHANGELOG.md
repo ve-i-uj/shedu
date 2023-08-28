@@ -1,5 +1,32 @@
 # Changelog
 
+## [0.10.1] - 2023-08-28
+
+### Compatibility
+
+- Docker Compose V2
+- KBEngine [v2.x](https://github.com/kbengine/kbengine)
+- KBEngine [v1.x](https://github.com/kbengine/kbengine/tree/1.x)
+- Enki (Python library for KBEngine) [v0.7.x](https://github.com/ve-i-uj/enki)
+
+### Added
+
+- Sequence diagrams of KBEngine starting up
+- Dockerfile with Python v3.7.3 to install python libraries in KBEngine v2.5.12
+- New rule "restart_game" to rebuilt assets image only
+- The use of the debugger for the cluster has been documented
+- New script to print environment variables docs (`make print_vars_doc`)
+
+### Changed
+
+- Portainer deployment added
+- Docker build optimization
+
+### Fixed
+
+- The game couldn't create a log directory if ELK was running before
+- Loginapp::importClientSDK message didn't work because assets directory permissions
+
 ## [0.10.0] - 2023-06-15
 
 ### Compatibility

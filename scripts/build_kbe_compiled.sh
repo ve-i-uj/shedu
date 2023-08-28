@@ -59,7 +59,7 @@ if ! $force; then
     log info "There is NO image \"$kbe_compiled_image_name_sha\" at the host"
 
     log info "Trying to find the \"$kbe_compiled_image_name_sha\" image on the docker hub ..."
-    if docker manifest inspect $kbe_compiled_image_name_sha > /dev/null; then
+    if docker manifest inspect $kbe_compiled_image_name_sha >/dev/null 2>&1; then
         log info "The image is found. Download the \"$kbe_compiled_image_name_sha\" image ..."
         docker pull "$kbe_compiled_image_name_sha"
         docker tag "$kbe_compiled_image_name_sha" "$kbe_compiled_image_name_1"

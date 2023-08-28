@@ -1,0 +1,28 @@
+FROM centos:centos7 AS kbe_pre_build
+
+#
+# Этот образ нужен для скачивания или сборки библиотек под нужную версию Python.
+# Версия питона используется таже, что и в KBEngine v2.5.12.
+# Библиотеки затем устанавливаются средствами pip и копируются из контейнера.
+#
+# См. https://github.com/ve-i-uj/modern_kbengine_demos_assets
+#
+
+RUN yum groupinstall "Development Tools" -y \
+    && yum install epel-release -y \
+    && yum install wget zlib-devel -y \
+    && yum install libffi libffi-devel -y \
+    && yum install openssl-devel -y \
+    && yum clean all \
+    && rm -rf /var/cache/yum
+
+WORKDIR /tmp
+RUN wget https://www.python.org/ftp/python/3.7.3/Python-3.7.3.tgz \
+    && tar xvf Python-3.7.3.tgz \
+    && cd Python-3.7.3 && ./configure \
+        --enable-optimizations \
+        --prefix=/opt/python \
+    && make altinstall \
+    && rm -rf /tmp/Python-3.7.3
+
+ENV PYTHON37=/opt/python/bin/python3.7

@@ -1,25 +1,41 @@
-ARG KBE_COMPILED_IMAGE_NAME
+ARG KBE_COMPILED_IMAGE_NAME_SHA
 ARG KBE_ENKI_PYTHON_IMAGE_NAME
+FROM ${KBE_COMPILED_IMAGE_NAME_SHA} as kbe_compiled
 FROM ${KBE_ENKI_PYTHON_IMAGE_NAME} as enki_python
 LABEL maintainer="Aleksei Burov <burov_alexey@mail.ru>"
 
-FROM ${KBE_COMPILED_IMAGE_NAME} as kbe_compiled
+#
+# Копируются данные, настраиваются переменные окружения. Образ на основе этого
+# файла ляжет в основу для создания образа игры. Образ основан на голой centos7
+# с небольшими доустановленными пакетами для отладки приложения.
+#
+# Отдельный Dockerfile делается для того, чтобы скопировать всё что нужно из
+# Shedu. Это делается здесь, т.к. образ ассетов будет собираться в контексте
+# папки ассетов (и в папке ассетов, например, уже .env файла из shedu нет).
+#
+# В самом конце копируем бирарники KBEngine. Бинарники весят ~1.5Гб, виртуальный
+# размер у промежуточных слоёв игры будет большой, но т.к. он не реальный - это
+# не страшно.
+#
 
-RUN yum install git wget net-tools nano socat nc tcpdump -y
 
-WORKDIR /opt/kbengine/assets/.shedu/
-# Запомним, на основе чего всё создано. Это делается здесь, т.к. образ
-# ассетов будет собираться в контексте папки ассетов (в этой папке уже .env
-# файла shedu нет).
-COPY .env .env
+FROM centos:centos7
+
+RUN yum install git wget net-tools nano socat nc tcpdump gettext mariadb-devel gdb -y \
+    && yum clean all \
+    && rm -rf /var/cache/yum
+
+WORKDIR /opt/shedu
+# Данные для обновления kbengine.xml
 COPY data/kbenginexml.data data/kbenginexml.data
-
-# Скрипты для модификации конфига, точка входа и т.п.
-COPY scripts/deploy scripts/deploy
+# Точка входа
+COPY scripts/deploy/start_component.sh scripts/deploy/start_component.sh
+# Просмотр логов из консоли
+COPY scripts/deploy/tail_logs.sh scripts/deploy/tail_logs.sh
 # Настройки для Log4J
 COPY data/log4j/log4cxx_properties data/log4j/log4cxx_properties
 
-# Enki нужен для проверки здоровья компонентов.
+# Enki и Python нужны для проверки здоровья компонентов
 COPY --from=enki_python /opt/python /opt/python
 COPY --from=enki_python /opt/enki /opt/enki
 # Чтобы у $ENKI_PYTHON в healthcheck был путь до библиотеки enki
@@ -27,8 +43,14 @@ ENV PYTHONPATH=/opt/enki
 ENV ENKI_PYTHON=/opt/python/bin/python3.9
 
 # Эти переменные нужны скриптам деплоя
-ENV KBE_ASSETS_PATH=/opt/kbengine/assets/
+ENV KBE_ASSETS_PATH=/opt/kbengine/assets
 # Эти переменные нужны движку для старта
 ENV KBE_ROOT=/opt/kbengine
 ENV KBE_BIN_PATH=/opt/kbengine/kbe/bin/server
 ENV KBE_RES_PATH=/opt/kbengine/kbe/res:/opt/kbengine/assets/res
+
+# Переменные окружения
+COPY .env .env
+
+# Скомпилированный KBEngine
+COPY --from=kbe_compiled /opt/kbengine/kbe/ /opt/kbengine/kbe/

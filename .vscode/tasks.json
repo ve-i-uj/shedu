@@ -56,9 +56,41 @@
             "problemMatcher": []
         },
         {
+            "label": "[Logger] ps aux",
+            "type": "shell",
+            "command": "docker exec kbe-game-logger ps aux",
+            "args": [],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared",
+                "focus": true
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "[Interfaces] netstat -tulpan",
+            "type": "shell",
+            "command": "docker exec kbe-game-interfaces netstat -tulpan",
+            "args": [],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared",
+                "focus": true
+            },
+            "problemMatcher": []
+        },
+        {
             "label": "[Make] Stop -> Clean -> Build -> Start game",
             "type": "shell",
-            "command": "make stop_game clean_game build_game start_game",
+            "command": "make force_stop_game clean_game build_game start_game",
             "args": [],
             "group": {
                 "kind": "build",

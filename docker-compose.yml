@@ -8,6 +8,7 @@ x-env:
   GAME_NAME: ${GAME_NAME}
   KBE_CONTAINER_USER: ${KBE_CONTAINER_USER}
   GAME_IDLE_START: ${GAME_IDLE_START}
+  UUID: 1000
 
 services:
 
@@ -36,13 +37,14 @@ services:
     command: --log_warnings=9
 
   supervisor:
-    image: ${KBE_ENKI_PYTHON_IMAGE_NAME}
+    image: ${KBE_SUPERVISOR_IMAGE_NAME}
     container_name: ${KBE_COMPONENT_CONTAINER_NAME}-supervisor
     restart: "no"
     working_dir: /opt/enki
     environment:
       DEBUG_SUPERVISOR: ${DEBUG_SUPERVISOR}
       <<: *env
+      GAME_IDLE_START: ""
     ports:
       - 20086:20086/udp
       - 20099:20099/tcp # Порт для запуска приложения под дебагером в контейнере
@@ -53,9 +55,9 @@ services:
       - kbe-net
     healthcheck:
       test: >
-        test $$GAME_IDLE_START
+        test $$GAME_IDLE_START || test $$DISABLE_HEALTHCHECK
         || LOG_LEVEL=ERROR $$ENKI_PYTHON /opt/enki/tools/cmd/machine/lookApp.py
-      interval: 5s
+      interval: ${HEALTHCHECK_INTERVAL}
       timeout: 2s
       retries: 1
     entrypoint: bash start_supervisor.sh
@@ -79,13 +81,13 @@ services:
       - 34000:34000
     healthcheck:
       test: >
-        test $$GAME_IDLE_START
+        test $$GAME_IDLE_START || test $$DISABLE_HEALTHCHECK
         || CACHE_ADDR=1 LOG_LEVEL=ERROR $$ENKI_PYTHON /opt/enki/tools/cmd/logger/lookApp.py
-      interval: 5s
+      interval: ${HEALTHCHECK_INTERVAL}
       timeout: 2s
       retries: 1
       start_period: 10s
-    entrypoint: bash /opt/kbengine/assets/.shedu/scripts/deploy/start_component.sh
+    entrypoint: bash /opt/shedu/scripts/deploy/start_component.sh
 
   interfaces:
     image: ${KBE_ASSETS_IMAGE_NAME}
@@ -108,13 +110,13 @@ services:
       - 33000:33000
     healthcheck:
       test: >
-        test $$GAME_IDLE_START
+        test $$GAME_IDLE_START || test $$DISABLE_HEALTHCHECK
         || CACHE_ADDR=1 LOG_LEVEL=ERROR $$ENKI_PYTHON /opt/enki/tools/cmd/interfaces/lookApp.py
-      interval: 5s
+      interval: ${HEALTHCHECK_INTERVAL}
       timeout: 2s
       start_period: 10s
       retries: 1
-    entrypoint: bash /opt/kbengine/assets/.shedu/scripts/deploy/start_component.sh
+    entrypoint: bash /opt/shedu/scripts/deploy/start_component.sh
 
   dbmgr:
     image: ${KBE_ASSETS_IMAGE_NAME}
@@ -138,13 +140,13 @@ services:
       - 32000:32000
     healthcheck:
       test: >
-        test $$GAME_IDLE_START
+        test $$GAME_IDLE_START || test $$DISABLE_HEALTHCHECK
         || CACHE_ADDR=1 LOG_LEVEL=ERROR $$ENKI_PYTHON /opt/enki/tools/cmd/dbmgr/lookApp.py
-      interval: 5s
+      interval: ${HEALTHCHECK_INTERVAL}
       timeout: 2s
       retries: 1
       start_period: 10s
-    entrypoint: bash /opt/kbengine/assets/.shedu/scripts/deploy/start_component.sh
+    entrypoint: bash /opt/shedu/scripts/deploy/start_component.sh
 
   baseappmgr:
     image: ${KBE_ASSETS_IMAGE_NAME}
@@ -162,13 +164,13 @@ services:
       - kbe-net
     healthcheck:
       test: >
-        test $$GAME_IDLE_START
+        test $$GAME_IDLE_START || test $$DISABLE_HEALTHCHECK
         || CACHE_ADDR=1 LOG_LEVEL=ERROR $$ENKI_PYTHON /opt/enki/tools/cmd/baseappmgr/lookApp.py
-      interval: 5s
+      interval: ${HEALTHCHECK_INTERVAL}
       timeout: 2s
       retries: 1
       start_period: 10s
-    entrypoint: bash /opt/kbengine/assets/.shedu/scripts/deploy/start_component.sh
+    entrypoint: bash /opt/shedu/scripts/deploy/start_component.sh
 
   cellappmgr:
     image: ${KBE_ASSETS_IMAGE_NAME}
@@ -186,15 +188,42 @@ services:
       - kbe-net
     healthcheck:
       test: >
-        test $$GAME_IDLE_START
+        test $$GAME_IDLE_START || test $$DISABLE_HEALTHCHECK
         || CACHE_ADDR=1 LOG_LEVEL=ERROR $$ENKI_PYTHON /opt/enki/tools/cmd/cellappmgr/lookApp.py
-      interval: 5s
+      interval: ${HEALTHCHECK_INTERVAL}
       timeout: 2s
       retries: 1
       start_period: 10s
-    entrypoint: bash /opt/kbengine/assets/.shedu/scripts/deploy/start_component.sh
+    entrypoint: bash /opt/shedu/scripts/deploy/start_component.sh
 
-  baseapp-7001:
+  cellapp-7001:
+    image: ${KBE_ASSETS_IMAGE_NAME}
+    depends_on:
+      cellappmgr: { condition: service_healthy }
+    container_name: ${KBE_COMPONENT_CONTAINER_NAME}-cellapp-1
+    restart: "no"
+    environment:
+      KBE_COMPONENT_NAME: cellapp
+      KBE_COMPONENT_ID: 7001
+      <<: *env
+    volumes:
+      - kbe-log-data:/opt/kbengine/assets/logs
+    networks:
+      - kbe-net
+    ports:
+      # telnet
+      - 50001:50000
+    healthcheck:
+      test: >
+        test $$GAME_IDLE_START || test $$DISABLE_HEALTHCHECK
+        || CACHE_ADDR=1 LOG_LEVEL=ERROR $$ENKI_PYTHON /opt/enki/tools/cmd/cellapp/lookApp.py
+      interval: ${HEALTHCHECK_INTERVAL}
+      timeout: 2s
+      retries: 1
+      start_period: 20s
+    entrypoint: bash /opt/shedu/scripts/deploy/start_component.sh
+
+  baseapp-8001:
     image: ${KBE_ASSETS_IMAGE_NAME}
     depends_on:
       baseappmgr: { condition: service_healthy }
@@ -202,7 +231,7 @@ services:
     restart: "no"
     environment:
       KBE_COMPONENT_NAME: baseapp
-      KBE_COMPONENT_ID: 7001
+      KBE_COMPONENT_ID: 8001
       <<: *env
     volumes:
       - kbe-log-data:/opt/kbengine/assets/logs
@@ -216,46 +245,19 @@ services:
       - 40001:40000
     healthcheck:
       test: >
-        test $$GAME_IDLE_START
+        test $$GAME_IDLE_START || test $$DISABLE_HEALTHCHECK
         || CACHE_ADDR=1 LOG_LEVEL=ERROR $$ENKI_PYTHON /opt/enki/tools/cmd/baseapp/lookApp.py
-      interval: 5s
+      interval: ${HEALTHCHECK_INTERVAL}
       timeout: 2s
       retries: 1
       start_period: 20s
-    entrypoint: bash /opt/kbengine/assets/.shedu/scripts/deploy/start_component.sh
-
-  cellapp-8001:
-    image: ${KBE_ASSETS_IMAGE_NAME}
-    depends_on:
-      cellappmgr: { condition: service_healthy }
-    container_name: ${KBE_COMPONENT_CONTAINER_NAME}-cellapp-1
-    restart: "no"
-    environment:
-      KBE_COMPONENT_NAME: cellapp
-      KBE_COMPONENT_ID: 8001
-      <<: *env
-    volumes:
-      - kbe-log-data:/opt/kbengine/assets/logs
-    networks:
-      - kbe-net
-    ports:
-      # telnet
-      - 50001:50000
-    healthcheck:
-      test: >
-        test $$GAME_IDLE_START
-        || CACHE_ADDR=1 LOG_LEVEL=ERROR $$ENKI_PYTHON /opt/enki/tools/cmd/cellapp/lookApp.py
-      interval: 5s
-      timeout: 2s
-      retries: 1
-      start_period: 20s
-    entrypoint: bash /opt/kbengine/assets/.shedu/scripts/deploy/start_component.sh
+    entrypoint: bash /opt/shedu/scripts/deploy/start_component.sh
 
   loginapp:
     image: ${KBE_ASSETS_IMAGE_NAME}
     depends_on:
-      baseapp-7001: { condition: service_healthy }
-      cellapp-8001: { condition: service_healthy }
+      baseapp-8001: { condition: service_healthy }
+      cellapp-7001: { condition: service_healthy }
     container_name: ${KBE_COMPONENT_CONTAINER_NAME}-loginapp
     restart: "no"
     environment:
@@ -276,13 +278,13 @@ services:
       - 21103:21103
     healthcheck:
       test: >
-        test $$GAME_IDLE_START
+        test $$GAME_IDLE_START || test $$DISABLE_HEALTHCHECK
         || CACHE_ADDR=1 LOG_LEVEL=ERROR $$ENKI_PYTHON /opt/enki/tools/cmd/loginapp/lookApp.py
-      interval: 5s
+      interval: ${HEALTHCHECK_INTERVAL}
       timeout: 2s
       retries: 1
       start_period: 20s
-    entrypoint: bash /opt/kbengine/assets/.shedu/scripts/deploy/start_component.sh
+    entrypoint: bash /opt/shedu/scripts/deploy/start_component.sh
 
 volumes:
   kbe-mariadb-data:

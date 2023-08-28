@@ -1,39 +1,40 @@
 FROM centos:centos7
 LABEL maintainer="Aleksei Burov <burov_alexey@mail.ru>"
 
+#
+# Образ библиотеки на Python для сетевого взаимодействия с серверным игровым
+# движком KBEngine. Образ содержит библиотеку и собранный Python с
+# установленными зависимостями. Так же добавлены инструменты для отладки
+# приложения Python, запущенного в контейнере.
+#
+
+# Пакеты libffi libffi-devel нужны, чтобы можно было запускать контейнер под
+# дебагером через debugpy. Пакет нужно установить до сборки питона.
+# git wget net-tools nano socat nc tcpdump - нужны для отладки приложения в контейнере
+RUN yum groupinstall "Development Tools" -y \
+    && yum install epel-release -y \
+    && yum install wget zlib-devel -y \
+    && yum install libffi libffi-devel -y \
+    && yum install openssl-devel -y \
+    && yum install git wget net-tools nano socat nc tcpdump -y \
+    && yum clean all \
+    && rm -rf /var/cache/yum
+
 WORKDIR /tmp
-RUN yum groupinstall "Development Tools" -y
-RUN yum install -y epel-release
-RUN yum install openssl-devel -y
-RUN yum install wget zlib-devel -y
-
-RUN wget https://www.python.org/ftp/python/3.9.16/Python-3.9.16.tgz
-RUN tar xvf Python-3.9.16.tgz
-
-# Этот пакет нужен, чтобы можно было запускать контейнер под дебагером через
-# debugpy. Пакет нужно установить до сборки питона.
-RUN yum install libffi libffi-devel -y
-RUN cd Python-3.9*/ && ./configure \
-    --enable-optimizations \
-    --prefix=/opt/python
-RUN cd Python-3.9*/ && make altinstall
-RUN rm -rf /tmp/Python-3.9*
+RUN wget https://www.python.org/ftp/python/3.9.16/Python-3.9.16.tgz \
+    && tar xvf Python-3.9.16.tgz \
+    && cd Python-3.9*/ && ./configure \
+        --enable-optimizations \
+        --prefix=/opt/python \
+    && make altinstall \
+    && rm -rf /tmp/Python-3.9*
 ENV ENKI_PYTHON=/opt/python/bin/python3.9
 
-# Пакеты для отладки приложения в контейнере
-RUN yum install git wget net-tools nano socat nc tcpdump -y
-
-COPY enki /opt/enki
-RUN $ENKI_PYTHON -m pip install --upgrade pip --trusted-host pypi.python.org
-RUN $ENKI_PYTHON -m pip install \
+ARG KBE_CONTAINER_USER
+RUN useradd $KBE_CONTAINER_USER
+COPY --chown=$KBE_CONTAINER_USER enki /opt/enki
+RUN $ENKI_PYTHON -m pip install --upgrade pip --trusted-host pypi.python.org \
+    && $ENKI_PYTHON -m pip install \
     --no-warn-script-location \
     -r /opt/enki/requirements.txt
 ENV PYTHONPATH=/opt/enki
-
-WORKDIR /opt/enki
-COPY scripts/deploy/start_supervisor.sh start_supervisor.sh
-
-ARG KBE_CONTAINER_USER
-ARG GAME_NAME
-RUN useradd $KBE_CONTAINER_USER
-RUN chown -R $KBE_CONTAINER_USER:$KBE_CONTAINER_USER /opt/enki

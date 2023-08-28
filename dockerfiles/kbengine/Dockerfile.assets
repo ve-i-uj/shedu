@@ -2,10 +2,21 @@ ARG PRE_ASSETS_IMAGE_NAME
 FROM ${PRE_ASSETS_IMAGE_NAME} as pre_assets
 LABEL maintainer="Aleksei Burov <burov_alexey@mail.ru>"
 
-# Предполагается, что контекст перемещён в папку $KBE_ASSETS_PATH
+#
+# Финальный образ игры. Содержит assets'ы, скомпилированные компоненты KBEngine
+# и Python с Enki для проверки здоровья компонентов. При сборке данного образа
+# будут слегка модифицированы конфиги KBEngine и Assets'ы, чтобы игра могла
+# работать в кластере Docker, где каждый компонент будет запущен в отедельном
+# контейнере.
+#
+# При сборке образа на основе этого файла предполагается, что контекст
+# перемещён в папку $KBE_ASSETS_PATH.
+#
+
 COPY . /opt/kbengine/assets
 WORKDIR /opt/kbengine/assets
 
+# Если Assets под версией git, то можно переключиться на нужный коммит
 ARG KBE_ASSETS_SHA
 RUN if [ -d /opt/kbengine/assets/.git ] && [ ! -z "${KBE_ASSETS_SHA}" ]; then \
         git checkout ${KBE_ASSETS_SHA} -b kbe-deploy-branch-${KBE_ASSETS_SHA}; \
@@ -13,11 +24,14 @@ RUN if [ -d /opt/kbengine/assets/.git ] && [ ! -z "${KBE_ASSETS_SHA}" ]; then \
 
 WORKDIR /opt/kbengine/assets
 
-# Модифицируем пользовательский конфиг файл kbe, чтобы работать с сетью docker
+# Модифицируем пользовательский конфиг файл kbe, чтобы работать с сетью docker.
+# Файл kbenginexml.data содержит не раскрытые переменные. На основе .env файла
+# переменные в kbenginexml.data заполяются и затем этот файл используется для
+# модификации kbengine.xml
 ARG KBE_KBENGINE_XML_ARGS
 RUN set -a \
-    && source .shedu/.env \
-    && envsubst < .shedu/data/kbenginexml.data > /tmp/kbenginexml.data \
+    && source /opt/shedu/.env \
+    && envsubst < /opt/shedu/data/kbenginexml.data > /tmp/kbenginexml.data \
     && $ENKI_PYTHON /opt/enki/tools/modify_kbeenginexml.py \
         --kbengine-xml-args=${KBE_KBENGINE_XML_ARGS} \
         --data-file=/tmp/kbenginexml.data \
@@ -38,7 +52,14 @@ RUN LOG_LEVEL=INFO \
 ARG GAME_NAME
 ENV GAME_NAME=${GAME_NAME}
 RUN rm -rf res/server/log4cxx_properties \
-    && cp -r .shedu/data/log4j/log4cxx_properties res/server/log4cxx_properties
+    && cp -r /opt/shedu/data/log4j/log4cxx_properties res/server/log4cxx_properties
 
 ARG KBE_CONTAINER_USER
 RUN useradd $KBE_CONTAINER_USER
+
+# При получении сообщения Loginapp::importClientSDK Loginapp создаёт временную
+# папку в Assets'ах (/opt/kbengine/assets/_tmp). Папка ассетсов под рутом, а
+# процесс Loginapp запущен от пользователя. Чтобы это соощение работало, заранее
+# создадим эту папку с нужными правами.
+RUN mkdir /opt/kbengine/assets/_tmp \
+    && chown $KBE_CONTAINER_USER:$KBE_CONTAINER_USER /opt/kbengine/assets/_tmp
