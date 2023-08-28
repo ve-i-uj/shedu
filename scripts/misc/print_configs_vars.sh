@@ -49,6 +49,8 @@ while IFS= read -r line; do
 
 done < $SCRIPTS/init.sh
 
+readarray -t all_vars < <(printf '%s\n' "${all_vars[@]}" | sort)
+
 for var_name in "${all_vars[@]}"; do
     log info "    $var_name=${!var_name}"
 done
