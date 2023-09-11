@@ -32,6 +32,8 @@ COPY data/kbenginexml.data data/kbenginexml.data
 COPY scripts/deploy/start_component.sh scripts/deploy/start_component.sh
 # Просмотр логов из консоли
 COPY scripts/deploy/tail_logs.sh scripts/deploy/tail_logs.sh
+# Для логов из консоли
+COPY scripts/log.sh scripts/log.sh
 # Настройки для Log4J
 COPY data/log4j/log4cxx_properties data/log4j/log4cxx_properties
 

@@ -1,5 +1,3 @@
-set -e
-
 if [ ! -z ${GAME_IDLE_START} ]; then
     tail -f /dev/null
     exit 0
