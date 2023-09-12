@@ -19,6 +19,15 @@ function sigterm_handler()
     if [ $status -ne 0 ]; then
         log error "Error text: $text"
         # И ждём, что Docker прибьёт по SIGKILL через KBE_STOP_GRACE_PERIOD
+        return
+    fi
+
+    # Уведомление Супервизору, что компонент останавливается
+    log info "Send the \"Supervisor::onStopComponent\" to notify Supervisor"
+    text=$( LOG_LEVEL=ERROR $ENKI_PYTHON /opt/enki/tools/cmd/supervisor/onStopComponent.py )
+    status=$?
+    if [ $status -ne 0 ]; then
+        log error "Error text: $text"
     fi
 }
 
