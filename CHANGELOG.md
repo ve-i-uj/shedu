@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.10.2] - 2023-09-30
+
+### Compatibility
+
+- Docker Compose V2
+- KBEngine [v2.x](https://github.com/kbengine/kbengine)
+- KBEngine [v1.x](https://github.com/kbengine/kbengine/tree/1.x)
+- Enki (Python library for KBEngine) [v0.7.3](https://github.com/ve-i-uj/enki)
+
+### Added
+
+- New optional env variable to set "stop_grace_period" in the compose file
+- Setting for KBEngine to start component shutdowning immediately after the "reqCloseServer" message (`root/shutdown_time=1` и `root/shutdown_waittick=1`)
+- The trap for SIGTERM was added to the `start_component.sh` script. The trap catches the signal and sends the "reqCloseServer" message to the component.
+- Gracefully stopping of Supervisor (signal -> message -> stop)
+- A stopping component sends the notification to Supervisor ("Supervisor::onStopComponent")
+- Suppress TCP channel loss error in Logstash when stopping component
+
 ## [0.10.1] - 2023-08-28
 
 ### Compatibility
