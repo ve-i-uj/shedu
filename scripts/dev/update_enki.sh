@@ -22,5 +22,5 @@ if [ ! -z "${ENKI_PATH-}" ]; then
     cp -r "${ENKI_PATH}" "$PROJECT_DIR/enki"
     log info "The library \"enki\" has been update (the source path is \"${ENKI_PATH}\")"
 else
-    log debug "The variable \"ENKI_PATH\" is not set"
+    log info "The variable \"ENKI_PATH\" is not set. Nothing to update"
 fi

@@ -40,7 +40,7 @@ trap sigterm_handler SIGTERM
 if [ ! -z ${GAME_IDLE_START} ]; then
     # Контейнеры запускаются под запуск компонентов под дебагером. Запуск
     # и подключение к компоненту будет осуществляться позже через VSCode.
-    log info "The \"$GAME_IDLE_START\" variable is set. Start a dummy process"
+    log info "The \"GAME_IDLE_START\" variable is set. Start a dummy process"
     tail -f /dev/null &
     wait
     log info "The dummy process is stopped. Exit"

@@ -18,7 +18,7 @@ function sigterm_handler()
 }
 
 if [ ! -z ${GAME_IDLE_START} ]; then
-    log info "The \"$GAME_IDLE_START\" variable is set. Start a dummy process"
+    log info "The \"GAME_IDLE_START\" variable is set. Start a dummy process"
     tail -f /dev/null &
     wait
     log info "The dummy process is stopped. Exit"

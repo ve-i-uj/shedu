@@ -132,7 +132,10 @@
                 ],
                 "pipeCwd": "${workspaceFolder}"
             },
-            "MIMode": "gdb"
+            "MIMode": "gdb",
+            "logging": {
+                "engineLogging": true,
+            }
         },
         {
             "name": "[Docker] CellappMgr",
@@ -248,7 +251,10 @@
                 ],
                 "pipeCwd": "${workspaceFolder}"
             },
-            "MIMode": "gdb"
+            "MIMode": "gdb",
+            "logging": {
+                "engineLogging": true,
+            }
         },
     ]
 }
