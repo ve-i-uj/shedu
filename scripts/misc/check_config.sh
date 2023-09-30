@@ -33,6 +33,7 @@ optional_vars=(
     "DISABLE_HEALTHCHECK"
     "HEALTHCHECK_INTERVAL"
     "NOT_STOP_DB"
+    "KBE_STOP_GRACE_PERIOD"
 )
 
 # The example config file contains all necessary variable. Read all variable

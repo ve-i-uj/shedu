@@ -5,8 +5,11 @@ SCRIPTS := $(ROOT_DIR)/scripts
 
 # Check if the .env file exists
 # Импорт переменых окружения из инициализационного файла, чтобы иметь
-# возможность запускать здесь docker-compose
+# возможность запускать здесь docker-compose. Сперва загружаются значения по
+# умолчанию из configs/example.env, затем значения выставляются из .env.
 ifneq ("$(wildcard .env)","")
+	include configs/example.env
+	export $(shell grep -v -e '^\s*\#' "configs/example.env" | sed 's/=.*//')
 	include .env
 	export $(shell sed 's/=.*//' .env)
 	tmp_dir := /tmp/shedu
@@ -46,10 +49,6 @@ ifeq ($(KBE_ASSETS_PATH), demo)
     $(shell if [ ! -d $(KBE_ASSETS_PATH) ]; then \
 		git clone "$(KBE_ASSETS_DEMO_GIT_URL)" $(KBE_ASSETS_PATH); \
 	fi)
-endif
-
-ifeq ($(HEALTHCHECK_INTERVAL),)
-	override HEALTHCHECK_INTERVAL := 5s
 endif
 
 .PHONY: *
@@ -501,6 +500,8 @@ hello:
 	@echo "KBE_ENKI_PYTHON_IMAGE_NAME=$(KBE_ENKI_PYTHON_IMAGE_NAME)"
 	@echo
 	@echo "HEALTHCHECK_INTERVAL"=$(HEALTHCHECK_INTERVAL)
+	@echo
+	@echo "KBE_STOP_GRACE_PERIOD"=$(KBE_STOP_GRACE_PERIOD)
 	@echo
 
 test:

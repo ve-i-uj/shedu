@@ -25,6 +25,13 @@ RUN yum install git wget net-tools nano socat nc tcpdump gettext mariadb-devel g
     && yum clean all \
     && rm -rf /var/cache/yum
 
+# Enki и Python нужны для проверки здоровья компонентов
+COPY --from=enki_python /opt/python /opt/python
+COPY --from=enki_python /opt/enki /opt/enki
+# Чтобы у $ENKI_PYTHON в healthcheck был путь до библиотеки enki
+ENV PYTHONPATH=/opt/enki
+ENV ENKI_PYTHON=/opt/python/bin/python3.9
+
 WORKDIR /opt/shedu
 # Данные для обновления kbengine.xml
 COPY data/kbenginexml.data data/kbenginexml.data
@@ -32,15 +39,10 @@ COPY data/kbenginexml.data data/kbenginexml.data
 COPY scripts/deploy/start_component.sh scripts/deploy/start_component.sh
 # Просмотр логов из консоли
 COPY scripts/deploy/tail_logs.sh scripts/deploy/tail_logs.sh
+# Для логов из консоли
+COPY scripts/log.sh scripts/log.sh
 # Настройки для Log4J
 COPY data/log4j/log4cxx_properties data/log4j/log4cxx_properties
-
-# Enki и Python нужны для проверки здоровья компонентов
-COPY --from=enki_python /opt/python /opt/python
-COPY --from=enki_python /opt/enki /opt/enki
-# Чтобы у $ENKI_PYTHON в healthcheck был путь до библиотеки enki
-ENV PYTHONPATH=/opt/enki
-ENV ENKI_PYTHON=/opt/python/bin/python3.9
 
 # Эти переменные нужны скриптам деплоя
 ENV KBE_ASSETS_PATH=/opt/kbengine/assets

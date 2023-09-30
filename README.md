@@ -40,6 +40,8 @@ Tested on Ubuntu 20.04, CentOS 7, Ubuntu 22.04
 
 [KBEngine server startup sequence diagrams](#sequence_diagrams)
 
+[Stoping the game server](#stoping_the_game_server)
+
 <a name="glossary"><h2>Glossary</h2></a>
 
 * Host - the server with installed Docker and Docker Compose
@@ -492,3 +494,37 @@ First, these 4 main sequences will be illustrated, then the startup diagram of t
 
 </details>
 <br/>
+
+<a name="stoping_the_game_server"><h2>Stoping the game server</h2></a>
+
+The approach to stopping a KBEngine cluster has been changed to integrate with Docker's approach to stopping a container. Below, we will first describe the original approach to stopping the KBEngine cluster. And then the approach to the stop at Shedu and what has been changed will be described.
+
+In the original KBEngine approach, the kbengine component was stopped by the Machine component. The machine receives the Machine::stopserver message and sends a `::reqCloseServer` message to the component to stop it. The stopping component starts finalization and checks for completion. In the kbengine.xml file, you can set some shutdown settings: `root/shutdown_time` - the start period for shutdown and `root/shutdown_waittick` - the interval for checking the completion of the component shutdown. If `root/shutdown_time` is zero, then shutdown will begin immediately and synchronously. The finalization of game logic will be ignored (e.g. `onReadyForShutDown` callback).
+
+<details>
+
+<summary>Stopping a component in the original KBEngine architecture</summary>
+
+![Stopping a component in the original KBEngine architecture](https://github.com/ve-i-uj/shedu/assets/6612371/908d8fae-a17d-4173-96d2-9a9646a4e64f)
+
+</details>
+<br/>
+
+In Shedu, Docker client manages serverices. Also the Machine component has been replaced by the Supervisor component. Supervisor receives the `Machine::stopserver` message but does nothing. Stopping a component in Shedu is triggered when Docker sends `SIGTERM` to the process with PID=1. This process is the bash script `start_component.sh`. The script intercepts this signal via `trap` and sends the `::reqCloseServer` message to the component. Next, the script waits for the server component process to stop. After the component stopped, the script exists and then the container is stopped. In the Shedu config you can set the maximum waiting time for the container to stop through the `KBE_STOP_GRACE_PERIOD` variable. This variable sets timeout then Docker will send `SIGKILL` to the process with PID=1. Shedu sets `root/shutdown_time=1` and `root/shutdown_waittick=1` so that the component shutdown starts after 1 second and the component is checked for completion every second.
+
+<details open>
+
+<summary>Stopping a component in a Shedu cluster</summary>
+
+![Stopping a component in the Shedu cluster](https://github.com/ve-i-uj/shedu/assets/6612371/24f6849f-7c0b-4464-a733-359abe79cf66)
+
+</details>
+<br/>
+
+When a component stops, the TCP connection with other components is broken. For example, Loginapp has a persistent tcp connection with BaseappMgr. When Loginapp is stopping, BaseappMgr does not understand whether Loginapp is shutting down normally or it has terminated abnormally. Therefore, there will be an error in the logs from BaseappMgr about the connection being lost.
+
+```console
+Components::removeComponentByChannel: loginapp : 9001, Abnormal exit(reason=disconnected)! Channel(timestamp=1253005611538929, lastReceivedTime=1252997482797767, inactivityExceptionPeriod=203836746624)
+```
+
+In the original KBEngine architecture, the stop message is sent to all components and all components start shutting down at the same time, in which case there will be no TCP connection loss error. In Shedu, a stop message is sent sequentially to each component after the services on which the terminated component depends (based on `depends_on` in docker-compose.yml) have completed. Therefore, so that the error would not be confusing when completing the component, I used Logstash to change the logging level from ERROR to INFO. Thus, this message will appear in Kibana, but with a different logging level. The case of connection loss means that the component has terminated, if this is an error situation - this should be visible at the container management level.

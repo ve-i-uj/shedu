@@ -11,3 +11,6 @@ root.baseapp.externalAddress=$KBE_PUBLIC_HOST
 root.loginapp.externalAddress=$KBE_PUBLIC_HOST
 
 root.interfaces.host=interfaces
+
+root.shutdown_time=1
+root.shutdown_waittick=1

@@ -9,6 +9,7 @@ x-env:
   KBE_CONTAINER_USER: ${KBE_CONTAINER_USER}
   GAME_IDLE_START: ${GAME_IDLE_START}
   UUID: 1000
+  KBE_STOP_GRACE_PERIOD: ${KBE_STOP_GRACE_PERIOD}
 
 services:
 
@@ -82,11 +83,12 @@ services:
     healthcheck:
       test: >
         test $$GAME_IDLE_START || test $$DISABLE_HEALTHCHECK
-        || CACHE_ADDR=1 LOG_LEVEL=ERROR $$ENKI_PYTHON /opt/enki/tools/cmd/logger/lookApp.py
+        || CACHE_ADDR=1 LOG_LEVEL=ERROR $$ENKI_PYTHON /opt/enki/tools/cmd/common/lookApp.py
       interval: ${HEALTHCHECK_INTERVAL}
       timeout: 2s
       retries: 1
       start_period: 10s
+    stop_grace_period: ${KBE_STOP_GRACE_PERIOD}
     entrypoint: bash /opt/shedu/scripts/deploy/start_component.sh
 
   interfaces:
@@ -111,11 +113,12 @@ services:
     healthcheck:
       test: >
         test $$GAME_IDLE_START || test $$DISABLE_HEALTHCHECK
-        || CACHE_ADDR=1 LOG_LEVEL=ERROR $$ENKI_PYTHON /opt/enki/tools/cmd/interfaces/lookApp.py
+        || CACHE_ADDR=1 LOG_LEVEL=ERROR $$ENKI_PYTHON /opt/enki/tools/cmd/common/lookApp.py
       interval: ${HEALTHCHECK_INTERVAL}
       timeout: 2s
       start_period: 10s
       retries: 1
+    stop_grace_period: ${KBE_STOP_GRACE_PERIOD}
     entrypoint: bash /opt/shedu/scripts/deploy/start_component.sh
 
   dbmgr:
@@ -141,11 +144,12 @@ services:
     healthcheck:
       test: >
         test $$GAME_IDLE_START || test $$DISABLE_HEALTHCHECK
-        || CACHE_ADDR=1 LOG_LEVEL=ERROR $$ENKI_PYTHON /opt/enki/tools/cmd/dbmgr/lookApp.py
+        || CACHE_ADDR=1 LOG_LEVEL=ERROR $$ENKI_PYTHON /opt/enki/tools/cmd/common/lookApp.py
       interval: ${HEALTHCHECK_INTERVAL}
       timeout: 2s
       retries: 1
       start_period: 10s
+    stop_grace_period: ${KBE_STOP_GRACE_PERIOD}
     entrypoint: bash /opt/shedu/scripts/deploy/start_component.sh
 
   baseappmgr:
@@ -165,11 +169,12 @@ services:
     healthcheck:
       test: >
         test $$GAME_IDLE_START || test $$DISABLE_HEALTHCHECK
-        || CACHE_ADDR=1 LOG_LEVEL=ERROR $$ENKI_PYTHON /opt/enki/tools/cmd/baseappmgr/lookApp.py
+        || CACHE_ADDR=1 LOG_LEVEL=ERROR $$ENKI_PYTHON /opt/enki/tools/cmd/common/lookApp.py
       interval: ${HEALTHCHECK_INTERVAL}
       timeout: 2s
       retries: 1
       start_period: 10s
+    stop_grace_period: ${KBE_STOP_GRACE_PERIOD}
     entrypoint: bash /opt/shedu/scripts/deploy/start_component.sh
 
   cellappmgr:
@@ -189,11 +194,12 @@ services:
     healthcheck:
       test: >
         test $$GAME_IDLE_START || test $$DISABLE_HEALTHCHECK
-        || CACHE_ADDR=1 LOG_LEVEL=ERROR $$ENKI_PYTHON /opt/enki/tools/cmd/cellappmgr/lookApp.py
+        || CACHE_ADDR=1 LOG_LEVEL=ERROR $$ENKI_PYTHON /opt/enki/tools/cmd/common/lookApp.py
       interval: ${HEALTHCHECK_INTERVAL}
       timeout: 2s
       retries: 1
       start_period: 10s
+    stop_grace_period: ${KBE_STOP_GRACE_PERIOD}
     entrypoint: bash /opt/shedu/scripts/deploy/start_component.sh
 
   cellapp-7001:
@@ -216,11 +222,12 @@ services:
     healthcheck:
       test: >
         test $$GAME_IDLE_START || test $$DISABLE_HEALTHCHECK
-        || CACHE_ADDR=1 LOG_LEVEL=ERROR $$ENKI_PYTHON /opt/enki/tools/cmd/cellapp/lookApp.py
+        || CACHE_ADDR=1 LOG_LEVEL=ERROR $$ENKI_PYTHON /opt/enki/tools/cmd/common/lookApp.py
       interval: ${HEALTHCHECK_INTERVAL}
       timeout: 2s
       retries: 1
       start_period: 20s
+    stop_grace_period: ${KBE_STOP_GRACE_PERIOD}
     entrypoint: bash /opt/shedu/scripts/deploy/start_component.sh
 
   baseapp-8001:
@@ -246,11 +253,12 @@ services:
     healthcheck:
       test: >
         test $$GAME_IDLE_START || test $$DISABLE_HEALTHCHECK
-        || CACHE_ADDR=1 LOG_LEVEL=ERROR $$ENKI_PYTHON /opt/enki/tools/cmd/baseapp/lookApp.py
+        || CACHE_ADDR=1 LOG_LEVEL=ERROR $$ENKI_PYTHON /opt/enki/tools/cmd/common/lookApp.py
       interval: ${HEALTHCHECK_INTERVAL}
       timeout: 2s
       retries: 1
       start_period: 20s
+    stop_grace_period: ${KBE_STOP_GRACE_PERIOD}
     entrypoint: bash /opt/shedu/scripts/deploy/start_component.sh
 
   loginapp:
@@ -279,11 +287,12 @@ services:
     healthcheck:
       test: >
         test $$GAME_IDLE_START || test $$DISABLE_HEALTHCHECK
-        || CACHE_ADDR=1 LOG_LEVEL=ERROR $$ENKI_PYTHON /opt/enki/tools/cmd/loginapp/lookApp.py
+        || CACHE_ADDR=1 LOG_LEVEL=ERROR $$ENKI_PYTHON /opt/enki/tools/cmd/common/lookApp.py
       interval: ${HEALTHCHECK_INTERVAL}
       timeout: 2s
       retries: 1
       start_period: 20s
+    stop_grace_period: ${KBE_STOP_GRACE_PERIOD}
     entrypoint: bash /opt/shedu/scripts/deploy/start_component.sh
 
 volumes:
