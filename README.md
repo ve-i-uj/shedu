@@ -497,34 +497,34 @@ First, these 4 main sequences will be illustrated, then the startup diagram of t
 
 <a name="stoping_the_game_server"><h2>Stoping the game server</h2></a>
 
-Подход к остановке KBEngine кластера был изменена для интеграции с [подходом остановки контейнеров в Docker](https://docs.docker.com/engine/reference/commandline/stop/). Сперва ниже будет описан подход остановки кластера в оригинальной архитектуре KBEngine. Затем будет описан подход к остановке кластера в этом проекте и какие изменения в оригинальный подход были внесены.
+The approach to stopping a KBEngine cluster has been changed to integrate with Docker's approach to stopping a container. Below, we will first describe the original approach to stopping the KBEngine cluster. And then the approach to the stop at Shedu and what has been changed will be described.
 
-В оригинальной архитектуре KBEngine кластер останавливается через компонент Machine. На Machine отправляется сообщение `Machine::stopserver`, а Machine уже в свою очередь отправляет серверному компоненту / сервис сообщение `::reqCloseServer`. На это сообщение в компоненте запускается процесс остановки. В конфиге через `root/shutdown_time` выставляется период через сколько будет запущена остановка. Если `root/shutdown_time` равен нулю, то компонент будет остановлен синхронно в одно действие. В игровую логику придёт уведомление, но остановка будет осуществлена независимо от того, завершилась или нет финализация в игровой логике (например, не зависимо от возврата колбэка `onReadyForShutDown`). Если `root/shutdown_time` положительный, то каждые `root/shutdown_waittick` будет проверка на то, завершилась финализация компонента или нет.
+In the original KBEngine approach, the kbengine component was stopped by the Machine component. The machine receives the Machine::stopserver message and sends a `::reqCloseServer` message to the component to stop it. The stopping component starts finalization and checks for completion. In the kbengine.xml file, you can set some shutdown settings: `root/shutdown_time` - the start period for shutdown and `root/shutdown_waittick` - the interval for checking the completion of the component shutdown. If `root/shutdown_time` is zero, then shutdown will begin immediately and synchronously. The finalization of game logic will be ignored (e.g. `onReadyForShutDown` callback).
 
 <details>
 
-<summary>Остановка компонента в оригинальной архитектуре KBEngine</summary>
+<summary>Stopping a component in the original KBEngine architecture</summary>
 
-![Остановка компонента в оригинальной архитектуре](https://github.com/ve-i-uj/shedu/assets/6612371/908d8fae-a17d-4173-96d2-9a9646a4e64f)
+![Stopping a component in the original KBEngine architecture](https://github.com/ve-i-uj/shedu/assets/6612371/908d8fae-a17d-4173-96d2-9a9646a4e64f)
 
 </details>
 <br/>
 
- В Shedu запуск, проверка здоровья, остановка и т.п. осуществляется средствами Docker. Так же компонент Machine заменён компонентом Supervisor. Supervisor принимает сообщение `Machine::stopserver`, но ничего не делает. Остановка компонента в Shedu запускается, когда Docker отправляет `SIGTERM` процессу с PID=1. Этим процессом является bash скрипт `start_component.sh`. Скрипт перехватывает через `trap` этот сигнал и отправляет компоненту сообщение `::reqCloseServer`. Дальше скрипт ждёт завершения процесса с запущенным серверным компонентом. После завершения компонента скрипт тоже завершается и контейнер будет остановлен. В конфиге Shedu можно выставить максимальное время ожидания завершения контейнера через переменную `KBE_STOP_GRACE_PERIOD`. Эта переменная выставляет через сколько Docker отправит `SIGKILL` процессу с PID=1. Shedu выставляет `root/shutdown_time=1` и `root/shutdown_waittick=1`, чтобы остановка компонента запустилась через 1 секунду и была проверка завершения компонента каждую секунду.
+In Shedu, Docker client manages serverices. Also the Machine component has been replaced by the Supervisor component. Supervisor receives the `Machine::stopserver` message but does nothing. Stopping a component in Shedu is triggered when Docker sends `SIGTERM` to the process with PID=1. This process is the bash script `start_component.sh`. The script intercepts this signal via `trap` and sends the `::reqCloseServer` message to the component. Next, the script waits for the server component process to stop. After the component stopped, the script exists and then the container is stopped. In the Shedu config you can set the maximum waiting time for the container to stop through the `KBE_STOP_GRACE_PERIOD` variable. This variable sets timeout then Docker will send `SIGKILL` to the process with PID=1. Shedu sets `root/shutdown_time=1` and `root/shutdown_waittick=1` so that the component shutdown starts after 1 second and the component is checked for completion every second.
 
 <details open>
 
-<summary>Остановка компонента в кластере Shedu</summary>
+<summary>Stopping a component in a Shedu cluster</summary>
 
-![Остановка компонента в кластере Shedu](https://github.com/ve-i-uj/shedu/assets/6612371/24f6849f-7c0b-4464-a733-359abe79cf66)
+![Stopping a component in the Shedu cluster](https://github.com/ve-i-uj/shedu/assets/6612371/24f6849f-7c0b-4464-a733-359abe79cf66)
 
 </details>
 <br/>
 
-При остановке компонента происходит разрыв tcp соединения с другими компонентами. Например, Loginapp поддерживает постоянное соединение с BaseappMgr. BaseappMgr при остановке Loginapp не понимает это нормальное завершение Loginapp или он завершился аварийно. Поэтому от BaseappMgr в логах будет ошибка о потере соединения.
+When a component stops, the TCP connection with other components is broken. For example, Loginapp has a persistent tcp connection with BaseappMgr. When Loginapp is stopping, BaseappMgr does not understand whether Loginapp is shutting down normally or it has terminated abnormally. Therefore, there will be an error in the logs from BaseappMgr about the connection being lost.
 
 ```console
 Components::removeComponentByChannel: loginapp : 9001, Abnormal exit(reason=disconnected)! Channel(timestamp=1253005611538929, lastReceivedTime=1252997482797767, inactivityExceptionPeriod=203836746624)
 ```
 
-В оригинальной архитектуре KBEngine сообщение об остановке рассылается всем компонентам и все компоненты начинают завершение одновременно, и в этом случае ошибки о потере tcp соединения не будет. В Shedu сообщение об остановке отправляется последовательно каждому компоненту после завершения сервисов, от которых зависит завершаемый компонент (на основе `depends_on` в docker-compose.yml). Поэтому, чтобы ошибка не сбивала с толку при завершении компонента, я через Logstash сделал подмену уровня логирования с ERROR на INFO. Таким образом это сообщение в Kibana будет появляться, но с другим уровнем логировния. Случай потери соединения означает, что компонент завершился, если это ошибочная ситуация - это должно быть видно на уровне управления контейнером.
+In the original KBEngine architecture, the stop message is sent to all components and all components start shutting down at the same time, in which case there will be no TCP connection loss error. In Shedu, a stop message is sent sequentially to each component after the services on which the terminated component depends (based on `depends_on` in docker-compose.yml) have completed. Therefore, so that the error would not be confusing when completing the component, I used Logstash to change the logging level from ERROR to INFO. Thus, this message will appear in Kibana, but with a different logging level. The case of connection loss means that the component has terminated, if this is an error situation - this should be visible at the container management level.
