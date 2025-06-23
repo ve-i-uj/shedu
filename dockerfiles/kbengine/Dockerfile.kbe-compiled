@@ -1,23 +1,46 @@
-FROM centos:centos7 AS kbe_pre_build
+FROM ubuntu:20.04 AS kbe_pre_build
 LABEL maintainer="Aleksei Burov <burov_alexey@mail.ru>"
-RUN yum groupinstall 'Development Tools' -y \
-    && yum install mariadb-devel -y \
-    && yum clean all \
-    && rm -rf /var/cache/yum
 
-FROM kbe_pre_build AS kbe_compiled
-# Download latest sha to be ensure the latest kbe source is up to date.
-ADD https://api.github.com/repos/kbengine/kbengine/git/refs/heads/master /tmp/kbe_version.json
-RUN git clone https://github.com/kbengine/kbengine.git --progress /opt
+RUN apt-get update \
+    && apt-get install -y \
+    git
+#     build-essential
+# #     autoconf \
+# #     automake \
+# #     libtool \
+# #     pkg-config \
+# #     libmariadb-dev \
+# #     cmake
+# # && apt-get clean \
+# # && rm -rf /var/lib/apt/lists/*
+
+# FROM kbe_pre_build AS kbe_compiled
+# # Download latest sha to be ensure the latest kbe source is up to date.
+# # ADD https://api.github.com/repos/kbengine/kbengine/git/refs/heads/master /tmp/kbe_version.json
+# # RUN git clone https://github.com/kbengine/kbengine.git --progress /opt
+
+COPY kbengine /opt
 
 ARG COMMIT_SHA
 WORKDIR /opt
 RUN git checkout ${COMMIT_SHA} -b kbe-deploy-branch-${COMMIT_SHA}
 
 WORKDIR /opt/kbe/src/
+
+# Для установки GCC 5
+RUN echo "deb http://dk.archive.ubuntu.com/ubuntu xenial main" >> /etc/apt/sources.list \
+    && echo "deb http://dk.archive.ubuntu.com/ubuntu xenial universe" >> /etc/apt/sources.list
+RUN apt update
+RUN apt install gcc g++ g++-5 gcc-5 make git autoconf libtool \
+    libmysqlclient-dev -y
+
+# RUN sed -i '/^CXXFLAGS += -Werror/a CXXFLAGS += -Wno-error=deprecated-declarations' /opt/kbe/src/build/common.mak
+
+ENV CC=gcc-5
+ENV CXX=g++-5
 RUN make
 
-FROM kbe_pre_build
-# Copy only the compiled binary files and the resources
-COPY --from=kbe_compiled /opt/kbe/bin/ /opt/kbengine/kbe/bin/
-COPY --from=kbe_compiled /opt/kbe/res/ /opt/kbengine/kbe/res/
+# FROM kbe_pre_build
+# # Copy only the compiled binary files and the resources
+# COPY --from=kbe_compiled /opt/kbe/bin/ /opt/kbengine/kbe/bin/
+# COPY --from=kbe_compiled /opt/kbe/res/ /opt/kbengine/kbe/res/
