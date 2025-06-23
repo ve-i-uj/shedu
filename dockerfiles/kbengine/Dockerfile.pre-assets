@@ -6,7 +6,7 @@ LABEL maintainer="Aleksei Burov <burov_alexey@mail.ru>"
 
 #
 # Копируются данные, настраиваются переменные окружения. Образ на основе этого
-# файла ляжет в основу для создания образа игры. Образ основан на голой centos7
+# файла ляжет в основу для создания образа игры. Образ основан на голой ubuntu20
 # с небольшими доустановленными пакетами для отладки приложения.
 #
 # Отдельный Dockerfile делается для того, чтобы скопировать всё что нужно из
@@ -16,14 +16,32 @@ LABEL maintainer="Aleksei Burov <burov_alexey@mail.ru>"
 # В самом конце копируем бирарники KBEngine. Бинарники весят ~1.5Гб, виртуальный
 # размер у промежуточных слоёв игры будет большой, но т.к. он не реальный - это
 # не страшно.
-#
 
+FROM ubuntu:20.04
 
-FROM centos:centos7
+# Устанавливаем переменную окружения для избежания вопросов при установке пакетов
+ENV DEBIAN_FRONTEND=noninteractive
 
-RUN yum install git wget net-tools nano socat nc tcpdump gettext mariadb-devel gdb -y \
-    && yum clean all \
-    && rm -rf /var/cache/yum
+RUN apt-get update
+RUN apt-get install -y --no-install-recommends \
+        git \
+        wget \
+        net-tools \
+        nano \
+        socat \
+        netcat-openbsd \
+        tcpdump \
+        gettext \
+        libmariadb-dev \
+        gdb \
+    && rm -rf /var/lib/apt/lists/*
+
+# Зависимость libmysqlclient.so.18 для работы DBMgr
+RUN cd /tmp \
+    && wget http://security.ubuntu.com/ubuntu/pool/main/m/mysql-5.5/libmysqlclient18_5.5.62-0ubuntu0.14.04.1_amd64.deb \
+    && wget http://archive.ubuntu.com/ubuntu/pool/main/g/glibc/multiarch-support_2.27-3ubuntu1_amd64.deb \
+    && dpkg -i multiarch-support_2.27-3ubuntu1_amd64.deb \
+    && dpkg -i libmysqlclient18_5.5.62-0ubuntu0.14.04.1_amd64.deb
 
 # Enki и Python нужны для проверки здоровья компонентов
 COPY --from=enki_python /opt/python /opt/python

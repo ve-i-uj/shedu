@@ -30,7 +30,7 @@ WORKDIR /opt/kbengine/assets
 # модификации kbengine.xml
 ARG KBE_KBENGINE_XML_ARGS
 RUN set -a \
-    && source /opt/shedu/.env \
+    && . /opt/shedu/.env \
     && envsubst < /opt/shedu/data/kbenginexml.data > /tmp/kbenginexml.data \
     && $ENKI_PYTHON /opt/enki/tools/modify_kbeenginexml.py \
         --kbengine-xml-args=${KBE_KBENGINE_XML_ARGS} \

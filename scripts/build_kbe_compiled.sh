@@ -46,6 +46,7 @@ if [ "$help" = true ]; then
 fi
 
 if [ -z "$kbe_git_commit" ] || [ -z "$kbe_compiled_image_name_1" ] || [ -z "$kbe_compiled_image_name_sha" ]; then
+    log debug "Not all arguments passed (Passed: $@)"
     log error "Not all arguments passed"
     exit 1
 fi

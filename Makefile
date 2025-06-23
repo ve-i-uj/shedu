@@ -280,6 +280,8 @@ version: ## [Dev] The current version of the shedu
 force_build_kbe: ## [Dev] Build a docker image of compiled KBEngine without using of cache
 	@$(SCRIPTS)/build_kbe_compiled.sh \
 		--kbe-git-commit=$(KBE_GIT_COMMIT) \
+        --kbe-compiled-image-name-sha=$(KBE_COMPILED_IMAGE_NAME_SHA) \
+        --kbe-compiled-image-name-1=$(KBE_COMPILED_IMAGE_NAME_1) \
 		--force
 
 force_stop_game: ## [Dev] Force stop any game
