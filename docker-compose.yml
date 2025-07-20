@@ -43,9 +43,12 @@ services:
     restart: "no"
     working_dir: /opt/enki
     environment:
+      KBE_COMPONENT_NAME: supervisor
+      KBE_COMPONENT_ID: 1001
       DEBUG_SUPERVISOR: ${DEBUG_SUPERVISOR}
       <<: *env
       GAME_IDLE_START: ""
+      LOG_LEVEL: DEBUG
     ports:
       - 20086:20086/udp
       - 20099:20099/tcp # Порт для запуска приложения под дебагером в контейнере
