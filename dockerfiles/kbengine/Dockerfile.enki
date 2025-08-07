@@ -21,6 +21,8 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
     socat \
     netcat \
     tcpdump \
+    iproute2 \
+    lsof \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 

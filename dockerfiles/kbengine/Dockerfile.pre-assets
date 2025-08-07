@@ -22,18 +22,20 @@ FROM ubuntu:20.04
 # Устанавливаем переменную окружения для избежания вопросов при установке пакетов
 ENV DEBIAN_FRONTEND=noninteractive
 
-RUN apt-get update
-RUN apt-get install -y --no-install-recommends \
-        git \
-        wget \
-        net-tools \
-        nano \
-        socat \
-        netcat-openbsd \
-        tcpdump \
-        gettext \
-        libmariadb-dev \
-        gdb \
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+    git \
+    wget \
+    net-tools \
+    nano \
+    socat \
+    netcat-openbsd \
+    tcpdump \
+    gettext \
+    libmariadb-dev \
+    gdb \
+    iproute2 \
+    lsof \
     && rm -rf /var/lib/apt/lists/*
 
 # Зависимость libmysqlclient.so.18 для работы DBMgr
