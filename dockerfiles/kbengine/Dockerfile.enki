@@ -25,15 +25,15 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /tmp
-# Сборка Python 3.9.16
-RUN wget https://www.python.org/ftp/python/3.9.16/Python-3.9.16.tgz \
-    && tar xvf Python-3.9.16.tgz \
-    && cd Python-3.9*/ && ./configure \
+# Сборка Python 3.13.5
+RUN wget https://www.python.org/ftp/python/3.13.5/Python-3.13.5.tgz \
+    && tar xvf Python-3.13.5.tgz \
+    && cd Python-3.13*/ && ./configure \
         --enable-optimizations \
         --prefix=/opt/python \
     && make -j$(nproc) altinstall \
-    && rm -rf /tmp/Python-3.9*
-ENV ENKI_PYTHON=/opt/python/bin/python3.9
+    && rm -rf /tmp/Python-3.13*
+ENV ENKI_PYTHON=/opt/python/bin/python3.13
 
 # Создание пользователя и установка зависимостей Python
 ARG KBE_CONTAINER_USER

@@ -48,7 +48,7 @@ COPY --from=enki_python /opt/python /opt/python
 COPY --from=enki_python /opt/enki /opt/enki
 # Чтобы у $ENKI_PYTHON в healthcheck был путь до библиотеки enki
 ENV PYTHONPATH=/opt/enki
-ENV ENKI_PYTHON=/opt/python/bin/python3.9
+ENV ENKI_PYTHON=/opt/python/bin/python3.13
 
 WORKDIR /opt/shedu
 # Данные для обновления kbengine.xml
