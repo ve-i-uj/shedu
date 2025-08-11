@@ -1,10 +1,10 @@
 version: '3'
 
-x-env:
-  &env
+x-env: &env
   LOG_LEVEL: INFO
   KBE_MACHINE_HOST: ${KBE_COMPONENT_CONTAINER_NAME}-supervisor
   KBE_MACHINE_TCP_PORT: 20099
+  KBE_MACHINE_UDP_PORT: 20086
   GAME_NAME: ${GAME_NAME}
   KBE_CONTAINER_USER: ${KBE_CONTAINER_USER}
   GAME_IDLE_START: ${GAME_IDLE_START}
@@ -30,8 +30,7 @@ services:
       - kbe-net
     healthcheck:
       test: >
-        mysql ${MYSQL_DATABASE} --host=mariadb -P 3306 --user=${MYSQL_USER}
-        --password=${MYSQL_PASSWORD} --silent --execute "SELECT 1;"
+        mysql ${MYSQL_DATABASE} --host=mariadb -P 3306 --user=${MYSQL_USER} --password=${MYSQL_PASSWORD} --silent --execute "SELECT 1;"
       interval: 5s
       timeout: 2s
       retries: 0
@@ -43,21 +42,24 @@ services:
     restart: "no"
     working_dir: /opt/enki
     environment:
+      KBE_COMPONENT_NAME: supervisor
+      KBE_COMPONENT_ID: 1001
       DEBUG_SUPERVISOR: ${DEBUG_SUPERVISOR}
       <<: *env
       GAME_IDLE_START: ""
+      LOG_LEVEL: DEBUG
     ports:
       - 20086:20086/udp
-      - 20099:20099/tcp # Порт для запуска приложения под дебагером в контейнере
-      - 18198:18198
+      - 20099:20099/tcp
+      - 18198:18198 # Порт для запуска приложения под дебагером в контейнере
     volumes:
       - kbe-log-data:/opt/kbengine/assets/logs
+      - /tmp/kbedump/:/tmp/kbedump/
     networks:
       - kbe-net
     healthcheck:
       test: >
-        test $$GAME_IDLE_START || test $$DISABLE_HEALTHCHECK
-        || LOG_LEVEL=ERROR $$ENKI_PYTHON /opt/enki/tools/cmd/machine/lookApp.py
+        test $$GAME_IDLE_START || test $$DISABLE_HEALTHCHECK || LOG_LEVEL=ERROR $$ENKI_PYTHON /opt/enki/tools/cmd/machine/lookApp.py
       interval: ${HEALTHCHECK_INTERVAL}
       timeout: 2s
       retries: 1
@@ -75,6 +77,7 @@ services:
       <<: *env
     volumes:
       - kbe-log-data:/opt/kbengine/assets/logs/
+      - /tmp/kbedump/:/tmp/kbedump/
     networks:
       - kbe-net
     ports:
@@ -82,8 +85,7 @@ services:
       - 34000:34000
     healthcheck:
       test: >
-        test $$GAME_IDLE_START || test $$DISABLE_HEALTHCHECK
-        || CACHE_ADDR=1 LOG_LEVEL=ERROR $$ENKI_PYTHON /opt/enki/tools/cmd/common/lookApp.py
+        test $$GAME_IDLE_START || test $$DISABLE_HEALTHCHECK || CACHE_ADDR=1 LOG_LEVEL=ERROR $$ENKI_PYTHON /opt/enki/tools/cmd/common/lookApp.py
       interval: ${HEALTHCHECK_INTERVAL}
       timeout: 2s
       retries: 1
@@ -104,6 +106,7 @@ services:
       <<: *env
     volumes:
       - kbe-log-data:/opt/kbengine/assets/logs
+      - /tmp/kbedump/:/tmp/kbedump/
     networks:
       - kbe-net
     ports:
@@ -112,8 +115,7 @@ services:
       - 33000:33000
     healthcheck:
       test: >
-        test $$GAME_IDLE_START || test $$DISABLE_HEALTHCHECK
-        || CACHE_ADDR=1 LOG_LEVEL=ERROR $$ENKI_PYTHON /opt/enki/tools/cmd/common/lookApp.py
+        test $$GAME_IDLE_START || test $$DISABLE_HEALTHCHECK || CACHE_ADDR=1 LOG_LEVEL=ERROR $$ENKI_PYTHON /opt/enki/tools/cmd/common/lookApp.py
       interval: ${HEALTHCHECK_INTERVAL}
       timeout: 2s
       start_period: 10s
@@ -136,6 +138,7 @@ services:
       <<: *env
     volumes:
       - kbe-log-data:/opt/kbengine/assets/logs
+      - /tmp/kbedump/:/tmp/kbedump/
     networks:
       - kbe-net
     ports:
@@ -143,8 +146,7 @@ services:
       - 32000:32000
     healthcheck:
       test: >
-        test $$GAME_IDLE_START || test $$DISABLE_HEALTHCHECK
-        || CACHE_ADDR=1 LOG_LEVEL=ERROR $$ENKI_PYTHON /opt/enki/tools/cmd/common/lookApp.py
+        test $$GAME_IDLE_START || test $$DISABLE_HEALTHCHECK || CACHE_ADDR=1 LOG_LEVEL=ERROR $$ENKI_PYTHON /opt/enki/tools/cmd/common/lookApp.py
       interval: ${HEALTHCHECK_INTERVAL}
       timeout: 2s
       retries: 1
@@ -168,8 +170,7 @@ services:
       - kbe-net
     healthcheck:
       test: >
-        test $$GAME_IDLE_START || test $$DISABLE_HEALTHCHECK
-        || CACHE_ADDR=1 LOG_LEVEL=ERROR $$ENKI_PYTHON /opt/enki/tools/cmd/common/lookApp.py
+        test $$GAME_IDLE_START || test $$DISABLE_HEALTHCHECK || CACHE_ADDR=1 LOG_LEVEL=ERROR $$ENKI_PYTHON /opt/enki/tools/cmd/common/lookApp.py
       interval: ${HEALTHCHECK_INTERVAL}
       timeout: 2s
       retries: 1
@@ -193,8 +194,7 @@ services:
       - kbe-net
     healthcheck:
       test: >
-        test $$GAME_IDLE_START || test $$DISABLE_HEALTHCHECK
-        || CACHE_ADDR=1 LOG_LEVEL=ERROR $$ENKI_PYTHON /opt/enki/tools/cmd/common/lookApp.py
+        test $$GAME_IDLE_START || test $$DISABLE_HEALTHCHECK || CACHE_ADDR=1 LOG_LEVEL=ERROR $$ENKI_PYTHON /opt/enki/tools/cmd/common/lookApp.py
       interval: ${HEALTHCHECK_INTERVAL}
       timeout: 2s
       retries: 1
@@ -221,8 +221,7 @@ services:
       - 50001:50000
     healthcheck:
       test: >
-        test $$GAME_IDLE_START || test $$DISABLE_HEALTHCHECK
-        || CACHE_ADDR=1 LOG_LEVEL=ERROR $$ENKI_PYTHON /opt/enki/tools/cmd/common/lookApp.py
+        test $$GAME_IDLE_START || test $$DISABLE_HEALTHCHECK || CACHE_ADDR=1 LOG_LEVEL=ERROR $$ENKI_PYTHON /opt/enki/tools/cmd/common/lookApp.py
       interval: ${HEALTHCHECK_INTERVAL}
       timeout: 2s
       retries: 1
@@ -252,8 +251,7 @@ services:
       - 40001:40000
     healthcheck:
       test: >
-        test $$GAME_IDLE_START || test $$DISABLE_HEALTHCHECK
-        || CACHE_ADDR=1 LOG_LEVEL=ERROR $$ENKI_PYTHON /opt/enki/tools/cmd/common/lookApp.py
+        test $$GAME_IDLE_START || test $$DISABLE_HEALTHCHECK || CACHE_ADDR=1 LOG_LEVEL=ERROR $$ENKI_PYTHON /opt/enki/tools/cmd/common/lookApp.py
       interval: ${HEALTHCHECK_INTERVAL}
       timeout: 2s
       retries: 1
@@ -286,8 +284,7 @@ services:
       - 21103:21103
     healthcheck:
       test: >
-        test $$GAME_IDLE_START || test $$DISABLE_HEALTHCHECK
-        || CACHE_ADDR=1 LOG_LEVEL=ERROR $$ENKI_PYTHON /opt/enki/tools/cmd/common/lookApp.py
+        test $$GAME_IDLE_START || test $$DISABLE_HEALTHCHECK || CACHE_ADDR=1 LOG_LEVEL=ERROR $$ENKI_PYTHON /opt/enki/tools/cmd/common/lookApp.py
       interval: ${HEALTHCHECK_INTERVAL}
       timeout: 2s
       retries: 1
