@@ -220,7 +220,7 @@ clean_all: force_stop_game force_stop_elk ## Stop and delete the artefacts of al
 	if [ ! -z "$$res" ]; then \
 		docker volume rm $$res; \
 	fi
-	@res=$$(docker images ls --filter reference="$(PROJECT_NAME)/*" --format "{{.Repository}}:{{.Tag}}"); \
+	@res=$$(docker image ls --filter reference="$(PROJECT_NAME)/*" --format "{{.Repository}}:{{.Tag}}"); \
 	if [ ! -z "$$res" ]; then \
 		echo $$res | xargs docker rmi; \
 	fi
@@ -228,6 +228,7 @@ clean_all: force_stop_game force_stop_elk ## Stop and delete the artefacts of al
 	@if [ ! -z "$$(docker images --filter "reference=$(PRE_ASSETS_IMAGE_NAME)" -q)" ]; then \
 		docker rmi "$(PRE_ASSETS_IMAGE_NAME)"; \
 	fi
+	@rm -rf $(PROJECT_DIR)/.env
 
 -----: ## -----
 
