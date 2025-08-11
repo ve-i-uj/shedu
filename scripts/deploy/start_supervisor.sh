@@ -3,19 +3,23 @@
 # Скрипт для запуска компонента Supervisor в Docker контейнере
 #
 
+
 curr_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-source $( realpath "$curr_dir/../log.sh" )
+source $( realpath "$curr_dir/scripts/log.sh" )
 
 function sigterm_handler()
 {
     log info "SIGTERM is catched"
-    # Уведомление Супервизору, что компонент останавливается
+    # Уведомление Супервизору, что из docker инициирована остановка компонента
     text=$( LOG_LEVEL=ERROR $ENKI_PYTHON /opt/enki/tools/cmd/supervisor/onStopComponent.py )
     status=$?
     if [ $status -ne 0 ]; then
         log error "Error text: $text"
     fi
 }
+
+# Ловим от Docker сигнал на остановку
+trap sigterm_handler SIGTERM
 
 if [ ! -z ${GAME_IDLE_START} ]; then
     log info "The \"GAME_IDLE_START\" variable is set. Start a dummy process"
@@ -37,14 +41,14 @@ chown $KBE_CONTAINER_USER:$KBE_CONTAINER_USER "$log_dir/supervisor.log"
 if [ ! -z ${DEBUG_SUPERVISOR} ]; then
     # Контейнер с Супервизором запускается под запуск компонентов под дебагером. Запуск
     # и подключение к компоненту будет осуществляться позже через VSCode.
-    # ${ENKI_PYTHON} -m debugpy --listen 0.0.0.0:18198 --wait-for-client /opt/enki/enki/app/supervisor/main.py > "$log_dir/supervisor.log"
-    cmd="${ENKI_PYTHON} -m debugpy --listen 0.0.0.0:18198 /opt/enki/enki/app/supervisor/main.py"
+    # ${ENKI_PYTHON} -m debugpy --listen 0.0.0.0:18198 --wait-for-client /opt/enki/enki/apps/supervisor/main.py
+    cmd="${ENKI_PYTHON} -Xfrozen_modules=off -m debugpy --listen 0.0.0.0:18198 /opt/enki/enki/apps/supervisor"
 else
     # Обычный запуск компонента
-    cmd="${ENKI_PYTHON} /opt/enki/enki/app/supervisor/main.py"
+    cmd="${ENKI_PYTHON} /opt/enki/enki/apps/supervisor"
 fi
 
-log info "Start the \"$KBE_COMPONENT_NAME\" component by \"$KBE_CONTAINER_USER\" user"
+log info "Start the \"$KBE_COMPONENT_NAME\" component by the \"$KBE_CONTAINER_USER\" user"
 runuser \
     --user kbengine \
     --preserve-environment \
@@ -55,7 +59,7 @@ wait $!
 
 log info "Waiting for the component stopped (it will be killed after \"$KBE_STOP_GRACE_PERIOD\")"
 while sleep 1; do
-  ps aux | grep "cid=${KBE_COMPONENT_ID}" | grep -q -v grep
+  ps aux | grep "enki/app/supervisor" | grep -q -v grep
   process_1_status=$?
   if [ $process_1_status -ne 0 ]; then
     log info "The component \"$KBE_COMPONENT_NAME\" has been stopped. Exit"
