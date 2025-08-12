@@ -115,7 +115,6 @@ build_game: config_is_ok game_is_not_built kbe_is_built ## Build a kbengine dock
 start_game: config_is_ok game_is_not_running game_is_built ## Start the docker containers contained the game and the DB
 	@docker-compose \
 		--log-level ERROR \
-		-f $(ROOT_DIR)/docker-compose.yml \
 		-p $(GAME_COMPOSE_PROJECT_NAME) \
 		up -d
 

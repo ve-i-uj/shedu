@@ -54,7 +54,6 @@ services:
       - 18198:18198 # Порт для запуска приложения под дебагером в контейнере
     volumes:
       - kbe-log-data:/opt/kbengine/assets/logs
-      - /tmp/kbedump/:/tmp/kbedump/
     networks:
       - kbe-net
     healthcheck:
@@ -77,7 +76,6 @@ services:
       <<: *env
     volumes:
       - kbe-log-data:/opt/kbengine/assets/logs/
-      - /tmp/kbedump/:/tmp/kbedump/
     networks:
       - kbe-net
     ports:
@@ -106,7 +104,6 @@ services:
       <<: *env
     volumes:
       - kbe-log-data:/opt/kbengine/assets/logs
-      - /tmp/kbedump/:/tmp/kbedump/
     networks:
       - kbe-net
     ports:
@@ -138,7 +135,6 @@ services:
       <<: *env
     volumes:
       - kbe-log-data:/opt/kbengine/assets/logs
-      - /tmp/kbedump/:/tmp/kbedump/
     networks:
       - kbe-net
     ports:

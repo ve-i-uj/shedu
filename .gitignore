@@ -11,3 +11,5 @@
 # Local custom settings
 .env
 
+# Debug volumes etc.
+docker-compose.override.yml
