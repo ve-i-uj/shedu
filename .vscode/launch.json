@@ -5,17 +5,19 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "[Docker] Supervisor",
-            "type": "python",
+            "name": "[Docker] Supervisor (Debug)",
+            "type": "debugpy",
             "request": "attach",
             "connect": {
                 "host": "0.0.0.0",
                 "port": 18198
             },
-            "pathMappings": [{
-                "localRoot": "${workspaceFolder:shedu}/enki",
-                "remoteRoot": "/opt/enki"
-            }]
+            "pathMappings": [
+                {
+                    "localRoot": "${workspaceFolder:shedu}/enki",
+                    "remoteRoot": "/opt/enki"
+                }
+            ]
         },
         {
             "name": "[Docker] Logger",
@@ -27,8 +29,7 @@
                 "--cid=2001"
             ],
             "stopAtEntry": false,
-            "environment": [
-            ],
+            "environment": [],
             "externalConsole": true,
             "sourceFileMap": {
                 "/opt": "${workspaceFolder:kbengine}"
@@ -255,6 +256,35 @@
             "logging": {
                 "engineLogging": true,
             }
+        },
+    ],
+    "compounds": [
+        {
+            "name": "Start SLI ...",
+            "configurations": [
+                "[Docker] Supervisor (Debug)",
+                "[Docker] Logger",
+                "[Docker] Interfaces",
+            ],
+            "stopAll": true
+        },
+        {
+            "name": "... D ...",
+            "configurations": [
+                "[Docker] DBMgr",
+            ],
+            "stopAll": true
+        },
+        {
+            "name": "... BM CM C B L...",
+            "configurations": [
+                "[Docker] BaseappMgr",
+                "[Docker] CellappMgr",
+                "[Docker] Cellapp",
+                "[Docker] Baseapp",
+                "[Docker] Loginapp",
+            ],
+            "stopAll": true
         },
     ]
 }

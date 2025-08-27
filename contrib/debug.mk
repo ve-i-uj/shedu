@@ -44,3 +44,6 @@ debug_db_down: # Stop DB only
 		-f $(ROOT_DIR)/docker-compose.yml \
 		-p $(GAME_COMPOSE_PROJECT_NAME) \
 		rm -f mariadb
+
+telnet_baseapp: # Connect to the Baseapp python console by telnet
+	@$(ROOT_DIR)/scripts/dev/telnet/connect_to_baseapp.sh

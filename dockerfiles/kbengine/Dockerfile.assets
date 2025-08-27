@@ -19,7 +19,7 @@ WORKDIR /opt/kbengine/assets
 # Если Assets под версией git, то можно переключиться на нужный коммит
 ARG KBE_ASSETS_SHA
 RUN if [ -d /opt/kbengine/assets/.git ] && [ ! -z "${KBE_ASSETS_SHA}" ]; then \
-        git checkout ${KBE_ASSETS_SHA} -b kbe-deploy-branch-${KBE_ASSETS_SHA}; \
+    git checkout ${KBE_ASSETS_SHA} -b kbe-deploy-branch-${KBE_ASSETS_SHA}; \
     fi
 
 WORKDIR /opt/kbengine/assets
@@ -33,9 +33,9 @@ RUN set -a \
     && . /opt/shedu/.env \
     && envsubst < /opt/shedu/data/kbenginexml.data > /tmp/kbenginexml.data \
     && $ENKI_PYTHON /opt/enki/tools/modify_kbeenginexml.py \
-        --kbengine-xml-args=${KBE_KBENGINE_XML_ARGS} \
-        --data-file=/tmp/kbenginexml.data \
-        --kbe-assets-path=/opt/kbengine/assets
+    --kbengine-xml-args=${KBE_KBENGINE_XML_ARGS} \
+    --data-file=/tmp/kbenginexml.data \
+    --kbe-assets-path=/opt/kbengine/assets
 
 # Добавим атрибуты hasBase, hasCell, hasClient сущности в entities.xml, на
 # основе содержания assets'ов. Это нужно делать обязательно, если компоненты

@@ -47,7 +47,7 @@ services:
       DEBUG_SUPERVISOR: ${DEBUG_SUPERVISOR}
       <<: *env
       GAME_IDLE_START: ""
-      LOG_LEVEL: DEBUG
+      LOG_LEVEL: INFO
     ports:
       - 20086:20086/udp
       - 20099:20099/tcp
@@ -266,13 +266,13 @@ services:
       KBE_COMPONENT_NAME: loginapp
       KBE_COMPONENT_ID: 9001
       <<: *env
-      LOGINAPP_PORT: 20013
+      KBE_LOGINAPP_TCP_PORT: 20013
     volumes:
       - kbe-log-data:/opt/kbengine/assets/logs
     networks:
       - kbe-net
     ports:
-      # Port for connecting the game client
+      # The tcp port for connecting the game client
       - 20013:20013
       # telnet
       - 31000:31000
