@@ -9,5 +9,7 @@ source $( realpath $SCRIPTS/log.sh )
 
 cp "$curr_dir/data/docker-compose.override.yml" "$PROJECT_DIR/"
 
+mkdir -p /tmp/kbedump/
+
 log info "The 'docker-compose.override.yml' file added to the project root"
 log info "Game resart needed to add pcap volumes to the game containers"

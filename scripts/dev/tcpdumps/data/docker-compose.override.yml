@@ -1,0 +1,38 @@
+version: '3'
+
+services:
+  supervisor:
+    volumes:
+      - /tmp/kbedump/:/tmp/kbedump/
+
+  logger:
+    volumes:
+      - /tmp/kbedump/:/tmp/kbedump/
+
+  interfaces:
+    volumes:
+      - /tmp/kbedump/:/tmp/kbedump/
+
+  dbmgr:
+    volumes:
+      - /tmp/kbedump/:/tmp/kbedump/
+
+  baseappmgr:
+    volumes:
+      - /tmp/kbedump/:/tmp/kbedump/
+
+  cellappmgr:
+    volumes:
+      - /tmp/kbedump/:/tmp/kbedump/
+
+  cellapp-7001:
+    volumes:
+      - /tmp/kbedump/:/tmp/kbedump/
+
+  baseapp-8001:
+    volumes:
+      - /tmp/kbedump/:/tmp/kbedump/
+
+  loginapp:
+    volumes:
+      - /tmp/kbedump/:/tmp/kbedump/
