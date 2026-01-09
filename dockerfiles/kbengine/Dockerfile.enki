@@ -43,8 +43,11 @@ ENV ENKI_PYTHON=/opt/python/bin/python3.13
 ARG KBE_CONTAINER_USER
 RUN useradd -m $KBE_CONTAINER_USER
 COPY --chown=$KBE_CONTAINER_USER enki /opt/enki
-RUN $ENKI_PYTHON -m pip install --upgrade pip \
+RUN $ENKI_PYTHON -m pip install \
+    --root-user-action=ignore \ 
+    --upgrade pip \
     && $ENKI_PYTHON -m pip install \
+    --root-user-action=ignore \ 
     --no-warn-script-location \
     -r /opt/enki/requirements.txt
 ENV PYTHONPATH=/opt/enki
