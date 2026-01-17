@@ -19,7 +19,14 @@ containers=(
 # Запускаем tcpdump в каждом контейнере
 for container in "${containers[@]}"; do
     echo "Starting tcpdump in $container..."
-    docker exec -d "$container" tcpdump -s 0 -i any -U -w "/tmp/kbedump/${container#kbe-game-}.pcap"
+    docker exec \
+        -d "$container" \
+        /bin/bash -c '
+            component_name="${KBE_COMPONENT_NAME}"
+            component_id="${KBE_COMPONENT_ID}"
+            ip=$(hostname -I | awk '\''{print $1}'\'')
+            tcpdump -s 0 -i any -U -w "/tmp/kbedump/${component_name}-${component_id}-${ip}.pcap"
+        '
 done
 
 echo "All tcpdump processes started in background."
