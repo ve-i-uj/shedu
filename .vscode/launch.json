@@ -107,13 +107,42 @@
             "MIMode": "gdb"
         },
         {
+            "name": "[Docker] CellappMgr",
+            "type": "cppdbg",
+            "request": "launch",
+            "cwd": "/opt/kbengine/assets",
+            "program": "/opt/kbengine/kbe/bin/server/cellappmgr",
+            "args": [
+                "--cid=5001"
+            ],
+            "stopAtEntry": false,
+            "environment": [],
+            "externalConsole": true,
+            "sourceFileMap": {
+                "/opt": "${workspaceFolder:kbengine}"
+            },
+            "pipeTransport": {
+                "debuggerPath": "/usr/bin/gdb",
+                "pipeProgram": "docker",
+                "pipeArgs": [
+                    "exec",
+                    "-i",
+                    "kbe-game-cellappmgr",
+                    "sh",
+                    "-c"
+                ],
+                "pipeCwd": "${workspaceFolder}"
+            },
+            "MIMode": "gdb"
+        },
+        {
             "name": "[Docker] BaseappMgr",
             "type": "cppdbg",
             "request": "launch",
             "cwd": "/opt/kbengine/assets",
             "program": "/opt/kbengine/kbe/bin/server/baseappmgr",
             "args": [
-                "--cid=5001"
+                "--cid=6001"
             ],
             "stopAtEntry": false,
             "environment": [],
@@ -137,35 +166,6 @@
             "logging": {
                 "engineLogging": true,
             }
-        },
-        {
-            "name": "[Docker] CellappMgr",
-            "type": "cppdbg",
-            "request": "launch",
-            "cwd": "/opt/kbengine/assets",
-            "program": "/opt/kbengine/kbe/bin/server/cellappmgr",
-            "args": [
-                "--cid=6001"
-            ],
-            "stopAtEntry": false,
-            "environment": [],
-            "externalConsole": true,
-            "sourceFileMap": {
-                "/opt": "${workspaceFolder:kbengine}"
-            },
-            "pipeTransport": {
-                "debuggerPath": "/usr/bin/gdb",
-                "pipeProgram": "docker",
-                "pipeArgs": [
-                    "exec",
-                    "-i",
-                    "kbe-game-cellappmgr",
-                    "sh",
-                    "-c"
-                ],
-                "pipeCwd": "${workspaceFolder}"
-            },
-            "MIMode": "gdb"
         },
         {
             "name": "[Docker] Cellapp",

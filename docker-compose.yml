@@ -38,6 +38,8 @@ services:
 
   supervisor:
     image: ${KBE_SUPERVISOR_IMAGE_NAME}
+    depends_on:
+      - mariadb
     container_name: ${KBE_COMPONENT_CONTAINER_NAME}-supervisor
     restart: "no"
     working_dir: /opt/enki
@@ -150,14 +152,14 @@ services:
     stop_grace_period: ${KBE_STOP_GRACE_PERIOD}
     entrypoint: bash /opt/shedu/scripts/deploy/start_component.sh
 
-  baseappmgr:
+  cellappmgr:
     image: ${KBE_ASSETS_IMAGE_NAME}
     depends_on:
       dbmgr: { condition: service_healthy }
-    container_name: ${KBE_COMPONENT_CONTAINER_NAME}-baseappmgr
+    container_name: ${KBE_COMPONENT_CONTAINER_NAME}-cellappmgr
     restart: "no"
     environment:
-      KBE_COMPONENT_NAME: baseappmgr
+      KBE_COMPONENT_NAME: cellappmgr
       KBE_COMPONENT_ID: 5001
       <<: *env
     volumes:
@@ -174,14 +176,14 @@ services:
     stop_grace_period: ${KBE_STOP_GRACE_PERIOD}
     entrypoint: bash /opt/shedu/scripts/deploy/start_component.sh
 
-  cellappmgr:
+  baseappmgr:
     image: ${KBE_ASSETS_IMAGE_NAME}
     depends_on:
-      dbmgr: { condition: service_healthy }
-    container_name: ${KBE_COMPONENT_CONTAINER_NAME}-cellappmgr
+      cellappmgr: { condition: service_healthy }
+    container_name: ${KBE_COMPONENT_CONTAINER_NAME}-baseappmgr
     restart: "no"
     environment:
-      KBE_COMPONENT_NAME: cellappmgr
+      KBE_COMPONENT_NAME: baseappmgr
       KBE_COMPONENT_ID: 6001
       <<: *env
     volumes:
@@ -201,7 +203,7 @@ services:
   cellapp-7001:
     image: ${KBE_ASSETS_IMAGE_NAME}
     depends_on:
-      cellappmgr: { condition: service_healthy }
+      baseappmgr: { condition: service_healthy }
     container_name: ${KBE_COMPONENT_CONTAINER_NAME}-cellapp-1
     restart: "no"
     environment:
@@ -228,7 +230,7 @@ services:
   baseapp-8001:
     image: ${KBE_ASSETS_IMAGE_NAME}
     depends_on:
-      baseappmgr: { condition: service_healthy }
+      cellapp-7001: { condition: service_healthy }
     container_name: ${KBE_COMPONENT_CONTAINER_NAME}-baseapp-1
     restart: "no"
     environment:
@@ -259,7 +261,6 @@ services:
     image: ${KBE_ASSETS_IMAGE_NAME}
     depends_on:
       baseapp-8001: { condition: service_healthy }
-      cellapp-7001: { condition: service_healthy }
     container_name: ${KBE_COMPONENT_CONTAINER_NAME}-loginapp
     restart: "no"
     environment:
