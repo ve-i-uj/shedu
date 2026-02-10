@@ -34,6 +34,7 @@ optional_vars=(
     "HEALTHCHECK_INTERVAL"
     "NOT_STOP_DB"
     "KBE_STOP_GRACE_PERIOD"
+    "DEBUG_TCPDUMP_ON_START"
 )
 
 # The example config file contains all necessary variable. Read all variable
@@ -82,7 +83,6 @@ for var_name in "${all_vars[@]}"; do
 done
 
 if [ ! -z "$KBE_GIT_COMMIT" ]; then
-    log info "Chech KBE_GIT_COMMIT ..."
     bash $SCRIPTS/misc/is_kbe_commit.sh $KBE_GIT_COMMIT
 fi
 
