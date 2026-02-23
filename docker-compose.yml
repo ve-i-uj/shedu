@@ -10,6 +10,8 @@ x-env: &env
   GAME_IDLE_START: ${GAME_IDLE_START}
   UUID: 1000
   KBE_STOP_GRACE_PERIOD: ${KBE_STOP_GRACE_PERIOD}
+  DEBUG_TCPDUMP_ON_START: ${DEBUG_TCPDUMP_ON_START}
+  DISABLE_HEALTHCHECK: ${DISABLE_HEALTHCHECK}
 
 services:
 
@@ -48,8 +50,8 @@ services:
       KBE_COMPONENT_ID: 1001
       DEBUG_SUPERVISOR: ${DEBUG_SUPERVISOR}
       <<: *env
-      GAME_IDLE_START: ""
-      LOG_LEVEL: INFO
+      GAME_IDLE_START: "" # TODO: это зачем?
+      LOG_LEVEL: INFO # Иначе будет слишком много логов
     ports:
       - 20086:20086/udp
       - 20099:20099/tcp
