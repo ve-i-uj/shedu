@@ -113,19 +113,19 @@ build_game: config_is_ok game_is_not_built kbe_is_built ## Build a kbengine dock
 
 
 start_game: config_is_ok game_is_not_running game_is_built ## Start the docker containers contained the game and the DB
-	@docker-compose \
-		--log-level ERROR \
+	@docker --log-level ERROR \
+		compose \
 		-p $(GAME_COMPOSE_PROJECT_NAME) \
 		up -d
 
 stop_game: config_is_ok game_is_running ## Stop the docker containers contained the game and the DB
-	@docker-compose \
-		--log-level ERROR \
+	@docker --log-level ERROR \
+		compose \
 		-f $(ROOT_DIR)/docker-compose.yml \
 		-p $(GAME_COMPOSE_PROJECT_NAME) \
 		stop
-	@docker-compose \
-		--log-level ERROR \
+	@docker --log-level ERROR \
+		compose \
 		-f $(ROOT_DIR)/docker-compose.yml \
 		-p $(GAME_COMPOSE_PROJECT_NAME) \
 		rm -f
@@ -157,24 +157,24 @@ build_elk: elk_is_not_built elk_is_not_runnig ## Build ELK images (Elasticsearch
 	fi
 
 start_elk: elk_is_not_runnig elk_is_built ## Start the game ELK (<https://www.elastic.co/what-is/elk-stack>)
-	@docker-compose \
+	@docker compose \
 		-f $(ROOT_DIR)/docker-compose.elk.yml \
 		-p $(ELK_COMPOSE_PROJECT_NAME) \
 		up -d --no-build
 
 stop_elk: elk_is_runnig ## Stop the game ELK
-	@docker-compose \
+	@docker compose \
 		-f $(ROOT_DIR)/docker-compose.elk.yml \
 		-p $(ELK_COMPOSE_PROJECT_NAME) \
 		stop
-	@docker-compose \
+	@docker compose \
 		-f $(ROOT_DIR)/docker-compose.elk.yml \
 		-p $(ELK_COMPOSE_PROJECT_NAME) \
 		rm -f
 
 clean_elk: elk_is_not_runnig elk_is_built
-	@docker-compose \
-		--log-level ERROR \
+	@docker --log-level ERROR \
+		compose \
 		-f $(ROOT_DIR)/docker-compose.elk.yml \
 		-p $(ELK_COMPOSE_PROJECT_NAME) \
 		down --rmi all
@@ -267,7 +267,7 @@ push_kbe: config_is_ok kbe_is_built ## [Dev] Push the image to the docker hub re
 	@docker push $(KBE_COMPILED_IMAGE_NAME_1)
 
 tail_elk_logs: config_is_ok elk_is_runnig ## [Dev] Show the ELK log records in the console
-	@docker-compose -f $(ROOT_DIR)/docker-compose.elk.yml logs -f
+	@docker compose -f $(ROOT_DIR)/docker-compose.elk.yml logs -f
 
 print_vars: ## [Dev] List the variables of the ".env" and "init.sh" files
 	@$(SCRIPTS)/misc/print_configs_vars.sh
@@ -346,8 +346,8 @@ restart_game: ## [Dev] Rebuild and restart the game server with only updated "as
 		--build-arg KBE_CONTAINER_USER="$(KBE_CONTAINER_USER)" \
 		--tag "$(KBE_ASSETS_IMAGE_NAME)" \
 		.
-	@docker-compose \
-		--log-level ERROR \
+	@docker --log-level ERROR \
+		compose \
 		-f $(ROOT_DIR)/docker-compose.yml \
 		-p $(GAME_COMPOSE_PROJECT_NAME) \
 		up -d
@@ -475,14 +475,14 @@ elk_is_not_built: # Check the ELK is NOT built. Raise error otherwise
 
 elk_is_runnig: # Check the ELK is running. Raise error otherwise
 	@source $(SCRIPTS)/log.sh; \
-	if [ -z "$$(docker-compose -f $(ROOT_DIR)/docker-compose.elk.yml -p $(ELK_COMPOSE_PROJECT_NAME) ps -q)" ]; then \
+	if [ -z "$$(docker compose -f $(ROOT_DIR)/docker-compose.elk.yml -p $(ELK_COMPOSE_PROJECT_NAME) ps -q)" ]; then \
 		log error  "The ELK services are NOT running now. Run \"make start_elk\" at first"; \
 		exit 1; \
 	fi
 
 elk_is_not_runnig: # Check the ELK is NOT running. Raise error otherwise
 	@source $(SCRIPTS)/log.sh; \
-	if [ ! -z "$$(docker-compose -f $(ROOT_DIR)/docker-compose.elk.yml -p $(ELK_COMPOSE_PROJECT_NAME) ps -q)" ]; then \
+	if [ ! -z "$$(docker compose -f $(ROOT_DIR)/docker-compose.elk.yml -p $(ELK_COMPOSE_PROJECT_NAME) ps -q)" ]; then \
 		log error  "The ELK services are running now. Run \"make stop_elk\" at first"; \
 		exit 1; \
 	fi
@@ -508,5 +508,5 @@ hello:
 
 test:
 	@docker version
-	@docker-compose version
+	@docker compose version
 	@$(ROOT_DIR)/tests/run_tests.sh

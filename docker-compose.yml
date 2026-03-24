@@ -270,6 +270,7 @@ services:
       KBE_COMPONENT_ID: 9001
       <<: *env
       KBE_LOGINAPP_TCP_PORT: 20013
+      GAME_IDLE_START: 1
     volumes:
       - kbe-log-data:/opt/kbengine/assets/logs
     networks:
